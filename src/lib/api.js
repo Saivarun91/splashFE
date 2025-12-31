@@ -462,7 +462,15 @@ async request(endpoint, options = {}) {
         });
     }
 
-    
+    async getJobImages(jobId, token) {
+        return this.request(`/probackendapp/api/jobs/${jobId}/images/`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
     async getTaskStatus(taskId, token) {
         return this.request(`/probackendapp/api/task-status/${taskId}/`, {
             method: 'GET',
@@ -473,43 +481,40 @@ async request(endpoint, options = {}) {
     }
 
     async generateProductModelImagesWithPolling(collectionId, token, onProgress = null) {
-        // Start the Celery task
+        // Start the bulk generation job
         const startResponse = await this.generateProductModelImages(collectionId, token);
 
-        if (!startResponse.success || !startResponse.task_id) {
-            throw new Error(startResponse.error || 'Failed to start image generation');
+        if (!startResponse.success || !startResponse.job_id) {
+            throw new Error(startResponse.error || 'Failed to start image generation job');
         }
 
-        const taskId = startResponse.task_id;
+        const jobId = startResponse.job_id;
 
-        // Poll for task completion
+        // Poll for job completion and progressive results
         return new Promise((resolve, reject) => {
             const pollInterval = setInterval(async () => {
                 try {
-                    const statusResponse = await this.getTaskStatus(taskId, token);
+                    const jobStatus = await this.getJobImages(jobId, token);
 
                     if (onProgress) {
-                        onProgress(statusResponse);
+                        // Pass full job status so caller can show progress/completed counts
+                        onProgress(jobStatus);
                     }
 
-                    if (statusResponse.status === 'SUCCESS') {
+                    if (jobStatus.status === 'completed') {
                         clearInterval(pollInterval);
-                        // Return the result from the task
-                        // statusResponse.result contains {success, message, total_generated}
-                        const result = statusResponse.result || {};
                         resolve({
-                            success: result.success !== false, // Default to true if not explicitly false
-                            message: result.message,
-                            total_generated: result.total_generated,
-                            task_id: taskId
+                            success: true,
+                            message: jobStatus.message || 'Image generation completed',
+                            total_generated: jobStatus.completed_images,
+                            job_id: jobId,
                         });
-                    } else if (statusResponse.status === 'FAILURE' || statusResponse.status === 'REVOKED') {
+                    } else if (jobStatus.status === 'failed') {
                         clearInterval(pollInterval);
-                        const errorMsg = statusResponse.error ||
-                            (typeof statusResponse.result === 'string' ? statusResponse.result : 'Task failed');
+                        const errorMsg = jobStatus.error || 'Image generation job failed';
                         reject(new Error(errorMsg));
                     }
-                    // If status is PENDING or STARTED, continue polling
+                    // If status is pending/running, continue polling
                 } catch (error) {
                     clearInterval(pollInterval);
                     reject(error);
@@ -519,7 +524,7 @@ async request(endpoint, options = {}) {
             // Set a timeout (e.g., 10 minutes)
             setTimeout(() => {
                 clearInterval(pollInterval);
-                reject(new Error('Task timeout: Image generation took too long'));
+                reject(new Error('Job timeout: Image generation took too long'));
             }, 600000); // 10 minutes timeout
         });
     }

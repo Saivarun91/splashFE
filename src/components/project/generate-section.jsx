@@ -54,18 +54,25 @@ export function GenerateSection({ project, collectionData, onGenerate, canEdit, 
 
         try {
             const response = await apiService.generateProductModelImagesWithPolling(
-                collectionData.id, 
+                collectionData.id,
                 token,
-                (progress) => {
-                    // Update progress if needed
-                    console.log('Generation progress:', progress.status)
+                (jobStatus) => {
+                    // jobStatus from /api/jobs/{job_id}/images/
+                    if (jobStatus) {
+                        setGenerationProgress({
+                            current: jobStatus.completed_images || 0,
+                            total: jobStatus.total_images || 0,
+                        })
+                        console.log('Generation progress:', jobStatus.status, jobStatus.completed_images, '/', jobStatus.total_images)
+                    }
                 }
             )
 
             if (response.success) {
                 setSuccess(`Generated ${response.total_generated || 0} images successfully!`)
                 if (onGenerate) {
-                    await onGenerate({ imagesGenerated: true })
+                    // Notify parent so it can refresh collection data from backend
+                    await onGenerate({ imagesGenerated: true, jobId: response.job_id })
                 }
                 setTimeout(() => setSuccess(null), 5000)
             } else {
