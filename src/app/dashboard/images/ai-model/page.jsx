@@ -56,6 +56,21 @@ export default function AIModelForm() {
         })
     }
 
+    const downloadImage = async (url, filename = "or-image.png") => {
+        const response = await fetch(url);
+        const blob = await response.blob();
+      
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = filename;
+      
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      };
+      
     const submitRegenerate = async () => {
         if (!regenerateModal.prompt.trim()) {
             setRegenerateModal(prev => ({
@@ -346,14 +361,16 @@ export default function AIModelForm() {
                                     </div>
                                     <div className="space-y-3">
                                         <div className="grid grid-cols-2 gap-3">
-                                            <a
-                                                href={result.generated_image_url}
-                                                download
-                                                className="px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold text-center hover:scale-105 transition-all flex items-center justify-center gap-2"
-                                            >
-                                                <Download size={16} />
-                                                Download
-                                            </a>
+                                        <button
+  onClick={() =>
+    downloadImage(result.or_image_url, "original-image.png")
+  }
+  className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
+>
+  <Download size={16} />
+  Download
+</button>
+
                                             <button
                                                 onClick={handleRegenerate}
                                                 className="px-4 py-3 border-2 border-purple-600 text-purple-600 rounded-xl font-semibold hover:bg-purple-50 transition-all flex items-center justify-center gap-2"
