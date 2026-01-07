@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Upload, X, CheckCircle, Image as ImageIcon, Eye } from "lucide-react"
+import React, { useState, useEffect, useRef, useImperativeHandle } from "react"
+import { Upload, X, CheckCircle, Image as ImageIcon, Eye, CheckSquare, Square } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
 import { HierarchicalOrnamentSelect } from "./hierarchical-ornament-select"
 
-export function ProductUploadPage({ project, collectionData, onSave, canEdit = true }) {
+export const ProductUploadPage = React.forwardRef(({ project, collectionData, onSave, canEdit = true }, ref) => {
     const [selectedFiles, setSelectedFiles] = useState([])
     const [fileOrnamentTypes, setFileOrnamentTypes] = useState({}) // Map file index to ornament type
     const [filePreviews, setFilePreviews] = useState({}) // Map file index to preview URL
@@ -17,14 +17,64 @@ export function ProductUploadPage({ project, collectionData, onSave, canEdit = t
     const [error, setError] = useState(null)
     const fileInputRef = useRef(null)
     const { token } = useAuth()
+    
+    // Selection state: { productIndex: { plainBg: boolean, bgReplace: boolean, model: boolean, campaign: boolean } }
+    const [selections, setSelections] = useState({})
+    
+    // Column header selection state
+    const [columnSelections, setColumnSelections] = useState({
+        plainBg: false,
+        bgReplace: false,
+        model: false,
+        campaign: false
+    })
 
     // Load existing product images from collection data
     useEffect(() => {
         if (collectionData?.items?.[0]?.product_images) {
             const existing = collectionData.items[0].product_images
             setUploadedProducts(existing)
+            // Initialize selections from backend or default to false
+            const initialSelections = {}
+            existing.forEach((product, index) => {
+                if (product.generation_selections) {
+                    // Use saved selections from backend
+                    initialSelections[index] = {
+                        plainBg: product.generation_selections.plainBg || false,
+                        bgReplace: product.generation_selections.bgReplace || false,
+                        model: product.generation_selections.model || false,
+                        campaign: product.generation_selections.campaign || false
+                    }
+                } else {
+                    // Default to false if no selections saved
+                    initialSelections[index] = {
+                        plainBg: false,
+                        bgReplace: false,
+                        model: false,
+                        campaign: false
+                    }
+                }
+            })
+            setSelections(initialSelections)
         }
     }, [collectionData])
+    
+    // Update column selections based on individual selections
+    useEffect(() => {
+        const productCount = uploadedProducts.length
+        if (productCount === 0) {
+            setColumnSelections({ plainBg: false, bgReplace: false, model: false, campaign: false })
+            return
+        }
+        
+        const newColumnSelections = {
+            plainBg: Object.values(selections).every(s => s.plainBg),
+            bgReplace: Object.values(selections).every(s => s.bgReplace),
+            model: Object.values(selections).every(s => s.model),
+            campaign: Object.values(selections).every(s => s.campaign)
+        }
+        setColumnSelections(newColumnSelections)
+    }, [selections, uploadedProducts.length])
 
     const handleFileSelect = (e) => {
         const files = Array.from(e.target.files)
@@ -199,6 +249,36 @@ export function ProductUploadPage({ project, collectionData, onSave, canEdit = t
         }
     }
 
+    // Function to save selections to backend (called manually when user clicks "Save and Continue")
+    const saveSelections = async () => {
+        if (!collectionData?.id || !token || Object.keys(selections).length === 0) {
+            return { success: true } // Nothing to save
+        }
+
+        try {
+            await apiService.updateProductGenerationSelections(
+                collectionData.id,
+                selections,
+                token
+            )
+            // Refresh collection data to get updated selections
+            const updatedCollection = await apiService.getCollection(collectionData.id, token)
+            if (updatedCollection.items?.[0]?.product_images) {
+                setUploadedProducts(updatedCollection.items[0].product_images)
+            }
+            return { success: true }
+        } catch (err) {
+            console.error("Error saving generation selections:", err)
+            return { success: false, error: err.message }
+        }
+    }
+
+    // Expose selections and save function to parent component via ref
+    useImperativeHandle(ref, () => ({
+        getSelections: () => selections,
+        saveSelections: saveSelections
+    }))
+
     const hasProducts = uploadedProducts.length > 0
     const hasSelectedFiles = selectedFiles.length > 0
 
@@ -321,66 +401,341 @@ export function ProductUploadPage({ project, collectionData, onSave, canEdit = t
                 </div>
             </div>
 
-            {/* Uploaded Products Display */}
+            {/* Image Generation Selection Table */}
             {hasProducts && (
-                <div>
-                    <div className="flex items-center gap-2 mb-4">
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        <h4 className="font-semibold text-[#1a1a1a]">
-                            Uploaded Products ({uploadedProducts.length})
-                        </h4>
+                <div className="mt-8">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5 text-green-500" />
+                            <h4 className="font-semibold text-[#1a1a1a] text-lg">
+                                Select Images to Generate ({uploadedProducts.length} {uploadedProducts.length === 1 ? 'Product' : 'Products'})
+                            </h4>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                onClick={() => {
+                                    const allSelected = {
+                                        plainBg: true,
+                                        bgReplace: true,
+                                        model: true,
+                                        campaign: true
+                                    }
+                                    const newSelections = {}
+                                    uploadedProducts.forEach((_, index) => {
+                                        newSelections[index] = { ...allSelected }
+                                    })
+                                    setSelections(newSelections)
+                                    setColumnSelections(allSelected)
+                                }}
+                                variant="outline"
+                                className="flex items-center gap-2 border-[#884cff] text-[#884cff] hover:bg-[#884cff] hover:text-white"
+                                disabled={!canEdit}
+                            >
+                                <CheckSquare className="w-4 h-4" />
+                                Select All
+                            </Button>
+                            <Button
+                                onClick={() => {
+                                    const allUnselected = {
+                                        plainBg: false,
+                                        bgReplace: false,
+                                        model: false,
+                                        campaign: false
+                                    }
+                                    const newSelections = {}
+                                    uploadedProducts.forEach((_, index) => {
+                                        newSelections[index] = { ...allUnselected }
+                                    })
+                                    setSelections(newSelections)
+                                    setColumnSelections(allUnselected)
+                                }}
+                                variant="outline"
+                                className="flex items-center gap-2 border-gray-300 text-gray-600 hover:bg-gray-100"
+                                disabled={!canEdit}
+                            >
+                                <Square className="w-4 h-4" />
+                                Clear All
+                            </Button>
+                        </div>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-6">
-                        {uploadedProducts.map((product, index) => (
-                            <div
-                                key={index}
-                                className="group relative border-2 border-[#e6e6e6] rounded-lg overflow-hidden hover:border-[#884cff]/50 transition-all"
-                            >
-                                <img
-                                    src={product.uploaded_image_url}
-                                    alt={`Product ${index + 1}`}
-                                    className="w-full h-24 object-contain bg-white"
-                                />
-                                {canEdit && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            handleDeleteProduct(product)
-                                        }}
-                                        className="absolute top-2 left-2 bg-red-500 hover:bg-red-700 text-white rounded-full p-1.5 transition-all duration-300 ease-in-out hover:scale-110 shadow-lg z-10"
-                                        title="Delete product image"
-                                        disabled={deleting || uploading}
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                )}
-                                {/* Hover overlay with View button */}
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            window.open(product.uploaded_image_url, '_blank')
-                                        }}
-                                        className="bg-white hover:bg-gray-100 text-[#884cff] px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all hover:scale-105"
-                                    >
-                                        <Eye className="w-4 h-4" />
-                                        View
-                                    </button>
-                                </div>
-                                <div className="p-3 bg-gray-50">
-                                    <p className="text-sm font-medium text-[#1a1a1a]">Product {index + 1}</p>
-                                    {product.ornament_type && (
-                                        <p className="text-xs text-[#884cff] mt-1 font-medium">
-                                            {product.ornament_type}
-                                        </p>
-                                    )}
-                                    <p className="text-xs text-[#708090] mt-1">
-                                        {product.generated_images?.length || 0} variations generated
-                                    </p>
-                                </div>
+                    <div className="bg-white rounded-lg border border-[#e6e6e6] overflow-hidden shadow-sm">
+                        <div className="overflow-x-auto">
+                            <table className="w-full min-w-[800px]">
+                                <thead className="bg-gray-50 border-b border-[#e6e6e6]">
+                                    <tr>
+                                        <th className="px-4 py-4 text-left text-sm font-semibold text-[#1a1a1a] min-w-[200px]">
+                                            Uploaded Product
+                                        </th>
+                                        <th className="px-4 py-4 text-center text-sm font-semibold text-[#1a1a1a] min-w-[150px]">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        const newValue = !columnSelections.plainBg
+                                                        setColumnSelections(prev => ({ ...prev, plainBg: newValue }))
+                                                        const newSelections = { ...selections }
+                                                        uploadedProducts.forEach((_, index) => {
+                                                            if (!newSelections[index]) {
+                                                                newSelections[index] = { plainBg: false, bgReplace: false, model: false, campaign: false }
+                                                            }
+                                                            newSelections[index].plainBg = newValue
+                                                        })
+                                                        setSelections(newSelections)
+                                                    }}
+                                                    className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+                                                    disabled={!canEdit}
+                                                >
+                                                    {columnSelections.plainBg ? (
+                                                        <CheckSquare className="w-5 h-5 text-[#884cff]" />
+                                                    ) : (
+                                                        <Square className="w-5 h-5 text-gray-400" />
+                                                    )}
+                                                </button>
+                                                <span>Plain BG Image</span>
+                                            </div>
+                                        </th>
+                                        <th className="px-4 py-4 text-center text-sm font-semibold text-[#1a1a1a] min-w-[150px]">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        const newValue = !columnSelections.bgReplace
+                                                        setColumnSelections(prev => ({ ...prev, bgReplace: newValue }))
+                                                        const newSelections = { ...selections }
+                                                        uploadedProducts.forEach((_, index) => {
+                                                            if (!newSelections[index]) {
+                                                                newSelections[index] = { plainBg: false, bgReplace: false, model: false, campaign: false }
+                                                            }
+                                                            newSelections[index].bgReplace = newValue
+                                                        })
+                                                        setSelections(newSelections)
+                                                    }}
+                                                    className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+                                                    disabled={!canEdit}
+                                                >
+                                                    {columnSelections.bgReplace ? (
+                                                        <CheckSquare className="w-5 h-5 text-[#884cff]" />
+                                                    ) : (
+                                                        <Square className="w-5 h-5 text-gray-400" />
+                                                    )}
+                                                </button>
+                                                <span>BG Replace Image</span>
+                                            </div>
+                                        </th>
+                                        <th className="px-4 py-4 text-center text-sm font-semibold text-[#1a1a1a] min-w-[150px]">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        const newValue = !columnSelections.model
+                                                        setColumnSelections(prev => ({ ...prev, model: newValue }))
+                                                        const newSelections = { ...selections }
+                                                        uploadedProducts.forEach((_, index) => {
+                                                            if (!newSelections[index]) {
+                                                                newSelections[index] = { plainBg: false, bgReplace: false, model: false, campaign: false }
+                                                            }
+                                                            newSelections[index].model = newValue
+                                                        })
+                                                        setSelections(newSelections)
+                                                    }}
+                                                    className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+                                                    disabled={!canEdit}
+                                                >
+                                                    {columnSelections.model ? (
+                                                        <CheckSquare className="w-5 h-5 text-[#884cff]" />
+                                                    ) : (
+                                                        <Square className="w-5 h-5 text-gray-400" />
+                                                    )}
+                                                </button>
+                                                <span>Model Image</span>
+                                            </div>
+                                        </th>
+                                        <th className="px-4 py-4 text-center text-sm font-semibold text-[#1a1a1a] min-w-[150px]">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        const newValue = !columnSelections.campaign
+                                                        setColumnSelections(prev => ({ ...prev, campaign: newValue }))
+                                                        const newSelections = { ...selections }
+                                                        uploadedProducts.forEach((_, index) => {
+                                                            if (!newSelections[index]) {
+                                                                newSelections[index] = { plainBg: false, bgReplace: false, model: false, campaign: false }
+                                                            }
+                                                            newSelections[index].campaign = newValue
+                                                        })
+                                                        setSelections(newSelections)
+                                                    }}
+                                                    className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+                                                    disabled={!canEdit}
+                                                >
+                                                    {columnSelections.campaign ? (
+                                                        <CheckSquare className="w-5 h-5 text-[#884cff]" />
+                                                    ) : (
+                                                        <Square className="w-5 h-5 text-gray-400" />
+                                                    )}
+                                                </button>
+                                                <span>Campaign Image</span>
+                                            </div>
+                                        </th>
+                                        <th className="px-4 py-4 text-center text-sm font-semibold text-[#1a1a1a] min-w-[100px]">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-[#e6e6e6]">
+                                    {uploadedProducts.map((product, index) => (
+                                        <tr key={index} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-4 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="relative group w-20 h-20 flex-shrink-0">
+                                                        <img
+                                                            src={product.uploaded_image_url}
+                                                            alt={`Product ${index + 1}`}
+                                                            className="w-full h-full object-contain bg-white border border-[#e6e6e6] rounded-lg"
+                                                        />
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                window.open(product.uploaded_image_url, '_blank')
+                                                            }}
+                                                            className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg"
+                                                            title="View full image"
+                                                        >
+                                                            <Eye className="w-4 h-4 text-white" />
+                                                        </button>
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-medium text-[#1a1a1a]">Product {index + 1}</p>
+                                                        {product.ornament_type && (
+                                                            <p className="text-xs text-[#884cff] mt-1 font-medium">
+                                                                {product.ornament_type}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4 text-center">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelections(prev => ({
+                                                            ...prev,
+                                                            [index]: {
+                                                                ...(prev[index] || { plainBg: false, bgReplace: false, model: false, campaign: false }),
+                                                                plainBg: !(prev[index]?.plainBg || false)
+                                                            }
+                                                        }))
+                                                    }}
+                                                    className="flex items-center justify-center mx-auto hover:opacity-70 transition-opacity"
+                                                    disabled={!canEdit}
+                                                >
+                                                    {selections[index]?.plainBg ? (
+                                                        <CheckSquare className="w-6 h-6 text-[#884cff]" />
+                                                    ) : (
+                                                        <Square className="w-6 h-6 text-gray-400" />
+                                                    )}
+                                                </button>
+                                            </td>
+                                            <td className="px-4 py-4 text-center">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelections(prev => ({
+                                                            ...prev,
+                                                            [index]: {
+                                                                ...(prev[index] || { plainBg: false, bgReplace: false, model: false, campaign: false }),
+                                                                bgReplace: !(prev[index]?.bgReplace || false)
+                                                            }
+                                                        }))
+                                                    }}
+                                                    className="flex items-center justify-center mx-auto hover:opacity-70 transition-opacity"
+                                                    disabled={!canEdit}
+                                                >
+                                                    {selections[index]?.bgReplace ? (
+                                                        <CheckSquare className="w-6 h-6 text-[#884cff]" />
+                                                    ) : (
+                                                        <Square className="w-6 h-6 text-gray-400" />
+                                                    )}
+                                                </button>
+                                            </td>
+                                            <td className="px-4 py-4 text-center">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelections(prev => ({
+                                                            ...prev,
+                                                            [index]: {
+                                                                ...(prev[index] || { plainBg: false, bgReplace: false, model: false, campaign: false }),
+                                                                model: !(prev[index]?.model || false)
+                                                            }
+                                                        }))
+                                                    }}
+                                                    className="flex items-center justify-center mx-auto hover:opacity-70 transition-opacity"
+                                                    disabled={!canEdit}
+                                                >
+                                                    {selections[index]?.model ? (
+                                                        <CheckSquare className="w-6 h-6 text-[#884cff]" />
+                                                    ) : (
+                                                        <Square className="w-6 h-6 text-gray-400" />
+                                                    )}
+                                                </button>
+                                            </td>
+                                            <td className="px-4 py-4 text-center">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelections(prev => ({
+                                                            ...prev,
+                                                            [index]: {
+                                                                ...(prev[index] || { plainBg: false, bgReplace: false, model: false, campaign: false }),
+                                                                campaign: !(prev[index]?.campaign || false)
+                                                            }
+                                                        }))
+                                                    }}
+                                                    className="flex items-center justify-center mx-auto hover:opacity-70 transition-opacity"
+                                                    disabled={!canEdit}
+                                                >
+                                                    {selections[index]?.campaign ? (
+                                                        <CheckSquare className="w-6 h-6 text-[#884cff]" />
+                                                    ) : (
+                                                        <Square className="w-6 h-6 text-gray-400" />
+                                                    )}
+                                                </button>
+                                            </td>
+                                            <td className="px-4 py-4 text-center">
+                                                {canEdit && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            handleDeleteProduct(product)
+                                                        }}
+                                                        className="text-red-500 hover:text-red-700 transition-colors p-2 rounded hover:bg-red-50"
+                                                        title="Delete product"
+                                                        disabled={deleting || uploading}
+                                                    >
+                                                        <X className="w-5 h-5" />
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        {/* Selection Summary */}
+                        <div className="px-4 py-4 bg-gray-50 border-t border-[#e6e6e6]">
+                            <div className="text-sm text-[#708090]">
+                                {(() => {
+                                    const totalSelected = Object.values(selections).reduce((acc, sel) => {
+                                        return acc + (sel.plainBg ? 1 : 0) + (sel.bgReplace ? 1 : 0) + (sel.model ? 1 : 0) + (sel.campaign ? 1 : 0)
+                                    }, 0)
+                                    const totalCredits = totalSelected * 2
+                                    return totalSelected > 0 ? (
+                                        <span>
+                                            <span className="font-semibold text-[#1a1a1a]">{totalSelected}</span> image{totalSelected !== 1 ? 's' : ''} selected • 
+                                            <span className="font-semibold text-[#884cff] ml-1">{totalCredits}</span> credits required
+                                        </span>
+                                    ) : (
+                                        <span className="text-yellow-600">⚠️ Select at least one image type to generate in the next step</span>
+                                    )
+                                })()}
                             </div>
-                        ))}
+                        </div>
                     </div>
                 </div>
             )}
@@ -394,4 +749,6 @@ export function ProductUploadPage({ project, collectionData, onSave, canEdit = t
             )}
         </div>
     )
-}
+})
+
+ProductUploadPage.displayName = 'ProductUploadPage'

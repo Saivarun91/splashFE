@@ -1,18 +1,20 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Sparkles, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
 import { useImageGeneration } from "@/context/ImageGenerationContext"
 
-export function GenerateSection({ project, collectionData, onGenerate, canEdit, isOwner = false }) {
+export function GenerateSection({ project, collectionData, onGenerate, canEdit, isOwner = false, productUploadPageRef = null }) {
     const [generating, setGenerating] = useState(false)
     const [error, setError] = useState(null)
     const [success, setSuccess] = useState(null)
     const [selectedModel, setSelectedModel] = useState(null)
     const [generationProgress, setGenerationProgress] = useState(null) // { current: 1, total: 3 }
+    const [selections, setSelections] = useState(null)
     const { token } = useAuth()
     const { setIsGenerating } = useImageGeneration()
+    
     // Get the selected model from backend
     useEffect(() => {
         const loadSelectedModel = async () => {
@@ -29,6 +31,24 @@ export function GenerateSection({ project, collectionData, onGenerate, canEdit, 
         }
         loadSelectedModel()
     }, [collectionData, token])
+
+    // Poll for selections from ProductUploadPage
+    useEffect(() => {
+        const updateSelections = () => {
+            if (productUploadPageRef && productUploadPageRef.current) {
+                const currentSelections = productUploadPageRef.current.getSelections()
+                setSelections(currentSelections)
+            }
+        }
+        
+        // Update immediately
+        updateSelections()
+        
+        // Poll every 500ms to catch selection changes
+        const interval = setInterval(updateSelections, 500)
+        
+        return () => clearInterval(interval)
+    }, [productUploadPageRef])
 
     const handleGenerate = async () => {
         if (!collectionData?.id) {
@@ -53,8 +73,37 @@ export function GenerateSection({ project, collectionData, onGenerate, canEdit, 
         setSuccess(null)
 
         try {
+            // Get image type selections from ProductUploadPage if ref is available
+            let imageTypeSelections = null
+            if (productUploadPageRef && productUploadPageRef.current) {
+                const currentSelections = productUploadPageRef.current.getSelections()
+                // Convert selections to the format expected by backend
+                // Frontend format: { 0: { plainBg: true, bgReplace: false, ... }, ... }
+                // Backend expects the same format
+                if (currentSelections && Object.keys(currentSelections).length > 0) {
+                    imageTypeSelections = currentSelections
+                }
+            } else if (selections && Object.keys(selections).length > 0) {
+                // Fallback to state if ref not available
+                imageTypeSelections = selections
+            }
+
+            // Validate that at least one image type is selected
+            if (imageTypeSelections) {
+                const hasAnySelection = Object.values(imageTypeSelections).some(sel => 
+                    sel && typeof sel === 'object' && (sel.plainBg || sel.bgReplace || sel.model || sel.campaign)
+                )
+                if (!hasAnySelection) {
+                    setError('Please select at least one image type to generate in Step 3 (Product Upload)')
+                    setGenerating(false)
+                    setIsGenerating(false)
+                    return
+                }
+            }
+
             const response = await apiService.generateProductModelImagesWithPolling(
                 collectionData.id,
+                imageTypeSelections,
                 token,
                 (jobStatus) => {
                     // jobStatus from /api/jobs/{job_id}/images/
@@ -90,6 +139,22 @@ export function GenerateSection({ project, collectionData, onGenerate, canEdit, 
     const hasProducts = collectionData?.items?.[0]?.product_images?.length > 0
     const hasModelSelected = selectedModel !== null
 
+    // Calculate total selected images
+    const totalSelectedImages = useMemo(() => {
+        if (!selections || Object.keys(selections).length === 0) return null
+        
+        let total = 0
+        Object.values(selections).forEach(sel => {
+            if (sel && typeof sel === 'object') {
+                if (sel.plainBg) total++
+                if (sel.bgReplace) total++
+                if (sel.model) total++
+                if (sel.campaign) total++
+            }
+        })
+        return total > 0 ? total : null
+    }, [selections])
+
     return (
         <div className="mb-8">
             <div className="flex items-center justify-between py-6 px-6 bg-[#f9f6f2] rounded-lg">
@@ -100,15 +165,22 @@ export function GenerateSection({ project, collectionData, onGenerate, canEdit, 
                     </p>
                     {hasProducts && hasModelSelected && (
                         <p className="text-xs text-green-600 mt-1">
-                            ✓ Ready to generate ({collectionData.items[0].product_images.length} products × 4 variations each)
+                            {totalSelectedImages !== null && totalSelectedImages > 0 ? (
+                                <>✓ Ready to generate {totalSelectedImages} image{totalSelectedImages !== 1 ? 's' : ''} ({totalSelectedImages} credits required)</>
+                            ) : (
+                                <>⚠️ Select image types in Step 3 (Product Upload) to generate</>
+                            )}
                         </p>
                     )}
                 </div>
                 <Button
                     onClick={handleGenerate}
-                    disabled={generating || !hasProducts || !hasModelSelected || !isOwner}
+                    disabled={generating || !hasProducts || !hasModelSelected || !isOwner || (totalSelectedImages !== null && totalSelectedImages === 0)}
                     className="bg-[#884cff] hover:bg-[#7a3ff0] text-white gap-2"
-                    title={isOwner ? "" : "You need Owner role to generate images"}
+                    title={
+                        !isOwner ? "You need Owner role to generate images" :
+                        (totalSelectedImages === 0 ? "Please select at least one image type in Step 3" : "")
+                    }
                 >
                     <Sparkles className="w-4 h-4" />
                     {generating ? 'Generating...' : 'Generate Product Images'}

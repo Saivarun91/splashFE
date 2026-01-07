@@ -11,6 +11,8 @@ export default function Dashboard() {
     const { user, token } = useAuth();
     const [recentImages, setRecentImages] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [organizationCredits, setOrganizationCredits] = useState(null);
+    const [creditsLoading, setCreditsLoading] = useState(true);
     const [stats, setStats] = useState({
         activeProjects: 0,
         inProgressProjects: 0,
@@ -42,6 +44,73 @@ export default function Dashboard() {
         }
         return "User";
     };
+
+    // Fetch organization credits
+    useEffect(() => {
+        const fetchOrganizationCredits = async () => {
+            if (!token || !user) {
+                setCreditsLoading(false);
+                return;
+            }
+
+            let organizationId = null;
+
+            // First, try to get the latest user profile to ensure we have the organization
+            try {
+                const userProfile = await apiService.getUserProfile(token);
+                if (userProfile?.success && userProfile?.user) {
+                    const currentUser = userProfile.user;
+                    
+                    // Check organization from profile - handle both object and string/ObjectId formats
+                    if (currentUser?.organization) {
+                        if (typeof currentUser.organization === 'object' && currentUser.organization.id) {
+                            organizationId = currentUser.organization.id;
+                        } else if (typeof currentUser.organization === 'string') {
+                            organizationId = currentUser.organization;
+                        }
+                    } else if (currentUser?.organization_id) {
+                        organizationId = currentUser.organization_id;
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+            }
+console.log("Organization ID:", organizationId);
+            // Fallback: Check if user object from context has organization
+            if (!organizationId && user?.organization) {
+                if (typeof user.organization === 'object' && user.organization.id) {
+                    organizationId = user.organization.id;
+                } else if (typeof user.organization === 'string') {
+                    organizationId = user.organization;
+                } else {
+                    // Try to get organization ID from the object directly (ObjectId)
+                    organizationId = String(user.organization);
+                }
+            }
+
+            if (!organizationId) {
+                setCreditsLoading(false);
+                return;
+            }
+
+            try {
+                const orgData = await apiService.getOrganization(organizationId, token);
+                if (orgData) {
+                    setOrganizationCredits({
+                        balance: orgData.credit_balance || 0,
+                        organizationName: orgData.name || 'Organization'
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching organization credits:", error);
+                console.error("Organization ID attempted:", organizationId);
+            } finally {
+                setCreditsLoading(false);
+            }
+        };
+
+        fetchOrganizationCredits();
+    }, [token, user]);
 
     // Fetch projects data
     useEffect(() => {
@@ -107,11 +176,36 @@ export default function Dashboard() {
                             <Zap className="w-4 h-4 text-yellow-400" />
                         </div>
                         <div>
-                            <div className="text-2xl font-bold text-gray-900">850</div>
-                            <div className="w-full bg-gray-200 h-2 rounded-full mt-2">
-                                <div className="bg-indigo-500 h-2 rounded-full w-[85%]" />
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">of 1,000 credits • Pro Plan</p>
+                            {creditsLoading ? (
+                                <div className="text-2xl font-bold text-gray-900">...</div>
+                            ) : organizationCredits ? (
+                                <>
+                                    <div className="text-2xl font-bold text-gray-900">
+                                        {organizationCredits.balance.toLocaleString()}
+                                    </div>
+                                    <div className="w-full bg-gray-200 h-2 rounded-full mt-2">
+                                        <div 
+                                            className="bg-indigo-500 h-2 rounded-full transition-all"
+                                            style={{ 
+                                                width: organizationCredits.balance > 0 
+                                                    ? `${Math.min((organizationCredits.balance / 10000) * 100, 100)}%` 
+                                                    : '0%' 
+                                            }}
+                                        />
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {organizationCredits.organizationName} • Organization Credits
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="text-2xl font-bold text-gray-900">0</div>
+                                    <div className="w-full bg-gray-200 h-2 rounded-full mt-2">
+                                        <div className="bg-indigo-500 h-2 rounded-full w-0" />
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">No organization assigned</p>
+                                </>
+                            )}
                         </div>
                     </div>
                 </Link>

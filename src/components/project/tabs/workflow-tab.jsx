@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { WorkflowSteps } from "@/components/project/workflow-steps"
 import { BriefAndConcept } from "@/components/project/brief-and-concept"
 import { ThemesAndBackgrounds } from "@/components/project/themes-and-backgrounds"
@@ -18,6 +18,8 @@ import { canEditProject, isProjectOwner } from "@/lib/permissions"
 import { useImageGeneration } from "@/context/ImageGenerationContext"
 
 export function WorkflowTab({ project }) {
+    // Ref to ProductUploadPage to access selections
+    const productUploadPageRef = useRef(null)
     console.log("roject : ", project)
     const [activeStep, setActiveStep] = useState(1)
     const [collectionData, setCollectionData] = useState(null)
@@ -339,6 +341,7 @@ export function WorkflowTab({ project }) {
                         setTimeout(() => setSuccessMessage(null), 3000)
                         // Don't navigate automatically - let "Save and Continue" button handle navigation
                     }
+                    // Note: Generation selections are saved when "Save and Continue" is clicked, not automatically
                     break
                 case 5:
                     // Image generation step - refresh data if images were generated
@@ -467,6 +470,7 @@ export function WorkflowTab({ project }) {
                 // Products Upload tab
                 return (
                     <ProductUploadPage
+                        ref={productUploadPageRef}
                         project={project}
                         collectionData={collectionData}
                         onSave={handleStepSave}
@@ -483,6 +487,7 @@ export function WorkflowTab({ project }) {
                             onGenerate={handleStepSave}
                             canEdit={canEdit}
                             isOwner={isOwner}
+                            productUploadPageRef={productUploadPageRef}
                         />
                         <ImageGrid
                             project={project}
@@ -564,6 +569,16 @@ export function WorkflowTab({ project }) {
                                 }
                                 if (activeStep === 4 && collectionData?.id) {
                                     try {
+                                        // Save generation selections if ProductUploadPage ref is available
+                                        if (productUploadPageRef?.current?.saveSelections) {
+                                            const saveResult = await productUploadPageRef.current.saveSelections()
+                                            if (!saveResult.success) {
+                                                setError(saveResult.error || 'Failed to save generation selections')
+                                                return
+                                            }
+                                        }
+                                        
+                                        // Refresh collection data after saving selections
                                         const updatedData = await apiService.getCollection(collectionData.id, token)
                                         setCollectionData(updatedData)
                                         const item = updatedData.items?.[0]
@@ -576,6 +591,7 @@ export function WorkflowTab({ project }) {
                                         }
                                     } catch (err) {
                                         console.error('Error checking step 4:', err)
+                                        setError('Failed to save generation selections')
                                     }
                                 }
                                 // For other steps, navigate to next unlocked step

@@ -452,10 +452,23 @@ async request(endpoint, options = {}) {
         });
     }
 
-    async generateProductModelImages(collectionId, token) {
+    async updateProductGenerationSelections(collectionId, imageTypeSelections, token) {
+        return this.request(`/probackendapp/api/collections/${collectionId}/products/generation-selections/`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                image_type_selections: imageTypeSelections
+            }),
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+    }
+
+    async generateProductModelImages(collectionId, imageTypeSelections = null, token) {
+        const body = imageTypeSelections ? { image_type_selections: imageTypeSelections } : {};
         return this.request(`/probackendapp/api/collections/${collectionId}/generate-all-product-model-images/`, {
             method: 'POST',
-            body: JSON.stringify({}),
+            body: JSON.stringify(body),
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
             },
@@ -480,9 +493,9 @@ async request(endpoint, options = {}) {
         });
     }
 
-    async generateProductModelImagesWithPolling(collectionId, token, onProgress = null) {
+    async generateProductModelImagesWithPolling(collectionId, imageTypeSelections = null, token, onProgress = null) {
         // Start the bulk generation job
-        const startResponse = await this.generateProductModelImages(collectionId, token);
+        const startResponse = await this.generateProductModelImages(collectionId, imageTypeSelections, token);
 
         if (!startResponse.success || !startResponse.job_id) {
             throw new Error(startResponse.error || 'Failed to start image generation job');
@@ -946,6 +959,120 @@ async request(endpoint, options = {}) {
 
     async initializePrompts(token) {
         return this.post('/probackendapp/api/prompts/initialize/', {}, {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    // =====================
+    // Organization API endpoints
+    // =====================
+
+    // List organizations (admin sees all, users see their own)
+    async listOrganizations(token) {
+        return this.get('/imgbackendapp/api/organizations/list/', {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    // Get organization details
+    async getOrganization(organizationId, token) {
+        return this.get(`/api/organizations/${organizationId}/`, {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    // Create organization (admin only)
+    async createOrganization(name, ownerEmail, initialCredits = 0, token) {
+        return this.post('/imgbackendapp/api/organizations/create/', {
+            name,
+            owner_email: ownerEmail,
+            initial_credits: initialCredits
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    // Update organization (owner/admin only)
+    async updateOrganization(organizationId, data, token) {
+        return this.request(`/imgbackendapp/api/organizations/${organizationId}/update/`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    // Delete organization (admin only)
+    async deleteOrganization(organizationId, token) {
+        return this.request(`/imgbackendapp/api/organizations/${organizationId}/delete/`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    // Add user to organization (admin only)
+    async addUserToOrganization(userEmail, organizationId, organizationRole = 'member', token) {
+        return this.post('/imgbackendapp/api/organizations/add-user/', {
+            user_email: userEmail,
+            organization_id: organizationId,
+            organization_role: organizationRole
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    // Add credits to organization (admin only)
+    async addOrganizationCredits(organizationId, amount, reason = 'Credit top-up by admin', token) {
+        return this.post(`/imgbackendapp/api/organizations/${organizationId}/add-credits/`, {
+            amount,
+            reason
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    // =====================
+    // Credit Usage API endpoints
+    // =====================
+
+    // Get organization credit usage
+    async getOrganizationCreditUsage(organizationId, params = {}, token) {
+        return this.get(`/imgbackendapp/api/credits/organization/${organizationId}/usage/`, {
+            params,
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    // Get organization credit summary
+    async getOrganizationCreditSummary(organizationId, token) {
+        return this.get(`/imgbackendapp/api/credits/organization/${organizationId}/summary/`, {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    // Get all organizations credit usage (admin only)
+    async getAllOrganizationsCreditUsage(params = {}, token) {
+        return this.get('/imgbackendapp/api/credits/all-organizations/usage/', {
+            params,
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
             },
