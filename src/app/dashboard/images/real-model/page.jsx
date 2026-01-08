@@ -33,20 +33,38 @@ export default function RealModelForm() {
         error: null
     })
 
-    const downloadImage = async (url, filename = "or-image.png") => {
-        const response = await fetch(url);
-        const blob = await response.blob();
-      
-        const blobUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = filename;
-      
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(blobUrl);
-      };
+    const downloadImage = async (url, filename = "image.png") => {
+        try {
+            const response = await fetch(url, {
+                mode: 'cors',
+                cache: 'no-cache'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch image: ${response.statusText}`);
+            }
+
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = filename;
+            link.style.display = 'none';
+
+            document.body.appendChild(link);
+            link.click();
+
+            setTimeout(() => {
+                link.remove();
+                window.URL.revokeObjectURL(blobUrl);
+            }, 100);
+        } catch (error) {
+            console.error('Error downloading image:', error);
+            // Fallback: open in new tab
+            window.open(url, '_blank');
+            toast.error('Download failed. Image opened in new tab.');
+        }
+    };
       
     const handleFileChange = (type, file) => {
         if (file) {

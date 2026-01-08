@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Sparkles, Upload, Cpu, Users, Ruler, Zap, Loader2, CheckCircle, AlertCircle, RefreshCw, X, Download } from "lucide-react"
+import { ChevronLeft, Sparkles, Upload, Cpu, Users, Ruler, Zap, Loader2, CheckCircle, AlertCircle, RefreshCw, X, Download, Eye } from "lucide-react"
 import { apiService } from "@/lib/api"
 import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
 import { OrnamentSelection } from "@/components/images/OrnamentSelection"
+import toast from "react-hot-toast"
 
 export default function ModelGenerationForm() {
     const router = useRouter()
@@ -57,21 +58,65 @@ export default function ModelGenerationForm() {
         error: null
     })
 
-    const downloadImage = async (url, filename = "or-image.png") => {
-        const response = await fetch(url);
-        const blob = await response.blob();
-      
-        const blobUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = filename;
-      
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(blobUrl);
-      };
-      
+    const handleView = (url) => {
+        window.open(url, '_blank');
+    };
+
+    const downloadImage = async (url, filename = "image.png") => {
+        try {
+            // First try with fetch and blob approach
+            const response = await fetch(url, {
+                mode: 'cors',
+                cache: 'no-cache',
+                credentials: 'omit'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch image: ${response.statusText}`);
+            }
+
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = filename;
+            link.style.display = 'none';
+            link.setAttribute('download', filename);
+
+            document.body.appendChild(link);
+            link.click();
+
+            // Clean up after a delay
+            setTimeout(() => {
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(blobUrl);
+            }, 200);
+
+            toast.success('Download started!');
+        } catch (error) {
+            console.error('Error downloading image:', error);
+            // Fallback: try direct download link
+            try {
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = filename;
+                link.target = '_blank';
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                }, 200);
+                toast.success('Download started!');
+            } catch (fallbackError) {
+                console.error('Fallback download also failed:', fallbackError);
+                // Last resort: open in new tab
+                window.open(url, '_blank');
+                toast.error('Download failed. Image opened in new tab.');
+            }
+        }
+    };
+
     // Get current state based on active tab
     const getCurrentState = () => {
         if (activeTab === "ai_model") {
@@ -614,7 +659,7 @@ export default function ModelGenerationForm() {
                                 />
 
                                 {/* Additional Measurements */}
-                                <div>
+                                {/* <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <Ruler className="w-4 h-4 text-[#7753ff]" />
                                         Additional Measurements (Optional)
@@ -626,7 +671,7 @@ export default function ModelGenerationForm() {
                                         onChange={(e) => setRealFormData((prev) => ({ ...prev, measurements: e.target.value }))}
                                         className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all shadow-sm"
                                     />
-                                </div>
+                                </div> */}
 
                                 {/* Custom Prompt */}
                                 <div>
@@ -712,21 +757,26 @@ export default function ModelGenerationForm() {
                                         <p className="text-green-700 font-semibold">
                                             ✓ {activeTab === "ai_model" ? "AI model" : "Real model image"} generated successfully!
                                         </p>
-                                        {currentState.result.mongo_id && (
-                                            <p className="text-green-600 text-xs mt-1">Image ID: {currentState.result.mongo_id}</p>
-                                        )}
+
                                     </div>
                                     <div className="space-y-3">
-                                        <div className="grid grid-cols-2 gap-3">
-                                        <button
-  onClick={() =>
-    downloadImage(result.or_image_url, "original-image.png")
-  }
-  className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
->
-  <Download size={16} />
-  Download
-</button>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <button
+                                                onClick={() => handleView(currentState.result.generated_image_url)}
+                                                className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Eye size={16} />
+                                                View
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    downloadImage(currentState.result.generated_image_url, "model-generated.png")
+                                                }
+                                                className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Download size={16} />
+                                                Download
+                                            </button>
 
                                             <button
                                                 onClick={activeTab === "ai_model" ? handleAiRegenerate : handleRealRegenerate}

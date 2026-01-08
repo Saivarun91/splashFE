@@ -1,19 +1,21 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, Bell, User, X, Check, Mail, Clock, Loader2 } from "lucide-react";
+import { Search, Bell, User, X, Check, Mail, Clock, Loader2, Building2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiService } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export function Topbar({ collapsed }) {
-    const { token } = useAuth();
+    const { token, user } = useAuth();
     const [showNotifications, setShowNotifications] = useState(false);
     const [invites, setInvites] = useState([]);
     const [loading, setLoading] = useState(true);
     const [processingInvite, setProcessingInvite] = useState(null);
     const notificationRef = useRef(null);
+    const [organizationInfo, setOrganizationInfo] = useState(null);
+    const [loadingOrg, setLoadingOrg] = useState(true);
 
     const fetchInvites = useCallback(async () => {
         if (!token) return;
@@ -32,6 +34,75 @@ export function Topbar({ collapsed }) {
     useEffect(() => {
         fetchInvites();
     }, [fetchInvites]);
+
+    // Fetch organization information
+    useEffect(() => {
+        const fetchOrganizationInfo = async () => {
+            if (!token) {
+                setLoadingOrg(false);
+                return;
+            }
+
+            try {
+                setLoadingOrg(true);
+                // Get user profile to check for organization
+                const userProfile = await apiService.getUserProfile(token);
+                if (userProfile?.success && userProfile?.user) {
+                    const currentUser = userProfile.user;
+                    let organizationId = null;
+                    let organizationRole = currentUser?.organization_role || null;
+
+                    // Check organization from profile - handle both object and string/ObjectId formats
+                    if (currentUser?.organization) {
+                        if (typeof currentUser.organization === 'object' && currentUser.organization.id) {
+                            organizationId = currentUser.organization.id;
+                        } else if (typeof currentUser.organization === 'string') {
+                            organizationId = currentUser.organization;
+                        }
+                    } else if (currentUser?.organization_id) {
+                        organizationId = currentUser.organization_id;
+                    }
+
+                    // Fallback: Check if user object from context has organization
+                    if (!organizationId && user?.organization) {
+                        if (typeof user.organization === 'object' && user.organization.id) {
+                            organizationId = user.organization.id;
+                        } else if (typeof user.organization === 'string') {
+                            organizationId = user.organization;
+                        } else {
+                            organizationId = String(user.organization);
+                        }
+                    }
+
+                    if (!organizationId) {
+                        setOrganizationInfo(null);
+                        setLoadingOrg(false);
+                        return;
+                    }
+
+                    // Fetch organization details to get the name
+                    const orgData = await apiService.getOrganization(organizationId, token);
+                    if (orgData) {
+                        setOrganizationInfo({
+                            name: orgData.name || 'Organization',
+                            role: organizationRole
+                        });
+                    } else {
+                        setOrganizationInfo(null);
+                    }
+                } else {
+                    setOrganizationInfo(null);
+                }
+            } catch (error) {
+                console.error("Error fetching organization info:", error);
+                setOrganizationInfo(null);
+            } finally {
+                setLoadingOrg(false);
+            }
+        };
+
+        fetchOrganizationInfo();
+    }, [token, user]);
 
     // Refresh invites when notification sidebar is opened
     useEffect(() => {
@@ -86,11 +157,17 @@ export function Topbar({ collapsed }) {
     };
 
     const getRoleBadgeColor = (role) => {
-        switch (role) {
+        switch (role?.toLowerCase()) {
             case "owner":
                 return "bg-[#a020f0] text-white";
+            case "chief_editor":
+                return "bg-[#8b5cf6] text-white";
             case "editor":
                 return "bg-[#7753ff] text-white";
+            case "admin":
+                return "bg-[#6366f1] text-white";
+            case "member":
+                return "bg-[#708090] text-white";
             case "viewer":
                 return "bg-[#708090] text-white";
             default:
@@ -127,8 +204,22 @@ export function Topbar({ collapsed }) {
                 className={`fixed top-0 right-0 z-30 h-16 flex items-center  bg-white border-b border-white shadow px-6 transition-all duration-300 ${collapsed ? "left-16" : "left-64"
                     }`}
             >
-                {/* Left Section */}
-
+                {/* Left Section - Organization Info */}
+                {!loadingOrg && organizationInfo && (
+                    <div className="flex items-center ml-6">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg shadow-sm">
+                            <Building2 className="w-8 h-8 text-indigo-600" />
+                            <span className="text-indigo-900 font-semibold text-xl">
+                                {organizationInfo.name}
+                            </span>
+                            {organizationInfo.role && (
+                                <Badge className={`${getRoleBadgeColor(organizationInfo.role)} text-xs px-2 py-0.5 font-medium`}>
+                                    {organizationInfo.role}
+                                </Badge>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* Middle Section (Search) */}
                 <div className="flex-1 flex justify-center">

@@ -438,7 +438,7 @@ export function OrnamentSelection({
             )}
 
             {/* Fitting Rules Display */}
-            {selectedOrnament && (
+            {/* {selectedOrnament && (
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-purple-600" />
@@ -453,7 +453,7 @@ export function OrnamentSelection({
                         </p>
                     </div>
                 </div>
-            )}
+            )} */}
         </div>
     )
 }

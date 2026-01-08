@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Sparkles, Upload, Award, Zap, Loader2, CheckCircle, AlertCircle, X, Download, RefreshCw, Cpu, Users } from "lucide-react"
+import { ChevronLeft, Sparkles, Upload, Award, Zap, Loader2, CheckCircle, AlertCircle, X, Download, RefreshCw, Cpu, Users, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { apiService } from "@/lib/api"
 import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
+import toast from "react-hot-toast"
 
 export default function CampaignForm() {
     const router = useRouter()
@@ -32,20 +33,64 @@ export default function CampaignForm() {
         error: null
     })
 
-    const downloadImage = async (url, filename = "or-image.png") => {
-        const response = await fetch(url);
-        const blob = await response.blob();
-      
-        const blobUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = filename;
-      
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(blobUrl);
-      };
+    const handleView = (url) => {
+        window.open(url, '_blank');
+    };
+
+    const downloadImage = async (url, filename = "image.png") => {
+        try {
+            // First try with fetch and blob approach
+            const response = await fetch(url, {
+                mode: 'cors',
+                cache: 'no-cache',
+                credentials: 'omit'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch image: ${response.statusText}`);
+            }
+
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = filename;
+            link.style.display = 'none';
+            link.setAttribute('download', filename);
+
+            document.body.appendChild(link);
+            link.click();
+
+            // Clean up after a delay
+            setTimeout(() => {
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(blobUrl);
+            }, 200);
+            
+            toast.success('Download started!');
+        } catch (error) {
+            console.error('Error downloading image:', error);
+            // Fallback: try direct download link
+            try {
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = filename;
+                link.target = '_blank';
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                }, 200);
+                toast.success('Download started!');
+            } catch (fallbackError) {
+                console.error('Fallback download also failed:', fallbackError);
+                // Last resort: open in new tab
+                window.open(url, '_blank');
+                toast.error('Download failed. Image opened in new tab.');
+            }
+        }
+    };
       
     const handleModelImageChange = (file) => {
         if (file) {
@@ -470,16 +515,23 @@ export default function CampaignForm() {
                                         )}
                                     </div>
                                     <div className="space-y-3">
-                                        <div className="grid grid-cols-2 gap-3">
-                                        <button
-  onClick={() =>
-    downloadImage(result.or_image_url, "original-image.png")
-  }
-  className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
->
-  <Download size={16} />
-  Download
-</button>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <button
+                                                onClick={() => handleView(result.generated_image_url)}
+                                                className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Eye size={16} />
+                                                View
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    downloadImage(result.generated_image_url, "campaign-shot.png")
+                                                }
+                                                className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Download size={16} />
+                                                Download
+                                            </button>
 
                                             <button
                                                 onClick={handleRegenerate}

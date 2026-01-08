@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Grid, Download, Trash2, Filter, Calendar, Tag, RefreshCw, Loader2, X, Sparkles, AlertCircle } from "lucide-react"
+import { ChevronLeft, Grid, Download, Trash2, Filter, Calendar, Tag, RefreshCw, Loader2, X, Sparkles, AlertCircle, Eye } from "lucide-react"
 import Image from "next/image"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
@@ -84,6 +84,52 @@ export default function GalleryPage() {
     }
 
     const filteredImages = images
+
+    // Download image function using blob approach
+    const downloadImage = async (url, filename = "image.png") => {
+        try {
+            const response = await fetch(url, {
+                mode: 'cors',
+                cache: 'no-cache'
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch image: ${response.statusText}`)
+            }
+
+            const blob = await response.blob()
+            const blobUrl = window.URL.createObjectURL(blob)
+
+            const link = document.createElement("a")
+            link.href = blobUrl
+            link.download = filename
+            link.style.display = 'none'
+
+            document.body.appendChild(link)
+            link.click()
+
+            setTimeout(() => {
+                link.remove()
+                window.URL.revokeObjectURL(blobUrl)
+            }, 100)
+        } catch (error) {
+            console.error('Error downloading image:', error)
+            // Fallback: open in new tab
+            window.open(url, '_blank')
+            toast.error('Download failed. Image opened in new tab.')
+        }
+    }
+
+    const handleDownload = (image) => {
+        const imageType = getImageCategory(image.type).toLowerCase().replace(/\s+/g, '-')
+        const timestamp = image.created_at ? new Date(image.created_at).getTime() : Date.now()
+        const filename = `image-${imageType}-${timestamp}.png`
+        downloadImage(image.generated_image_url, filename)
+    }
+
+    const handleView = (image) => {
+        window.open(image.generated_image_url, '_blank')
+    }
 
     const handleRegenerate = (image) => {
         setRegenerateModal({
@@ -276,22 +322,33 @@ export default function GalleryPage() {
                                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
 
                                         {/* Hover Actions */}
-                                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 bg-black/20">
-                                            <a
-                                                href={image.generated_image_url}
-                                                download
-                                                onClick={(e) => e.stopPropagation()}
-                                                className="p-2 bg-white rounded-full hover:bg-gray-100 transition-all"
+                                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 bg-black/40">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleView(image)
+                                                }}
+                                                className="p-2.5 bg-white rounded-full hover:bg-gray-100 transition-all shadow-lg"
+                                                title="View in new tab"
+                                            >
+                                                <Eye size={16} className="text-gray-700" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleDownload(image)
+                                                }}
+                                                className="p-2.5 bg-white rounded-full hover:bg-gray-100 transition-all shadow-lg"
                                                 title="Download"
                                             >
                                                 <Download size={16} className="text-gray-700" />
-                                            </a>
+                                            </button>
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation()
                                                     handleRegenerate(image)
                                                 }}
-                                                className="p-2 bg-white rounded-full hover:bg-gray-100 transition-all"
+                                                className="p-2.5 bg-white rounded-full hover:bg-gray-100 transition-all shadow-lg"
                                                 title="Regenerate"
                                             >
                                                 <RefreshCw size={16} className="text-gray-700" />
