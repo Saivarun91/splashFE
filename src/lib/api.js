@@ -794,7 +794,7 @@ async request(endpoint, options = {}) {
         // Extract ornament names and base prompt from formData
         const ornamentNames = formData.getAll('ornament_names');
         const basePrompt = formData.get('prompt') || 'Generate campaign shot with multiple ornaments';
-
+        console.log("basePrompt : ", basePrompt);
         // Generate enhanced prompt with fitting rules for multiple ornaments
         let enhancedPrompt = basePrompt;
         if (ornamentNames && ornamentNames.length > 0) {
