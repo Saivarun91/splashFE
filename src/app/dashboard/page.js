@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Sparkles, Image, FolderKanban, Zap, TrendingUp, Mail } from "lucide-react";
+import { FaCoins } from "react-icons/fa";
+import { RiAiGenerate2 } from "react-icons/ri";
 import PendingInvitations from "@/components/PendingInvitations";
 import { useAuth } from "@/context/AuthContext";
 import { apiService } from "@/lib/api";
@@ -173,7 +175,7 @@ console.log("Organization ID:", organizationId);
                     <div className="p-4 bg-white border border-indigo-100 rounded-xl shadow-sm hover:shadow-lg hover:border-indigo-300 transition-all duration-300 cursor-pointer">
                         <div className="flex justify-between items-center pb-2">
                             <span className="text-sm font-medium text-gray-500">Remaining Credits</span>
-                            <Zap className="w-4 h-4 text-yellow-400" />
+                            <FaCoins className="w-6 h-6 text-yellow-500" />
                         </div>
                         <div>
                             {creditsLoading ? (
@@ -214,7 +216,7 @@ console.log("Organization ID:", organizationId);
                 <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
                     <div className="flex justify-between items-center pb-2">
                         <span className="text-sm font-medium text-gray-500">Images Generated</span>
-                        <Image className="w-4 h-4 text-indigo-500" />
+                        <RiAiGenerate2  className="w-6 h-6 text-indigo-500" />
                     </div>
                     <div>
                         <div className="text-2xl font-bold text-gray-900">
@@ -231,7 +233,7 @@ console.log("Organization ID:", organizationId);
                 <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
                     <div className="flex justify-between items-center pb-2">
                         <span className="text-sm font-medium text-gray-500">Active Projects</span>
-                        <FolderKanban className="w-4 h-4 text-indigo-500" />
+                        <FolderKanban className="w-6 h-6 text-indigo-500" />
                     </div>
                     <div>
                         <div className="text-2xl font-bold text-gray-900">

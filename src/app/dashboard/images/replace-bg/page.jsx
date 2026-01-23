@@ -231,11 +231,11 @@ const BackgroundReplaceForm = () => {
                 <div className="mb-12">
                     <div className="flex items-center gap-4 mb-4">
                         <div className="p-3 bg-[#7753ff] rounded-2xl shadow-lg">
-                            <ImageIcon className="w-8 h-8 text-white" />
+                            <Sparkles className="w-8 h-8 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-4xl font-bold text-[#7753ff]">
-                                Background Replace
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">
+                               Themed image 
                             </h1>
                             <p className="text-[#737373] mt-2">Replace product backgrounds with AI-powered precision</p>
                         </div>

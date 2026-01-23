@@ -134,7 +134,7 @@ export default function Dashboard() {
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold mb-1">Projects</h1>
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">Projects</h1>
                         <p className="text-gray-600">Organize full campaign photoshoots with multiple products</p>
                     </div>
                     <Link href="/dashboard/projects/create">

@@ -300,11 +300,12 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useImageGeneration } from "@/context/ImageGenerationContext";
+import { apiService } from "@/lib/api";
 import {
     LayoutDashboard,
     Image,
@@ -329,15 +330,19 @@ import {
     Shield,
     FileText,
 } from "lucide-react";
+import { MdPhotoSizeSelectLarge } from "react-icons/md";
+import { SiGooglecampaignmanager360  } from "react-icons/si";
+import { HiOutlineUserCircle } from "react-icons/hi";
 
 export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
     const [expandedItems, setExpandedItems] = useState(["Individual Generator"]);
     const pathname = usePathname();
     const router = useRouter();
-    const { logout } = useAuth();
+    const { logout, user, token } = useAuth();
     const { isGenerating } = useImageGeneration();
 
-    const navItems = [
+    // Define all nav items
+    const allNavItems = [
         {
             label: "Dashboard",
             icon: LayoutDashboard,
@@ -348,10 +353,10 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
             icon: Image,
             path: "/dashboard/images",
             children: [
-                { label: "Plain Image", icon: Palette, path: "/dashboard/images/white-bg" },
+                { label: "Plain Image", icon: MdPhotoSizeSelectLarge , path: "/dashboard/images/white-bg" },
                 { label: "Themed Image", icon: Sparkles, path: "/dashboard/images/replace-bg" },
-                { label: "Model Images", icon: Users, path: "/dashboard/images/model-generation" },
-                { label: "Campaign Images", icon: Grid3x3, path: "/dashboard/images/campaign" },
+                { label: "Model Images", icon: HiOutlineUserCircle, path: "/dashboard/images/model-generation" },
+                { label: "Campaign Images", icon: SiGooglecampaignmanager360 , path: "/dashboard/images/campaign" },
                 { label: "My Images", icon: Images, path: "/dashboard/images/gallery" },
             ],
         },
@@ -383,6 +388,112 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
             ],
         },
     ];
+
+    // Check user organization membership and filter nav items
+    const [navItems, setNavItems] = useState(() => {
+        // Initialize with all items, but without Subscription (safer default)
+        return allNavItems.map(item => {
+            if (item.label === "My Account" && item.children) {
+                return {
+                    ...item,
+                    children: item.children.filter(child => child.label !== "Subscription")
+                };
+            }
+            return item;
+        });
+    });
+
+    useEffect(() => {
+        const checkUserOrganization = async () => {
+            if (!token) {
+                // If no token, show all items including Subscription (user not logged in)
+                setNavItems(allNavItems);
+                return;
+            }
+
+            try {
+                const userProfile = await apiService.getUserProfile(token);
+                if (userProfile?.success && userProfile?.user) {
+                    const currentUser = userProfile.user;
+                    
+                    // Check if user belongs to any organization
+                    let belongsToOrganization = false;
+                    
+                    // Check organization_id first (most reliable)
+                    if (currentUser.organization_id && 
+                        currentUser.organization_id !== null && 
+                        currentUser.organization_id !== 'null' && 
+                        currentUser.organization_id !== 'undefined') {
+                        belongsToOrganization = true;
+                    }
+                    // Check organization object
+                    else if (currentUser.organization && 
+                             currentUser.organization !== null && 
+                             currentUser.organization !== undefined) {
+                        // If organization is an object with id
+                        if (typeof currentUser.organization === 'object' && currentUser.organization.id) {
+                            belongsToOrganization = true;
+                        }
+                        // If organization is a string/ObjectId (non-empty)
+                        else if (typeof currentUser.organization === 'string' && currentUser.organization.trim() !== '') {
+                            belongsToOrganization = true;
+                        }
+                        // If organization exists as an object with properties (not empty object)
+                        else if (typeof currentUser.organization === 'object' && Object.keys(currentUser.organization).length > 0) {
+                            belongsToOrganization = true;
+                        }
+                    }
+
+                    // Filter nav items - hide Subscription if user belongs to organization
+                    const filteredNavItems = allNavItems.map(item => {
+                        if (item.label === "My Account" && item.children) {
+                            return {
+                                ...item,
+                                children: item.children.filter(child => {
+                                    // Hide Subscription if user belongs to any organization
+                                    if (child.label === "Subscription" && belongsToOrganization) {
+                                        return false;
+                                    }
+                                    // Show Subscription only if user doesn't belong to organization
+                                    return true;
+                                })
+                            };
+                        }
+                        return item;
+                    });
+
+                    setNavItems(filteredNavItems);
+                } else {
+                    // If profile fetch fails, hide subscriptions by default
+                    const filteredNavItems = allNavItems.map(item => {
+                        if (item.label === "My Account" && item.children) {
+                            return {
+                                ...item,
+                                children: item.children.filter(child => child.label !== "Subscription")
+                            };
+                        }
+                        return item;
+                    });
+                    setNavItems(filteredNavItems);
+                }
+            } catch (error) {
+                console.error('Failed to fetch user profile:', error);
+                // On error, hide subscriptions by default
+                const filteredNavItems = allNavItems.map(item => {
+                    if (item.label === "My Account" && item.children) {
+                        return {
+                            ...item,
+                            children: item.children.filter(child => child.label !== "Subscription")
+                        };
+                    }
+                    return item;
+                });
+                setNavItems(filteredNavItems);
+            }
+        };
+
+        checkUserOrganization();
+    }, [token]);
 
     const toggleExpanded = (label) => {
         if (isGenerating) return;

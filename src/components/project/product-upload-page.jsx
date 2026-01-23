@@ -29,6 +29,27 @@ export const ProductUploadPage = React.forwardRef(({ project, collectionData, on
         campaign: false
     })
 
+    // Credit settings state
+    const [creditSettings, setCreditSettings] = useState({
+        credits_per_image_generation: 2 // Default fallback
+    })
+
+    // Fetch credit settings
+    useEffect(() => {
+        const fetchCreditSettings = async () => {
+            try {
+                const response = await apiService.getCreditSettings()
+                if (response?.success && response?.settings) {
+                    setCreditSettings(response.settings)
+                }
+            } catch (error) {
+                console.error('Failed to fetch credit settings:', error)
+                // Keep default value
+            }
+        }
+        fetchCreditSettings()
+    }, [])
+
     // Load existing product images from collection data
     useEffect(() => {
         if (collectionData?.items?.[0]?.product_images) {
@@ -724,7 +745,7 @@ export const ProductUploadPage = React.forwardRef(({ project, collectionData, on
                                     const totalSelected = Object.values(selections).reduce((acc, sel) => {
                                         return acc + (sel.plainBg ? 1 : 0) + (sel.bgReplace ? 1 : 0) + (sel.model ? 1 : 0) + (sel.campaign ? 1 : 0)
                                     }, 0)
-                                    const totalCredits = totalSelected * 2
+                                    const totalCredits = totalSelected * creditSettings.credits_per_image_generation
                                     return totalSelected > 0 ? (
                                         <span>
                                             <span className="font-semibold text-[#1a1a1a]">{totalSelected}</span> image{totalSelected !== 1 ? 's' : ''} selected • 

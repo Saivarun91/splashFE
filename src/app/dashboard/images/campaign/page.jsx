@@ -9,7 +9,7 @@ import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 import toast from "react-hot-toast"
-
+import { SiGooglecampaignmanager360  } from "react-icons/si";
 export default function CampaignForm() {
     const router = useRouter()
     const { token } = useAuth()
@@ -276,10 +276,10 @@ export default function CampaignForm() {
                 <div className="mb-12">
                     <div className="flex items-center gap-4 mb-4">
                         <div className="p-3 bg-[#7753ff] rounded-2xl shadow-lg">
-                            <Award className="w-8 h-8 text-white" />
+                            <SiGooglecampaignmanager360  className="w-8 h-8 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-4xl font-bold text-[#7753ff]">
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">
                                 Campaign Shots
                             </h1>
                             <p className="text-[#737373] mt-2">Create stunning marketing visuals with AI-powered campaign shots</p>
