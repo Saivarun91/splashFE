@@ -9,7 +9,7 @@ import { useAuth } from "@/context/AuthContext"
 import { OrnamentSelection } from "@/components/images/OrnamentSelection"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 import toast from "react-hot-toast"
-
+import { HiOutlineUserCircle } from "react-icons/hi";
 export default function ModelGenerationForm() {
     const router = useRouter()
     const { token } = useAuth()
@@ -402,7 +402,7 @@ export default function ModelGenerationForm() {
                 <div className="mb-12">
                     <div className="flex items-center gap-4 mb-4">
                         <div className="p-3 bg-[#7753ff] rounded-2xl shadow-lg">
-                            <Users className="w-8 h-8 text-white" />
+                            <HiOutlineUserCircle className="w-8 h-8 text-white" />
                         </div>
                         <div>
                             <h1 className="text-4xl font-bold text-[#7753ff]">

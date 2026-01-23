@@ -830,7 +830,7 @@ async request(endpoint, options = {}) {
 
         // Update the prompt in formData
         formData.set('prompt', enhancedPrompt);
-
+        
         const response = await axios.post(`${this.baseURL}/image/generate-campaign-shot/`, formData, {
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
@@ -1101,6 +1101,23 @@ async request(endpoint, options = {}) {
                 'Authorization': `Bearer ${token || ''}`,
             },
         });
+    }
+
+    // Get credit settings (public read-only)
+    async getCreditSettings() {
+        return this.request('/api/credits/settings/');
+    }
+
+    // Plans endpoints
+    async getPlans(activeOnly = true) {
+        const endpoint = activeOnly 
+            ? '/api/plans/?active_only=true'
+            : '/api/plans/';
+        return this.request(endpoint);
+    }
+
+    async getPlan(planId) {
+        return this.request(`/api/plans/${planId}/`);
     }
 }
 

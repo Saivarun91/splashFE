@@ -204,7 +204,7 @@ export default function GalleryPage() {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">My Images</h1>
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">My Images</h1>
                     <p className="text-[#737373] text-lg">All your generated visuals in one place</p>
                 </div>
 
@@ -297,7 +297,7 @@ export default function GalleryPage() {
                                 : "No images found for this filter"}
                         </p>
                         <button
-                            onClick={() => router.push("/dashboard/images")}
+                            onClick={() => router.push("/dashboard/")}
                             className="px-8 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg"
                         >
                             Start Creating

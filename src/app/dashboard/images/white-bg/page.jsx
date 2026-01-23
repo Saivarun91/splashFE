@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, Zap, Upload, Palette, Sparkles, Loader2, CheckCircle, AlertCircle, RefreshCw, X, Download, Eye } from "lucide-react"
+import { MdPhotoSizeSelectLarge } from "react-icons/md";
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { apiService } from "@/lib/api"
@@ -252,7 +254,7 @@ const PlainBackgroundForm = () => {
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-12">
                     <div className="p-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] rounded-2xl shadow-lg">
-                        <Palette className="w-8 h-8 text-white" />
+                        <MdPhotoSizeSelectLarge className="w-8 h-8 text-white" />
                     </div>
                     <div>
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">
