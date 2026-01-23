@@ -17,9 +17,19 @@ const Home = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
-    // Redirect to dashboard if user is already authenticated
+    // Redirect to dashboard or complete-profile if user is already authenticated
     if (!isLoading && isAuthenticated) {
-      router.push("/dashboard");
+      const savedUser = localStorage.getItem("user");
+      if (savedUser) {
+        const userData = JSON.parse(savedUser);
+        if (!userData.profile_completed) {
+          router.push("/complete-profile");
+        } else {
+          router.push("/dashboard");
+        }
+      } else {
+        router.push("/dashboard");
+      }
     }
   }, [isAuthenticated, isLoading, router]);
 

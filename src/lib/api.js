@@ -159,6 +159,30 @@ async request(endpoint, options = {}) {
         });
     }
 
+    async completeProfile(profileData, token) {
+        return this.request('/api/profile/complete/', {
+            method: 'POST',
+            body: JSON.stringify(profileData),
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    async forgotPassword(email) {
+        return this.request('/api/forgot-password/', {
+            method: 'POST',
+            body: JSON.stringify({ email }),
+        });
+    }
+
+    async resetPassword(token, newPassword) {
+        return this.request('/api/reset-password/', {
+            method: 'POST',
+            body: JSON.stringify({ token, new_password: newPassword }),
+        });
+    }
+
     // Project endpoints
     async getProjects(token) {
         console.log('Getting projects with token:', token);

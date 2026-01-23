@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { AuthProvider } from "@/context/AuthContext";
 import { ImageGenerationProvider } from "@/context/ImageGenerationContext";
 import { NavigationBlocker } from "@/components/NavigationBlocker";
+import { ProfileCompletionGuard } from "@/components/ProfileCompletionGuard";
 
 import { Topbar } from "@/components/Topbar";
 
@@ -45,10 +46,12 @@ export default function DashboardLayout({ children }) {
                     }}
                 >
                     <AuthProvider>
-                        <ImageGenerationProvider>
-                            <NavigationBlocker />
-                            {children}
-                        </ImageGenerationProvider>
+                        <ProfileCompletionGuard>
+                            <ImageGenerationProvider>
+                                <NavigationBlocker />
+                                {children}
+                            </ImageGenerationProvider>
+                        </ProfileCompletionGuard>
                     </AuthProvider>
                 </main>
             </div>

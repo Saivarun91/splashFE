@@ -86,12 +86,12 @@ export default function LoginForm() {
 
                 {/* Forgot Password Link */}
                 <div className="text-right">
-                    <a
-                        href="#"
+                    <Link
+                        href="/forgot-password"
                         className="text-sm font-medium text-[#5533ff] hover:opacity-80 transition-opacity"
                     >
                         Forgot Password?
-                    </a>
+                    </Link>
                 </div>
 
                 {/* Error Message */}

@@ -20,12 +20,22 @@ export function AuthProvider({ children }) {
             const savedUser = localStorage.getItem("user");
 
             if (savedToken && savedUser) {
+                const userData = JSON.parse(savedUser);
                 setToken(savedToken);
-                setUser(JSON.parse(savedUser));
+                setUser(userData);
+                
+                // Check if profile is incomplete and redirect if not on complete-profile page
+                if (!userData.profile_completed && window.location.pathname !== "/complete-profile") {
+                    // Don't redirect if on public pages
+                    const publicPages = ["/login", "/signup", "/forgot-password", "/reset-password", "/"];
+                    if (!publicPages.includes(window.location.pathname)) {
+                        router.push("/complete-profile");
+                    }
+                }
             }
             setIsLoading(false);
         }
-    }, []);
+    }, [router]);
 
     // LOGIN function
     const login = async (email, password) => {
@@ -37,14 +47,22 @@ export function AuthProvider({ children }) {
                 setUser({
                     email: data.user.email,
                     role: data.user.role,
-
+                    profile_completed: data.user.profile_completed,
+                    organization: data.user.organization,
+                    organization_role: data.user.organization_role,
                 });
 
                 localStorage.setItem("token", data.token);
                 localStorage.setItem("user", JSON.stringify(data.user));
 
                 toast.success("Login successful");
-                router.push("/dashboard");
+                
+                // Check if profile is completed
+                if (!data.user.profile_completed) {
+                    router.push("/complete-profile");
+                } else {
+                    router.push("/dashboard");
+                }
                 return data;
             } else {
                 const errorMessage = "Invalid login response";
@@ -72,12 +90,24 @@ export function AuthProvider({ children }) {
         router.push("/login");
     };
 
+    // Refresh user data from localStorage
+    const refreshUser = () => {
+        if (typeof window !== "undefined") {
+            const savedUser = localStorage.getItem("user");
+            if (savedUser) {
+                const userData = JSON.parse(savedUser);
+                setUser(userData);
+            }
+        }
+    };
+
     // Context value (only provide once token & user are loaded)
     const value = {
         user,
         token,
         login,
         logout,
+        refreshUser,
         isAuthenticated: !!token,
         isLoading,
     };
