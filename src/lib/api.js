@@ -8,6 +8,7 @@ class ApiService {
         this.baseURL = API_BASE_URL;
     }
 
+    // Low-level request helper (uses fetch)
 async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
 
@@ -737,6 +738,65 @@ async request(endpoint, options = {}) {
         });
     }
 
+    // =======================
+    // Image Generation helpers (imgbackendapp)
+    // =======================
+
+    // Get Celery task status for image generation
+    async getImageTaskStatus(taskId, token) {
+        const response = await axios.get(
+            `${this.baseURL}/image/task-status/`,
+            {
+                params: { task_id: taskId },
+                headers: {
+                    'Authorization': `Bearer ${token || ''}`,
+                }
+            }
+        );
+        return response.data;
+    }
+
+    // Wait for a Celery image-generation task to complete and return its result
+    async waitForImageTask(taskId, token, options = {}) {
+        const intervalMs = options.intervalMs || 2000;
+        const timeoutMs = options.timeoutMs || 10 * 60 * 1000; // 10 minutes
+        const start = Date.now();
+
+        // Simple polling loop
+        // NOTE: This keeps the UI "loading" until the image is actually ready
+        // but avoids blocking the Django request thread.
+        // The frontend components don't need to change their success logic.
+        // They will only receive the final result once the task finishes.
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            const status = await this.getImageTaskStatus(taskId, token);
+
+            if (!status || !status.status) {
+                throw new Error('Invalid task status response from server');
+            }
+
+            if (status.status === 'SUCCESS') {
+                // Celery task result is the original view-style response dict
+                if (!status.result) {
+                    throw new Error('Task completed but no result was returned');
+                }
+                return status.result;
+            }
+
+            if (status.status === 'FAILURE') {
+                const errMsg = status.error || status.message || 'Image generation failed';
+                throw new Error(errMsg);
+            }
+
+            if (Date.now() - start > timeoutMs) {
+                throw new Error('Image generation timed out. Please try again.');
+            }
+
+            // Wait before next poll
+            await new Promise((resolve) => setTimeout(resolve, intervalMs));
+        }
+    }
+
     // Image Generation endpoints (imgbackendapp)
     async uploadOrnamentWithBackground(formData, token) {
         const response = await axios.post(`${this.baseURL}/image/`, formData, {
@@ -744,7 +804,15 @@ async request(endpoint, options = {}) {
                 'Authorization': `Bearer ${token || ''}`,
             }
         });
-        return response.data;
+        const data = response.data;
+
+        // If Celery queued a background task, wait for completion
+        if (data && data.task_id) {
+            return await this.waitForImageTask(data.task_id, token);
+        }
+
+        // Backward-compatible: if the backend returns final result directly
+        return data;
     }
 
     async changeBackground(formData, token) {
@@ -753,7 +821,13 @@ async request(endpoint, options = {}) {
                 'Authorization': `Bearer ${token || ''}`,
             }
         });
-        return response.data;
+        const data = response.data;
+
+        if (data && data.task_id) {
+            return await this.waitForImageTask(data.task_id, token);
+        }
+
+        return data;
     }
 
     async generateModelWithOrnament(formData, token) {
@@ -782,7 +856,13 @@ async request(endpoint, options = {}) {
                 'Authorization': `Bearer ${token || ''}`,
             }
         });
-        return response.data;
+        const data = response.data;
+
+        if (data && data.task_id) {
+            return await this.waitForImageTask(data.task_id, token);
+        }
+
+        return data;
     }
 
     async generateRealModelWithOrnament(formData, token) {
@@ -811,7 +891,13 @@ async request(endpoint, options = {}) {
                 'Authorization': `Bearer ${token || ''}`,
             }
         });
-        return response.data;
+        const data = response.data;
+
+        if (data && data.task_id) {
+            return await this.waitForImageTask(data.task_id, token);
+        }
+
+        return data;
     }
 
     async generateCampaignShot(formData, token) {
@@ -836,7 +922,13 @@ async request(endpoint, options = {}) {
                 'Authorization': `Bearer ${token || ''}`,
             }
         });
-        return response.data;
+        const data = response.data;
+
+        if (data && data.task_id) {
+            return await this.waitForImageTask(data.task_id, token);
+        }
+
+        return data;
     }
 
     // Regeneration endpoints
@@ -865,7 +957,13 @@ async request(endpoint, options = {}) {
                 }
             }
         );
-        return response.data;
+        const data = response.data;
+
+        if (data && data.task_id) {
+            return await this.waitForImageTask(data.task_id, token);
+        }
+
+        return data;
     }
 
     async getUserImages(type = null, page = 1, limit = 20) {
