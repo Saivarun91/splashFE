@@ -191,13 +191,13 @@ export function OrganizationsTab() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-[#1a1a1a]">Organizations</h2>
-                    <p className="text-sm text-[#737373] mt-1">Manage organizations and their settings</p>
+                    <h2 className="text-2xl font-bold text-gray-900">Organizations</h2>
+                    <p className="text-sm text-gray-500 mt-1">Manage organizations and their settings</p>
                 </div>
                 {isAdmin && (
                     <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button className="bg-[#884cff] hover:bg-[#7a3ff0] text-white">
+                            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
                                 <Plus className="w-4 h-4 mr-2" />
                                 Create Organization
                             </Button>
@@ -208,7 +208,7 @@ export function OrganizationsTab() {
                             </DialogHeader>
                             <div className="space-y-4 mt-4">
                                 <div>
-                                    <label className="text-sm font-medium text-[#1a1a1a]">Organization Name</label>
+                                    <label className="text-sm font-medium text-gray-900">Organization Name</label>
                                     <Input
                                         value={createForm.name}
                                         onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
@@ -217,7 +217,7 @@ export function OrganizationsTab() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-sm font-medium text-[#1a1a1a]">Owner Email</label>
+                                    <label className="text-sm font-medium text-gray-900">Owner Email</label>
                                     <Input
                                         type="email"
                                         value={createForm.owner_email}
@@ -227,7 +227,7 @@ export function OrganizationsTab() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-sm font-medium text-[#1a1a1a]">Initial Credits</label>
+                                    <label className="text-sm font-medium text-gray-900">Initial Credits</label>
                                     <Input
                                         type="number"
                                         value={createForm.initial_credits}
@@ -241,7 +241,7 @@ export function OrganizationsTab() {
                                 )}
                                 <Button
                                     onClick={handleCreateOrganization}
-                                    className="w-full bg-[#884cff] hover:bg-[#7a3ff0] text-white"
+                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
                                 >
                                     Create Organization
                                 </Button>
