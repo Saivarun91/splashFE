@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button"
 import { apiService } from "@/lib/api"
 import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
+import { useLanguage } from "@/context/LanguageContext"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 import toast from "react-hot-toast"
 import { SiGooglecampaignmanager360  } from "react-icons/si";
 export default function CampaignForm() {
     const router = useRouter()
     const { token } = useAuth()
+    const { t } = useLanguage()
     const [formData, setFormData] = useState({
         modelType: "ai_model",
         modelImage: null,
@@ -69,7 +71,7 @@ export default function CampaignForm() {
                 window.URL.revokeObjectURL(blobUrl);
             }, 200);
 
-            toast.success('Download started!');
+            toast.success(t("images.downloadStarted"));
         } catch (error) {
             console.error('Error downloading image:', error);
             // Fallback: try direct download link
@@ -84,12 +86,12 @@ export default function CampaignForm() {
                 setTimeout(() => {
                     document.body.removeChild(link);
                 }, 200);
-                toast.success('Download started!');
+                toast.success(t("images.downloadStarted"));
             } catch (fallbackError) {
                 console.error('Fallback download also failed:', fallbackError);
                 // Last resort: open in new tab
                 window.open(url, '_blank');
-                toast.error('Download failed. Image opened in new tab.');
+                toast.error(t("images.downloadFailed"));
             }
         }
     };
@@ -194,7 +196,7 @@ export default function CampaignForm() {
                     error: null
                 })
 
-                alert('Image regenerated successfully!')
+                alert(t("images.imageRegeneratedSuccess"))
             } else {
                 throw new Error(response.error || 'Regeneration failed')
             }
@@ -203,7 +205,7 @@ export default function CampaignForm() {
             setRegenerateModal(prev => ({
                 ...prev,
                 loading: false,
-                error: error.response?.data?.error || error.message || 'Failed to regenerate image'
+                error: error.response?.data?.error || error.message || t("images.failedToRegenerate")
             }))
         }
     }
@@ -225,12 +227,12 @@ export default function CampaignForm() {
         setResult(null)
 
         if (formData.ornamentImages.length === 0) {
-            setError("Please upload at least one ornament image")
+            setError(t("images.pleaseUploadAtLeastOneOrnament"))
             return
         }
 
         if (formData.modelType === "real_model" && !formData.modelImage) {
-            setError("Please upload a model image for Real Model option")
+            setError(t("images.pleaseUploadModelImageForRealModel"))
             return
         }
 
@@ -251,7 +253,7 @@ export default function CampaignForm() {
             formData.themeImages.forEach((image) => {
                 formDataToSend.append("theme_images", image)
             })
-            formDataToSend.append("prompt", formData.prompt || "Create professional campaign shot")
+            formDataToSend.append("prompt", formData.prompt || t("images.createProfessionalCampaignShot"))
             formDataToSend.append("dimension", formData.dimension)
 
             const response = await apiService.generateCampaignShot(formDataToSend, token)
@@ -259,11 +261,11 @@ export default function CampaignForm() {
             if (response.status === "success") {
                 setResult(response)
             } else {
-                setError(response.message || "Failed to generate campaign shot")
+                setError(response.message || t("images.failedToGenerateCampaignShot"))
             }
         } catch (err) {
             console.error("Error generating campaign shot:", err)
-            setError(err.message || "An error occurred while generating the campaign shot")
+            setError(err.message || t("images.errorGeneratingCampaignShot"))
         } finally {
             setIsLoading(false)
         }
@@ -280,9 +282,9 @@ export default function CampaignForm() {
                         </div>
                         <div>
                             <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">
-                                Campaign Shots
+                                {t("images.campaignShots")}
                             </h1>
-                            <p className="text-[#737373] mt-2">Create stunning marketing visuals with AI-powered campaign shots</p>
+                            <p className="text-[#737373] mt-2">{t("images.marketingReady")}</p>
                         </div>
                     </div>
 
@@ -296,7 +298,7 @@ export default function CampaignForm() {
                                 }`}
                         >
                             <Cpu className="w-5 h-5" />
-                            AI Model
+                            {t("images.aiModel")}
                         </button>
                         <button
                             onClick={() => setFormData((prev) => ({ ...prev, modelType: "real_model" }))}
@@ -306,7 +308,7 @@ export default function CampaignForm() {
                                 }`}
                         >
                             <Users className="w-5 h-5" />
-                            Real Model
+                            {t("images.realModel")}
                         </button>
                     </div>
                 </div>
@@ -321,7 +323,7 @@ export default function CampaignForm() {
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
-                                        Model Image<span className="text-red-500 ml-1">*</span>
+                                        {t("images.modelImage")}<span className="text-red-500 ml-1">*</span>
                                     </label>
                                     <div
                                         className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
@@ -341,7 +343,7 @@ export default function CampaignForm() {
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
                                                 <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#7753ff] transition-colors" />
-                                                <p className="text-sm text-gray-500">Upload model image</p>
+                                                <p className="text-sm text-gray-500">{t("images.uploadModelImage")}</p>
                                             </div>
                                         )}
                                     </div>
@@ -352,7 +354,7 @@ export default function CampaignForm() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
-                                    Ornament Images<span className="text-red-500 ml-1">*</span>
+                                    {t("images.ornamentImages")}<span className="text-red-500 ml-1">*</span>
                                 </label>
                                 <div
                                     className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
@@ -368,7 +370,7 @@ export default function CampaignForm() {
                                     />
                                     <div className="flex flex-col items-center justify-center gap-3 text-center">
                                         <Upload className="w-8 h-8 text-gray-400 group-hover:text-purple-500 transition-colors" />
-                                        <p className="text-sm text-gray-500">Upload one or more ornaments (multiple selection)</p>
+                                        <p className="text-sm text-gray-500">{t("images.uploadOneOrMoreOrnaments")}</p>
                                     </div>
                                 </div>
                                 {ornamentPreviews.length > 0 && (
@@ -395,7 +397,7 @@ export default function CampaignForm() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
-                                    Theme/Style Images (Optional)
+                                    {t("images.themeStyleImages")} ({t("common.optional")})
                                 </label>
                                 <div
                                     className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
@@ -411,7 +413,7 @@ export default function CampaignForm() {
                                     />
                                     <div className="flex flex-col items-center justify-center gap-3 text-center">
                                         <Upload className="w-8 h-8 text-gray-400 group-hover:text-purple-500 transition-colors" />
-                                        <p className="text-sm text-gray-500">Upload theme reference images (optional)</p>
+                                        <p className="text-sm text-gray-500">{t("images.uploadThemeReferenceImages")}</p>
                                     </div>
                                 </div>
                                 {themePreviews.length > 0 && (
@@ -438,12 +440,12 @@ export default function CampaignForm() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <Sparkles className="w-4 h-4 text-[#7753ff]" />
-                                    Campaign Instructions (Optional)
+                                    {t("images.campaignInstructions")} ({t("common.optional")})
                                 </label>
                                 <textarea
                                     value={formData.prompt}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, prompt: e.target.value }))}
-                                    placeholder="Add specific instructions for your campaign shot..."
+                                    placeholder={t("images.addSpecificInstructionsForCampaign")}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent resize-none shadow-sm"
                                     rows="3"
                                 />
@@ -460,7 +462,7 @@ export default function CampaignForm() {
                             {error && (
                                 <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500" />
-                                    <p className="text-red-700 text-sm"> Oops! Something went wrong. Please try again.</p>
+                                    <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
                                 </div>
                             )}
 
@@ -472,7 +474,7 @@ export default function CampaignForm() {
                                     className="flex items-center gap-2 text-[#7753ff] font-semibold hover:text-[#6a47e6] transition-colors group"
                                 >
                                     <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-                                    Back
+                                    {t("common.back")}
                                 </button>
                                 <Button
                                     type="submit"
@@ -482,12 +484,12 @@ export default function CampaignForm() {
                                     {isLoading ? (
                                         <>
                                             <Loader2 className="w-5 h-5 animate-spin" />
-                                            Generating...
+                                            {t("images.generating")}
                                         </>
                                     ) : (
                                         <>
                                             <Sparkles className="w-5 h-5" />
-                                            Generate Campaign Shots
+                                            {t("images.generateCampaignShots")}
                                         </>
                                     )}
                                 </Button>
@@ -499,13 +501,13 @@ export default function CampaignForm() {
                     <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
                         <h3 className="text-2xl font-bold text-[#1a1a1a] mb-6 flex items-center gap-2">
                             <CheckCircle className="w-6 h-6 text-[#7753ff]" />
-                            Campaign Shot Preview
+                            {t("images.campaignShotPreview")}
                         </h3>
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center h-[600px] text-center">
                                 <Loader2 className="w-16 h-16 text-[#7753ff] animate-spin mb-4" />
-                                <p className="text-[#737373] text-lg">Creating your campaign shot...</p>
-                                <p className="text-[#737373] text-sm mt-2">This may take up to 45 seconds</p>
+                                <p className="text-[#737373] text-lg">{t("images.creatingCampaignShot")}</p>
+                                <p className="text-[#737373] text-sm mt-2">{t("images.mayTakeUpTo45Seconds")}</p>
                             </div>
                         ) : result ? (
                             <div className="space-y-6">
@@ -519,7 +521,7 @@ export default function CampaignForm() {
                                 </div>
                                 <div className="space-y-3">
                                     <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                                        <p className="text-green-700 font-semibold">✓ Campaign shot generated successfully!</p>
+                                        <p className="text-green-700 font-semibold">✓ {t("images.campaignShotGeneratedSuccess")}</p>
 
                                     </div>
                                     <div className="space-y-3">
@@ -529,7 +531,7 @@ export default function CampaignForm() {
                                                 className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
                                             >
                                                 <Eye size={16} />
-                                                View
+                                                {t("images.view")}
                                             </button>
                                             <button
                                                 onClick={() =>
@@ -538,7 +540,7 @@ export default function CampaignForm() {
                                                 className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
                                             >
                                                 <Download size={16} />
-                                                Download
+                                                {t("images.download")}
                                             </button>
 
                                             <button
@@ -546,7 +548,7 @@ export default function CampaignForm() {
                                                 className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] hover:bg-[#7753ff]/10 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
                                             >
                                                 <RefreshCw size={16} />
-                                                Regenerate
+                                                {t("images.regenerate")}
                                             </button>
                                         </div>
                                         <button
@@ -567,13 +569,13 @@ export default function CampaignForm() {
                                             }}
                                             className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
                                         >
-                                            New Campaign
+                                            {t("images.newCampaign")}
                                         </button>
                                     </div>
                                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                         <p className="text-blue-700 text-sm flex items-center gap-2">
                                             <Sparkles className="w-4 h-4" />
-                                            Click "Regenerate" to modify this image with new instructions!
+                                            {t("images.clickRegenerateToModify")}
                                         </p>
                                     </div>
                                 </div>
@@ -583,8 +585,8 @@ export default function CampaignForm() {
                                 <div className="w-24 h-24 bg-[#7753ff]/10 rounded-full flex items-center justify-center mb-4">
                                     <Award className="w-12 h-12 text-[#7753ff]" />
                                 </div>
-                                <p className="text-[#737373] text-lg">Your campaign shot will appear here</p>
-                                <p className="text-[#737373] text-sm mt-2">Upload ornaments and configure settings to start</p>
+                                <p className="text-[#737373] text-lg">{t("images.campaignShotWillAppear")}</p>
+                                <p className="text-[#737373] text-sm mt-2">{t("images.uploadOrnamentsAndConfigure")}</p>
                             </div>
                         )}
                     </div>
@@ -603,8 +605,8 @@ export default function CampaignForm() {
                                         <RefreshCw className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">Regenerate Campaign Shot</h2>
-                                        <p className="text-sm text-gray-500">Modify and regenerate this campaign shot</p>
+                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">{t("images.regenerateCampaignShot")}</h2>
+                                        <p className="text-sm text-gray-500">{t("images.modifyAndRegenerateCampaignShot")}</p>
                                     </div>
                                 </div>
                                 <button
@@ -621,7 +623,7 @@ export default function CampaignForm() {
                         <div className="p-6 space-y-6">
                             {/* Current Image */}
                             <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-3">Current Image:</p>
+                                <p className="text-sm font-semibold text-gray-700 mb-3">{t("images.currentImage")}:</p>
                                 <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-gray-200">
                                     <Image
                                         src={result.generated_image_url}
@@ -635,7 +637,7 @@ export default function CampaignForm() {
                             {/* Original Prompt */}
                             {result.prompt && (
                                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                                    <p className="text-xs font-semibold text-blue-900 mb-2">Original Prompt:</p>
+                                    <p className="text-xs font-semibold text-blue-900 mb-2">{t("images.originalPrompt")}:</p>
                                     <p className="text-sm text-blue-700">{result.prompt}</p>
                                 </div>
                             )}
@@ -644,18 +646,18 @@ export default function CampaignForm() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <Sparkles className="w-4 h-4 text-[#7753ff]" />
-                                    What would you like to change?
+                                    {t("images.whatWouldYouLikeToChange")}
                                 </label>
                                 <textarea
                                     value={regenerateModal.prompt}
                                     onChange={(e) => setRegenerateModal(prev => ({ ...prev, prompt: e.target.value }))}
-                                    placeholder="E.g., 'Add more lighting', 'Make it more vibrant', 'Change the background color'..."
+                                    placeholder={t("images.regeneratePromptPlaceholder")}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent resize-none"
                                     rows="4"
                                     disabled={regenerateModal.loading}
                                 />
                                 <p className="text-xs text-gray-500 mt-2">
-                                    💡 Your modification will be applied to regenerate the campaign shot
+                                    💡 {t("images.modificationWillBeApplied")}
                                 </p>
                             </div>
 
@@ -663,7 +665,7 @@ export default function CampaignForm() {
                             {regenerateModal.error && (
                                 <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                    <p className="text-red-700 text-sm"> Oops! Something went wrong. Please try again.</p>
+                                    <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
                                 </div>
                             )}
 
@@ -674,7 +676,7 @@ export default function CampaignForm() {
                                     disabled={regenerateModal.loading}
                                     className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
                                 >
-                                    Cancel
+                                    {t("common.cancel")}
                                 </button>
                                 <button
                                     onClick={submitRegenerate}
@@ -684,12 +686,12 @@ export default function CampaignForm() {
                                     {regenerateModal.loading ? (
                                         <>
                                             <Loader2 className="w-5 h-5 animate-spin" />
-                                            Regenerating...
+                                            {t("images.regenerating")}
                                         </>
                                     ) : (
                                         <>
                                             <RefreshCw className="w-5 h-5" />
-                                            Regenerate Image
+                                            {t("images.regenerateImage")}
                                         </>
                                     )}
                                 </button>
@@ -699,7 +701,7 @@ export default function CampaignForm() {
                             {regenerateModal.loading && (
                                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                                     <p className="text-yellow-800 text-sm text-center">
-                                        ⏱️ This may take up to 45 seconds. Please wait...
+                                        ⏱️ {t("images.mayTakeUpTo45Seconds")}
                                     </p>
                                 </div>
                             )}

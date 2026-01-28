@@ -6,11 +6,13 @@ import { ChevronLeft, Grid, Download, Trash2, Filter, Calendar, Tag, RefreshCw, 
 import Image from "next/image"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
+import { useLanguage } from "@/context/LanguageContext"
 import toast from "react-hot-toast"
 
 export default function GalleryPage() {
     const router = useRouter()
     const { token } = useAuth()
+    const { t } = useLanguage()
     const [images, setImages] = useState([])
     const [filter, setFilter] = useState("all")
     const [loading, setLoading] = useState(true)
@@ -36,22 +38,23 @@ export default function GalleryPage() {
 
     // Map image types to filter categories
     const getImageCategory = (imageType) => {
-        if (imageType === "white_background") return "Plain"
-        if (imageType === "background_change") return "Themed"
-        if (imageType === "model_with_ornament" || imageType === "real_model_with_ornament") return "Model"
-        if (imageType === "campaign_shot_advanced") return "Campaign"
-        return "Plain" // default
+        if (imageType === "white_background") return t("images.plain")
+        if (imageType === "background_change") return t("images.themed")
+        if (imageType === "model_with_ornament" || imageType === "real_model_with_ornament") return t("images.model")
+        if (imageType === "campaign_shot_advanced") return t("images.campaign")
+        return t("images.plain") // default
     }
 
     // Calculate days ago
     const getDaysAgo = (dateString) => {
-        if (!dateString) return "Recently"
+        if (!dateString) return t("images.recently")
         const date = new Date(dateString)
         const now = new Date()
         const diffTime = Math.abs(now - date)
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-        if (diffDays === 0) return "0 days ago"
-        return `${diffDays} days ago`
+        if (diffDays === 0) return t("images.justNow")
+        if (diffDays === 1) return `1 ${t("images.dayAgo")}`
+        return `${diffDays} ${t("images.daysAgo")}`
     }
 
     useEffect(() => {
@@ -116,7 +119,7 @@ export default function GalleryPage() {
             console.error('Error downloading image:', error)
             // Fallback: open in new tab
             window.open(url, '_blank')
-            toast.error('Download failed. Image opened in new tab.')
+            toast.error(t("images.downloadFailed"))
         }
     }
 
@@ -145,7 +148,7 @@ export default function GalleryPage() {
         if (!regenerateModal.prompt.trim()) {
             setRegenerateModal(prev => ({
                 ...prev,
-                error: 'Please enter a prompt for regeneration'
+                error: t("images.pleaseEnterPrompt")
             }))
             return
         }
@@ -172,7 +175,7 @@ export default function GalleryPage() {
                     error: null
                 })
 
-                toast.success('Image regenerated successfully!')
+                toast.success(t("images.imageRegeneratedSuccess"))
             } else {
                 throw new Error(response.error || 'Regeneration failed')
             }
@@ -181,7 +184,7 @@ export default function GalleryPage() {
             setRegenerateModal(prev => ({
                 ...prev,
                 loading: false,
-                error: error.response?.data?.error || error.message || 'Failed to regenerate image'
+                error: error.response?.data?.error || error.message || t("images.failedToRegenerate")
             }))
         }
     }
@@ -204,8 +207,8 @@ export default function GalleryPage() {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">My Images</h1>
-                    <p className="text-[#737373] text-lg">All your generated visuals in one place</p>
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">{t("dashboard.myImages")}</h1>
+                    <p className="text-[#737373] text-lg">{t("images.allVisualsInOnePlace")}</p>
                 </div>
 
                 {/* Filter Buttons */}
@@ -221,7 +224,7 @@ export default function GalleryPage() {
                                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                     >
-                        All
+                        {t("images.all")}
                     </button>
                     <button
                         onClick={() => {
@@ -234,7 +237,7 @@ export default function GalleryPage() {
                                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                     >
-                        Plain
+                        {t("images.plain")}
                     </button>
                     <button
                         onClick={() => {
@@ -247,7 +250,7 @@ export default function GalleryPage() {
                                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                     >
-                        Themed
+                        {t("images.themed")}
                     </button>
                     <button
                         onClick={() => {
@@ -260,7 +263,7 @@ export default function GalleryPage() {
                                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                     >
-                        Model
+                        {t("images.model")}
                     </button>
                     <button
                         onClick={() => {
@@ -273,7 +276,7 @@ export default function GalleryPage() {
                                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                     >
-                        Campaign
+                        {t("images.campaign")}
                     </button>
                 </div>
 
@@ -282,7 +285,7 @@ export default function GalleryPage() {
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
                             <Loader2 className="w-12 h-12 text-[#884cff] animate-spin mx-auto mb-4" />
-                            <p className="text-[#737373]">Loading your images...</p>
+                            <p className="text-[#737373]">{t("images.loadingImages")}</p>
                         </div>
                     </div>
                 ) : filteredImages.length === 0 ? (
@@ -294,7 +297,7 @@ export default function GalleryPage() {
                         <p className="text-[#737373] mb-6">
                             {filter === "all"
                                 ? "Start generating images to see them here"
-                                : "No images found for this filter"}
+                                : t("images.noImagesFound")}
                         </p>
                         <button
                             onClick={() => router.push("/dashboard/")}
@@ -359,7 +362,7 @@ export default function GalleryPage() {
                                         {image.parent_image_id && (
                                             <div className="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
                                                 <RefreshCw size={10} />
-                                                Regenerated
+                                                {t("images.regenerated")}
                                             </div>
                                         )}
                                     </div>
@@ -426,7 +429,7 @@ export default function GalleryPage() {
                                         <RefreshCw className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">Regenerate Image</h2>
+                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">{t("images.regenerateImage")}</h2>
                                         <p className="text-sm text-gray-500">Modify and regenerate this image</p>
                                     </div>
                                 </div>
@@ -474,7 +477,7 @@ export default function GalleryPage() {
                                 <textarea
                                     value={regenerateModal.prompt}
                                     onChange={(e) => setRegenerateModal(prev => ({ ...prev, prompt: e.target.value }))}
-                                    placeholder="E.g., 'Add more sparkle and brightness', 'Make it more vibrant', 'Add gold accents'..."
+                                    placeholder={t("images.regeneratePromptPlaceholder")}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent resize-none"
                                     rows="4"
                                     disabled={regenerateModal.loading}
@@ -514,7 +517,7 @@ export default function GalleryPage() {
                                     ) : (
                                         <>
                                             <RefreshCw className="w-5 h-5" />
-                                            Regenerate Image
+                                            {t("images.regenerateImage")}
                                         </>
                                     )}
                                 </button>

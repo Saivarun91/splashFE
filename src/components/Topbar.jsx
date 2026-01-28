@@ -3,12 +3,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Bell, User, X, Check, Mail, Clock, Loader2, Building2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { apiService } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export function Topbar({ collapsed }) {
     const { token, user } = useAuth();
+    const { t } = useLanguage();
     const [showNotifications, setShowNotifications] = useState(false);
     const [invites, setInvites] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -190,10 +192,10 @@ export function Topbar({ collapsed }) {
         const now = new Date();
         const diffInSeconds = Math.floor((now - date) / 1000);
 
-        if (diffInSeconds < 60) return "just now";
-        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-        return `${Math.floor(diffInSeconds / 86400)}d ago`;
+        if (diffInSeconds < 60) return t("dashboard.justNow");
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}${t("dashboard.minutesAgo")}`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}${t("dashboard.hoursAgo")}`;
+        return `${Math.floor(diffInSeconds / 86400)}${t("dashboard.daysAgo")}`;
     };
 
     const pendingCount = invites.length;
@@ -281,12 +283,12 @@ export function Topbar({ collapsed }) {
                                     ) : invites.length === 0 ? (
                                         <div className="p-8 text-center">
                                             <Mail className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                            <p className="text-gray-500 text-sm">No pending invitations</p>
+                                            <p className="text-gray-500 text-sm">{t("dashboard.noPendingInvitations")}</p>
                                         </div>
                                     ) : (
                                         <div className="p-4 space-y-3">
                                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                                                Pending Invitations
+                                                {t("dashboard.pendingInvitations")}
                                             </p>
                                             {invites.map((invite) => (
                                                 <div
@@ -302,7 +304,7 @@ export function Topbar({ collapsed }) {
                                                                 {invite.project_name}
                                                             </h4>
                                                             <p className="text-xs text-gray-500 truncate">
-                                                                Invited by {invite.inviter_name}
+                                                                {t("dashboard.invitedBy")} {invite.inviter_name}
                                                             </p>
                                                             <div className="flex items-center gap-2 mt-1">
                                                                 <Badge className={`${getRoleBadgeColor(invite.role)} text-xs px-1.5 py-0`}>
@@ -326,12 +328,12 @@ export function Topbar({ collapsed }) {
                                                             {processingInvite === invite.id ? (
                                                                 <>
                                                                     <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                                                                    Processing...
+                                                                    {t("dashboard.processing")}
                                                                 </>
                                                             ) : (
                                                                 <>
                                                                     <Check className="w-3 h-3 mr-1" />
-                                                                    Accept
+                                                                    {t("dashboard.accept")}
                                                                 </>
                                                             )}
                                                         </Button>
@@ -343,7 +345,7 @@ export function Topbar({ collapsed }) {
                                                             className="flex-1 border-gray-300 hover:bg-red-50 hover:border-red-300 hover:text-red-600 text-xs h-8"
                                                         >
                                                             <X className="w-3 h-3 mr-1" />
-                                                            Decline
+                                                            {t("dashboard.decline")}
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -358,7 +360,7 @@ export function Topbar({ collapsed }) {
                         <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-sm font-semibold">
                             <User className="w-5 h-5 text-white" />
                         </div>
-                        <span className="text-black text-sm hidden md:inline">Profile</span>
+                        <span className="text-black text-sm hidden md:inline">{t("profile.title").split(" & ")[0]}</span>
                     </button>
                 </div>
             </header>

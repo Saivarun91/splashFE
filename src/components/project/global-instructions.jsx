@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { FileText } from 'lucide-react'
+import { useLanguage } from '@/context/LanguageContext'
 
 export function GlobalInstructions({
     collectionData,
@@ -8,6 +9,7 @@ export function GlobalInstructions({
     canEdit = true,
     onInstructionsChange
 }) {
+    const { t } = useLanguage()
     const [instructions, setInstructions] = useState("")
 
     // Load existing instructions when collection data changes
@@ -29,7 +31,7 @@ export function GlobalInstructions({
         <div className="space-y-4">
             <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-[#884cff]" />
-                <h3 className="font-bold text-[#1a1a1a] text-lg">Additional Instructions</h3>
+                <h3 className="font-bold text-[#1a1a1a] text-lg">{t("images.additionalInstructions")}</h3>
             </div>
 
             <div className="space-y-3">

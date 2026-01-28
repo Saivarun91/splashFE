@@ -15,10 +15,12 @@ import {
 } from "@/components/ui/dialog"
 import { Edit2, Trash2, CheckCircle, Clock, Loader2 } from "lucide-react"
 import { apiService } from "@/lib/api"
+import { useLanguage } from "@/context/LanguageContext"
 import toast from "react-hot-toast"
 
 export function Header({ project, onProjectUpdate }) {
     const router = useRouter()
+    const { t } = useLanguage()
     const [updating, setUpdating] = useState(false)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
@@ -29,7 +31,7 @@ export function Header({ project, onProjectUpdate }) {
     // Normalize incoming data
     const projectData = {
         id: project?.id,
-        title: project?.title || project?.name || "Untitled Project",
+        title: project?.title || project?.name || t("images.untitledProject"),
         description: project?.description || project?.about || "",
         status: project?.status?.toLowerCase() || "progress",
         userRole: project?.userRole || "owner",
@@ -42,7 +44,7 @@ export function Header({ project, onProjectUpdate }) {
     // Update edit fields when project prop changes
     useEffect(() => {
         if (project) {
-            const currentTitle = project?.title || project?.name || "Untitled Project"
+            const currentTitle = project?.title || project?.name || t("images.untitledProject")
             const currentDescription = project?.description || project?.about || ""
             setEditName(currentTitle)
             setEditDescription(currentDescription)
@@ -63,7 +65,7 @@ export function Header({ project, onProjectUpdate }) {
             }
         } catch (error) {
             console.error("Error updating project status:", error)
-            toast.error("Failed to update project status. Please try again.")
+            toast.error(t("images.failedToUpdate"))
         } finally {
             setUpdating(false)
         }
@@ -91,7 +93,7 @@ export function Header({ project, onProjectUpdate }) {
 
     // Human-readable display label
     const displayStatus =
-        projectData.status === "progress" ? "In Progress" : "Completed"
+        projectData.status === "progress" ? t("images.inProgress") : t("images.completed")
 
     // Handle edit button click
     const handleEditClick = () => {
@@ -106,7 +108,7 @@ export function Header({ project, onProjectUpdate }) {
     // Handle save project changes
     const handleSaveProject = async () => {
         if (!editName.trim()) {
-            toast.error("Project name is required")
+            toast.error(t("images.projectNameRequired"))
             return
         }
 
@@ -131,11 +133,11 @@ export function Header({ project, onProjectUpdate }) {
                     status: response.status || projectData.status,
                 })
                 setIsEditModalOpen(false)
-                toast.success("Project updated successfully")
+                toast.success(t("images.projectUpdated"))
             }
         } catch (error) {
             console.error("Error updating project:", error)
-            toast.error("Failed to update project. Please try again.")
+            toast.error(t("images.failedToUpdate"))
         } finally {
             setIsSaving(false)
         }
@@ -143,7 +145,7 @@ export function Header({ project, onProjectUpdate }) {
 
     // Handle delete project
     const handleDeleteProject = async () => {
-        if (!confirm("Are you sure you want to delete this project? This action cannot be undone and will also delete the associated collection.")) {
+        if (!confirm(t("images.deleteConfirm"))) {
             return
         }
 
@@ -210,12 +212,12 @@ export function Header({ project, onProjectUpdate }) {
                             {isCompleted ? (
                                 <>
                                     <Clock className="w-4 h-4" />
-                                    {updating ? "Updating..." : "Mark as In Progress"}
+                                    {updating ? t("common.loading") : t("images.markAsInProgress")}
                                 </>
                             ) : (
                                 <>
                                     <CheckCircle className="w-4 h-4" />
-                                    {updating ? "Updating..." : "Mark as Completed"}
+                                    {updating ? t("common.loading") : t("images.markAsCompleted")}
                                 </>
                             )}
                         </Button>
@@ -244,12 +246,12 @@ export function Header({ project, onProjectUpdate }) {
                             {isDeleting ? (
                                 <>
                                     <Loader2 className="w-4 h-4 animate-spin" />
-                                    Deleting...
+                                    {t("images.deleting")}
                                 </>
                             ) : (
                                 <>
                                     <Trash2 className="w-4 h-4" />
-                                    Delete
+                                    {t("images.deleteProject")}
                                 </>
                             )}
                         </Button>
@@ -263,31 +265,31 @@ export function Header({ project, onProjectUpdate }) {
                     <DialogHeader>
                         <DialogTitle>Edit Project</DialogTitle>
                         <DialogDescription>
-                            Update your project name and description. Click save when you're done.
+                            {t("images.updateProjectDetails")}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
                             <label htmlFor="project-name" className="text-sm font-medium">
-                                Project Name
+                                {t("images.projectName")}
                             </label>
                             <Input
                                 id="project-name"
                                 value={editName}
                                 onChange={(e) => setEditName(e.target.value)}
-                                placeholder="Enter project name"
+                                placeholder={t("images.enterProjectName")}
                                 disabled={isSaving}
                             />
                         </div>
                         <div className="grid gap-2">
                             <label htmlFor="project-description" className="text-sm font-medium">
-                                Project Description
+                                {t("images.projectDescription")}
                             </label>
                             <Textarea
                                 id="project-description"
                                 value={editDescription}
                                 onChange={(e) => setEditDescription(e.target.value)}
-                                placeholder="Enter project description"
+                                placeholder={t("images.enterProjectDescription")}
                                 rows={4}
                                 disabled={isSaving}
                             />
@@ -299,7 +301,7 @@ export function Header({ project, onProjectUpdate }) {
                             onClick={() => setIsEditModalOpen(false)}
                             disabled={isSaving}
                         >
-                            Cancel
+                            {t("images.cancel")}
                         </Button>
                         <Button
                             onClick={handleSaveProject}
@@ -308,10 +310,10 @@ export function Header({ project, onProjectUpdate }) {
                             {isSaving ? (
                                 <>
                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Saving...
+                                    {t("profile.saving")}
                                 </>
                             ) : (
-                                "Save Changes"
+                                t("images.saveChanges")
                             )}
                         </Button>
                     </DialogFooter>

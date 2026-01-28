@@ -6,11 +6,13 @@ import { ChevronLeft, Sparkles, Upload, Users, Ruler, Loader2, CheckCircle, Aler
 import { apiService } from "@/lib/api"
 import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
+import { useLanguage } from "@/context/LanguageContext"
 import { OrnamentSelection } from "@/components/images/OrnamentSelection"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 import toast from "react-hot-toast"
 export default function RealModelForm() {
     const router = useRouter()
+    const { t } = useLanguage()
     const [formData, setFormData] = useState({
         modelImage: null,
         ornamentImage: null,
@@ -64,7 +66,7 @@ export default function RealModelForm() {
             console.error('Error downloading image:', error);
             // Fallback: open in new tab
             window.open(url, '_blank');
-            toast.error('Download failed. Image opened in new tab.');
+                toast.error(t("images.downloadFailed"));
         }
     };
       
@@ -98,7 +100,7 @@ export default function RealModelForm() {
         if (!regenerateModal.prompt.trim()) {
             setRegenerateModal(prev => ({
                 ...prev,
-                error: 'Please enter a prompt for regeneration'
+                error: t("images.pleaseEnterPrompt")
             }))
             return
         }
@@ -127,7 +129,7 @@ export default function RealModelForm() {
                     error: null
                 })
 
-                toast.success('Image regenerated successfully!')
+                toast.success(t("images.imageRegeneratedSuccess"))
             } else {
                 throw new Error(response.error || 'Regeneration failed')
             }
@@ -136,7 +138,7 @@ export default function RealModelForm() {
             setRegenerateModal(prev => ({
                 ...prev,
                 loading: false,
-                error: error.response?.data?.error || error.message || 'Failed to regenerate image'
+                error: error.response?.data?.error || error.message || t("images.failedToRegenerate")
             }))
         }
     }
@@ -158,12 +160,12 @@ export default function RealModelForm() {
         setResult(null)
 
         if (!formData.modelImage) {
-            setError("Please upload a model image")
+            setError(t("images.pleaseUploadModelImage"))
             return
         }
 
         if (!formData.ornamentImage) {
-            setError("Please upload an ornament image")
+            setError(t("images.pleaseUploadOrnamentImage"))
             return
         }
 
@@ -176,7 +178,7 @@ export default function RealModelForm() {
             if (formData.poseImage) {
                 formDataToSend.append("pose_style", formData.poseImage)
             }
-            formDataToSend.append("prompt", formData.prompt || "Generate realistic image with model wearing ornament")
+            formDataToSend.append("prompt", formData.prompt || t("images.generateRealisticImageWithModel"))
             formDataToSend.append("measurements", formData.measurements || "")
             formDataToSend.append("ornament_type", ornamentType || "")
             formDataToSend.append("ornament_measurements", JSON.stringify(ornamentMeasurements))
@@ -187,11 +189,11 @@ export default function RealModelForm() {
             if (response.status === "success") {
                 setResult(response)
             } else {
-                setError(response.message || "Failed to generate image")
+                setError(response.message || t("images.failedToGenerate"))
             }
         } catch (err) {
             console.error("Error generating image:", err)
-            setError(err.message || "An error occurred while generating the image")
+            setError(err.message || t("images.errorGeneratingImage"))
         } finally {
             setIsLoading(false)
         }
@@ -208,14 +210,14 @@ export default function RealModelForm() {
                         </div>
                         <div>
                             <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-orange-500 bg-clip-text text-transparent">
-                                Real Model Generation
+                                {t("images.realModelGeneration")}
                             </h1>
-                            <p className="text-[#737373] mt-2">Place your products on real models with realistic results</p>
+                            <p className="text-[#737373] mt-2">{t("images.placeProductsOnRealModels")}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full w-fit border border-orange-200">
                         <Users className="w-4 h-4 text-orange-600" />
-                        <span className="text-sm font-medium text-orange-600">Realistic Models</span>
+                        <span className="text-sm font-medium text-orange-600">{t("images.realisticModels")}</span>
                     </div>
                 </div>
 
@@ -228,7 +230,7 @@ export default function RealModelForm() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></div>
-                                    Model Image<span className="text-red-500 ml-1">*</span>
+                                    {t("images.modelImage")}<span className="text-red-500 ml-1">*</span>
                                 </label>
                                 <div
                                     className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
@@ -248,7 +250,7 @@ export default function RealModelForm() {
                                     ) : (
                                         <div className="flex flex-col items-center justify-center gap-3 text-center">
                                             <Upload className="w-8 h-8 text-gray-400 group-hover:text-orange-500 transition-colors" />
-                                            <p className="text-sm text-gray-500">Upload model image</p>
+                                            <p className="text-sm text-gray-500">{t("images.uploadModelImage")}</p>
                                         </div>
                                     )}
                                 </div>
@@ -258,7 +260,7 @@ export default function RealModelForm() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></div>
-                                    Ornament/Product Image<span className="text-red-500 ml-1">*</span>
+                                    {t("images.ornamentProductImage")}<span className="text-red-500 ml-1">*</span>
                                 </label>
                                 <div
                                     className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
@@ -278,7 +280,7 @@ export default function RealModelForm() {
                                     ) : (
                                         <div className="flex flex-col items-center justify-center gap-3 text-center">
                                             <Upload className="w-8 h-8 text-gray-400 group-hover:text-orange-500 transition-colors" />
-                                            <p className="text-sm text-gray-500">Upload ornament/product image</p>
+                                            <p className="text-sm text-gray-500">{t("images.uploadOrnamentProductImage")}</p>
                                         </div>
                                     )}
                                 </div>
@@ -288,7 +290,7 @@ export default function RealModelForm() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></div>
-                                    Pose Style Reference (Optional)
+                                    {t("images.poseStyleReference")} ({t("common.optional")})
                                 </label>
                                 <div
                                     className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
@@ -326,11 +328,11 @@ export default function RealModelForm() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <Ruler className="w-4 h-4 text-orange-600" />
-                                    Additional Measurements (Optional)
+                                    {t("images.additionalMeasurements")} ({t("common.optional")})
                                 </label>
                                 <input
                                     type="text"
-                                    placeholder="E.g., Length: 5cm, Width: 3cm"
+                                    placeholder={t("images.additionalMeasurementsPlaceholder")}
                                     value={formData.measurements}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, measurements: e.target.value }))}
                                     className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all shadow-sm"
@@ -341,12 +343,12 @@ export default function RealModelForm() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <Sparkles className="w-4 h-4 text-orange-600" />
-                                    Custom Instructions (Optional)
+                                    {t("images.customInstructions")} ({t("common.optional")})
                                 </label>
                                 <textarea
                                     value={formData.prompt}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, prompt: e.target.value }))}
-                                    placeholder="Add specific instructions for placing the ornament on the model..."
+                                    placeholder={t("images.addSpecificInstructionsForPlacingOrnament")}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none shadow-sm"
                                     rows="3"
                                 />
@@ -363,7 +365,7 @@ export default function RealModelForm() {
                             {error && (
                                 <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500" />
-                                    <p className="text-red-700 text-sm"> Oops! Something went wrong. Please try again.</p>
+                                    <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
                                 </div>
                             )}
 
@@ -375,7 +377,7 @@ export default function RealModelForm() {
                                     className="flex items-center gap-2 text-orange-600 font-semibold hover:text-orange-700 transition-colors group"
                                 >
                                     <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-                                    Back
+                                    {t("common.back")}
                                 </button>
                                 <button
                                     type="submit"
@@ -385,12 +387,12 @@ export default function RealModelForm() {
                                     {isLoading ? (
                                         <>
                                             <Loader2 className="w-5 h-5 animate-spin" />
-                                            Generating...
+                                            {t("images.generating")}
                                         </>
                                     ) : (
                                         <>
                                             <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                            Generate Image
+                                            {t("images.generateImage")}
                                         </>
                                     )}
                                 </button>
@@ -402,13 +404,13 @@ export default function RealModelForm() {
                     <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
                         <h3 className="text-2xl font-bold text-[#1a1a1a] mb-6 flex items-center gap-2">
                             <CheckCircle className="w-6 h-6 text-orange-600" />
-                            Generated Image
+                            {t("images.generatedImage")}
                         </h3>
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center h-[600px] text-center">
                                 <Loader2 className="w-16 h-16 text-orange-600 animate-spin mb-4" />
-                                <p className="text-[#737373] text-lg">Generating realistic model image...</p>
-                                <p className="text-[#737373] text-sm mt-2">This may take up to 30 seconds</p>
+                                <p className="text-[#737373] text-lg">{t("images.generatingRealisticModel")}</p>
+                                <p className="text-[#737373] text-sm mt-2">{t("images.mayTakeUpTo30Seconds")}</p>
                             </div>
                         ) : result ? (
                             <div className="space-y-6">
@@ -422,9 +424,9 @@ export default function RealModelForm() {
                                 </div>
                                 <div className="space-y-3">
                                     <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                                        <p className="text-green-700 font-semibold">✓ Real model image generated successfully!</p>
+                                        <p className="text-green-700 font-semibold">✓ {t("images.realModelImageGeneratedSuccess")}</p>
                                         {result.mongo_id && (
-                                            <p className="text-green-600 text-xs mt-1">Image ID: {result.mongo_id}</p>
+                                            <p className="text-green-600 text-xs mt-1">{t("images.imageId")}: {result.mongo_id}</p>
                                         )}
                                     </div>
                                     <div className="space-y-3">
@@ -436,7 +438,7 @@ export default function RealModelForm() {
   className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
 >
   <Download size={16} />
-  Download
+  {t("images.download")}
 </button>
 
                                             <button
@@ -444,7 +446,7 @@ export default function RealModelForm() {
                                                 className="px-4 py-3 border-2 border-orange-600 text-orange-600 rounded-xl font-semibold hover:bg-orange-50 transition-all flex items-center justify-center gap-2"
                                             >
                                                 <RefreshCw size={16} />
-                                                Regenerate
+                                                {t("images.regenerate")}
                                             </button>
                                         </div>
                                         <button
@@ -466,13 +468,13 @@ export default function RealModelForm() {
                                             }}
                                             className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
                                         >
-                                            New Image
+                                            {t("images.newImage")}
                                         </button>
                                     </div>
                                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                         <p className="text-blue-700 text-sm flex items-center gap-2">
                                             <Sparkles className="w-4 h-4" />
-                                            Click "Regenerate" to modify this image with new instructions!
+                                            {t("images.clickRegenerateToModify")}
                                         </p>
                                     </div>
                                 </div>
@@ -482,8 +484,8 @@ export default function RealModelForm() {
                                 <div className="w-24 h-24 bg-gradient-to-br from-orange-100 to-red-100 rounded-full flex items-center justify-center mb-4">
                                     <Users className="w-12 h-12 text-orange-600" />
                                 </div>
-                                <p className="text-[#737373] text-lg">Your generated image will appear here</p>
-                                <p className="text-[#737373] text-sm mt-2">Upload model and ornament images to start</p>
+                                <p className="text-[#737373] text-lg">{t("images.generatedImageWillAppear")}</p>
+                                <p className="text-[#737373] text-sm mt-2">{t("images.uploadModelAndOrnamentToStart")}</p>
                             </div>
                         )}
                     </div>
@@ -502,8 +504,8 @@ export default function RealModelForm() {
                                         <RefreshCw className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">Regenerate Real Model Image</h2>
-                                        <p className="text-sm text-gray-500">Modify and regenerate this real model image</p>
+                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">{t("images.regenerateRealModelImage")}</h2>
+                                        <p className="text-sm text-gray-500">{t("images.modifyAndRegenerateRealModel")}</p>
                                     </div>
                                 </div>
                                 <button
@@ -520,7 +522,7 @@ export default function RealModelForm() {
                         <div className="p-6 space-y-6">
                             {/* Current Image */}
                             <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-3">Current Image:</p>
+                                <p className="text-sm font-semibold text-gray-700 mb-3">{t("images.currentImage")}:</p>
                                 <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-gray-200">
                                     <Image
                                         src={result.generated_image_url}
@@ -534,7 +536,7 @@ export default function RealModelForm() {
                             {/* Original Prompt */}
                             {result.prompt && (
                                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                                    <p className="text-xs font-semibold text-blue-900 mb-2">Original Prompt:</p>
+                                    <p className="text-xs font-semibold text-blue-900 mb-2">{t("images.originalPrompt")}:</p>
                                     <p className="text-sm text-blue-700">{result.prompt}</p>
                                 </div>
                             )}
@@ -543,18 +545,18 @@ export default function RealModelForm() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <Sparkles className="w-4 h-4 text-orange-600" />
-                                    What would you like to change?
+                                    {t("images.whatWouldYouLikeToChange")}
                                 </label>
                                 <textarea
                                     value={regenerateModal.prompt}
                                     onChange={(e) => setRegenerateModal(prev => ({ ...prev, prompt: e.target.value }))}
-                                    placeholder="E.g., 'Adjust the lighting', 'Change the pose', 'Make it more realistic'..."
+                                    placeholder={t("images.regenerateRealModelPlaceholder")}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
                                     rows="4"
                                     disabled={regenerateModal.loading}
                                 />
                                 <p className="text-xs text-gray-500 mt-2">
-                                    💡 Your modification will be applied to regenerate the real model image
+                                    💡 {t("images.modificationWillBeAppliedToRealModel")}
                                 </p>
                             </div>
 
@@ -562,7 +564,7 @@ export default function RealModelForm() {
                             {regenerateModal.error && (
                                 <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                    <p className="text-red-700 text-sm"> Oops! Something went wrong. Please try again.</p>
+                                    <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
                                 </div>
                             )}
 
@@ -573,7 +575,7 @@ export default function RealModelForm() {
                                     disabled={regenerateModal.loading}
                                     className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
                                 >
-                                    Cancel
+                                    {t("common.cancel")}
                                 </button>
                                 <button
                                     onClick={submitRegenerate}
@@ -583,12 +585,12 @@ export default function RealModelForm() {
                                     {regenerateModal.loading ? (
                                         <>
                                             <Loader2 className="w-5 h-5 animate-spin" />
-                                            Regenerating...
+                                            {t("images.regenerating")}
                                         </>
                                     ) : (
                                         <>
                                             <RefreshCw className="w-5 h-5" />
-                                            Regenerate Image
+                                            {t("images.regenerateImage")}
                                         </>
                                     )}
                                 </button>
@@ -598,7 +600,7 @@ export default function RealModelForm() {
                             {regenerateModal.loading && (
                                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                                     <p className="text-yellow-800 text-sm text-center">
-                                        ⏱️ This may take up to 30 seconds. Please wait...
+                                        ⏱️ {t("images.mayTakeUpTo30Seconds")}
                                     </p>
                                 </div>
                             )}

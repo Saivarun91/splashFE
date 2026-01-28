@@ -16,6 +16,48 @@ export function AuthProvider({ children }) {
     // Load saved token & user from localStorage (client-side only)
     useEffect(() => {
         if (typeof window !== "undefined") {
+            // First check if token is passed via URL (from organization portal switch)
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenFromUrl = urlParams.get("token");
+            const userFromUrl = urlParams.get("user");
+            const fromPortal = urlParams.get("from");
+
+            if (tokenFromUrl && fromPortal === "org") {
+                // Token passed from organization portal - authenticate automatically
+                try {
+                    const decodedToken = decodeURIComponent(tokenFromUrl);
+                    const decodedUser = userFromUrl ? JSON.parse(decodeURIComponent(userFromUrl)) : null;
+
+                    if (decodedUser) {
+                        localStorage.setItem("token", decodedToken);
+                        localStorage.setItem("user", JSON.stringify(decodedUser));
+                        setToken(decodedToken);
+                        setUser(decodedUser);
+
+                        // Set preferred language if available
+                        if (decodedUser.preferred_language) {
+                            localStorage.setItem('preferredLanguage', decodedUser.preferred_language);
+                        }
+
+                        // Clean URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+
+                        // Check if profile is incomplete and redirect if not on complete-profile page
+                        if (!decodedUser.profile_completed && window.location.pathname !== "/complete-profile") {
+                            const publicPages = ["/login", "/signup", "/forgot-password", "/reset-password", "/"];
+                            if (!publicPages.includes(window.location.pathname)) {
+                                router.push("/complete-profile");
+                            }
+                        }
+                        setIsLoading(false);
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Error processing token from URL:", error);
+                }
+            }
+
+            // Check for existing token in localStorage
             const savedToken = localStorage.getItem("token");
             const savedUser = localStorage.getItem("user");
 
@@ -50,10 +92,16 @@ export function AuthProvider({ children }) {
                     profile_completed: data.user.profile_completed,
                     organization: data.user.organization,
                     organization_role: data.user.organization_role,
+                    preferred_language: data.user.preferred_language || 'en',
                 });
 
                 localStorage.setItem("token", data.token);
                 localStorage.setItem("user", JSON.stringify(data.user));
+                
+                // Set language preference if available
+                if (data.user.preferred_language && typeof window !== 'undefined') {
+                    localStorage.setItem('preferredLanguage', data.user.preferred_language);
+                }
 
                 toast.success("Login successful");
                 

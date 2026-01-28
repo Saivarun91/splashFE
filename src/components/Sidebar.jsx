@@ -305,6 +305,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useImageGeneration } from "@/context/ImageGenerationContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { apiService } from "@/lib/api";
 import {
     LayoutDashboard,
@@ -335,56 +336,57 @@ import { SiGooglecampaignmanager360  } from "react-icons/si";
 import { HiOutlineUserCircle } from "react-icons/hi";
 
 export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
-    const [expandedItems, setExpandedItems] = useState(["Individual Generator"]);
+    const { t } = useLanguage();
+    const [expandedItems, setExpandedItems] = useState([]);
     const pathname = usePathname();
     const router = useRouter();
     const { logout, user, token } = useAuth();
     const { isGenerating } = useImageGeneration();
 
-    // Define all nav items
+    // Define all nav items with translations
     const allNavItems = [
         {
-            label: "Dashboard",
+            label: t("dashboard.dashboard"),
             icon: LayoutDashboard,
             path: "/dashboard",
         },
         {
-            label: "Individual Generator",
+            label: t("dashboard.individualGenerator"),
             icon: Image,
             path: "/dashboard/images",
             children: [
-                { label: "Plain Image", icon: MdPhotoSizeSelectLarge , path: "/dashboard/images/white-bg" },
-                { label: "Themed Image", icon: Sparkles, path: "/dashboard/images/replace-bg" },
-                { label: "Model Images", icon: HiOutlineUserCircle, path: "/dashboard/images/model-generation" },
-                { label: "Campaign Images", icon: SiGooglecampaignmanager360 , path: "/dashboard/images/campaign" },
-                { label: "My Images", icon: Images, path: "/dashboard/images/gallery" },
+                { label: t("dashboard.plainImage"), icon: MdPhotoSizeSelectLarge , path: "/dashboard/images/white-bg" },
+                { label: t("dashboard.themedImage"), icon: Sparkles, path: "/dashboard/images/replace-bg" },
+                { label: t("dashboard.modelImages"), icon: HiOutlineUserCircle, path: "/dashboard/images/model-generation" },
+                { label: t("dashboard.campaignImages"), icon: SiGooglecampaignmanager360 , path: "/dashboard/images/campaign" },
+                { label: t("dashboard.myImages"), icon: Images, path: "/dashboard/images/gallery" },
             ],
         },
         {
-            label: "Projects",
+            label: t("dashboard.projects"),
             icon: FolderKanban,
             path: "/dashboard/projects",
         },
         {
-            label: "Help & Learning",
+            label: t("dashboard.helpLearning"),
             icon: HelpCircle,
             path: "/dashboard/help",
             children: [
-                { label: "Feedback", icon: MessageSquare, path: "/dashboard/help/feedback" },
-                { label: "Tutorials", icon: BookOpen, path: "/dashboard/help/tutorials" },
-                { label: "Help Center", icon: FileQuestion, path: "/dashboard/help/help-center" },
+                { label: t("dashboard.feedback"), icon: MessageSquare, path: "/dashboard/help/feedback" },
+                { label: t("dashboard.tutorials"), icon: BookOpen, path: "/dashboard/help/tutorials" },
+                { label: t("dashboard.helpCenter"), icon: FileQuestion, path: "/dashboard/help/help-center" },
             ],
         },
         {
-            label: "My Account",
+            label: t("dashboard.myAccount"),
             icon: User,
             path: "/dashboard/account",
             children: [
-                { label: "Profile", icon: User, path: "/dashboard/my-account/profile" },
-                { label: "Subscription", icon: CreditCard, path: "/dashboard/my-account/billing" },
-                { label: "Security", icon: Shield, path: "/dashboard/my-account/security" },
-                { label: "Notifications", icon: Bell, path: "/dashboard/my-account/notification" },
-                { label: "Prompt Master", icon: FileText, path: "/dashboard/my-account/prompt-master" },
+                { label: t("profile.title").split(" & ")[0], icon: User, path: "/dashboard/my-account/profile" },
+                { label: t("dashboard.subscription"), icon: CreditCard, path: "/dashboard/my-account/billing" },
+                { label: t("dashboard.security"), icon: Shield, path: "/dashboard/my-account/security" },
+                { label: t("dashboard.notifications"), icon: Bell, path: "/dashboard/my-account/notification" },
+                { label: t("dashboard.promptMaster"), icon: FileText, path: "/dashboard/my-account/prompt-master" },
             ],
         },
     ];
@@ -410,6 +412,9 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                 setNavItems(allNavItems);
                 return;
             }
+
+            const subscriptionLabel = t("dashboard.subscription");
+            const myAccountLabel = t("dashboard.myAccount");
 
             try {
                 const userProfile = await apiService.getUserProfile(token);
@@ -446,12 +451,12 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
 
                     // Filter nav items - hide Subscription if user belongs to organization
                     const filteredNavItems = allNavItems.map(item => {
-                        if (item.label === "My Account" && item.children) {
+                        if (item.label === myAccountLabel && item.children) {
                             return {
                                 ...item,
                                 children: item.children.filter(child => {
                                     // Hide Subscription if user belongs to any organization
-                                    if (child.label === "Subscription" && belongsToOrganization) {
+                                    if (child.label === subscriptionLabel && belongsToOrganization) {
                                         return false;
                                     }
                                     // Show Subscription only if user doesn't belong to organization
@@ -466,10 +471,10 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                 } else {
                     // If profile fetch fails, hide subscriptions by default
                     const filteredNavItems = allNavItems.map(item => {
-                        if (item.label === "My Account" && item.children) {
+                        if (item.label === myAccountLabel && item.children) {
                             return {
                                 ...item,
-                                children: item.children.filter(child => child.label !== "Subscription")
+                                children: item.children.filter(child => child.label !== subscriptionLabel)
                             };
                         }
                         return item;
@@ -480,10 +485,10 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                 console.error('Failed to fetch user profile:', error);
                 // On error, hide subscriptions by default
                 const filteredNavItems = allNavItems.map(item => {
-                    if (item.label === "My Account" && item.children) {
+                    if (item.label === myAccountLabel && item.children) {
                         return {
                             ...item,
-                            children: item.children.filter(child => child.label !== "Subscription")
+                            children: item.children.filter(child => child.label !== subscriptionLabel)
                         };
                     }
                     return item;
@@ -493,7 +498,7 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
         };
 
         checkUserOrganization();
-    }, [token]);
+    }, [token, t]);
 
     const toggleExpanded = (label) => {
         if (isGenerating) return;
@@ -675,7 +680,7 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                             text-gray-300 hover:text-white px-3 py-2 rounded-md hover:bg-white/10 transition ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         <LogOut className="w-5 h-5" />
-                        {isExpanded && <span>Logout</span>}
+                        {isExpanded && <span>{t("dashboard.logout")}</span>}
                     </button>
 
                     {/* Footer icons (hidden when collapsed) */}

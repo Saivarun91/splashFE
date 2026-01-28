@@ -3,23 +3,25 @@
 
 import { Zap, ImageIcon, Star } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useLanguage } from "@/context/LanguageContext"
 
 export function PopularTools() {
     const router = useRouter()
+    const { t } = useLanguage()
 
     const tools = [
         {
             icon: Zap,
-            title: "Plain Background",
-            description: "Clean product shots with custom backgrounds",
+            title: t("images.plainBackground"),
+            description: t("images.cleanProductShots"),
             popular: true,
             gradient: "from-purple-500 to-pink-500",
             path: "/dashboard/images/white-bg"
         },
         {
             icon: ImageIcon,
-            title: "Background Replace",
-            description: "AI-powered background transformation",
+            title: t("images.backgroundReplace"),
+            description: t("images.aiPoweredTransformation"),
             popular: true,
             gradient: "from-blue-500 to-cyan-500",
             path: "/dashboard/images/replace-bg"
@@ -29,10 +31,10 @@ export function PopularTools() {
     return (
         <div>
             <div className="flex items-center gap-3 mb-6 fade-in">
-                <h2 className="text-2xl font-extrabold bg-gradient-to-r from-[#7753ff] to-[#ec4899] bg-clip-text text-transparent">Popular Tools</h2>
+                <h2 className="text-2xl font-extrabold bg-gradient-to-r from-[#7753ff] to-[#ec4899] bg-clip-text text-transparent">{t("images.popularTools")}</h2>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full border-2 border-amber-200 shadow-sm">
                     <Star size={16} className="text-amber-500 fill-amber-500" />
-                    <span className="text-xs font-bold text-amber-700">Most Used</span>
+                    <span className="text-xs font-bold text-amber-700">{t("images.mostUsed")}</span>
                 </div>
             </div>
             <div className="grid grid-cols-2 gap-6">
@@ -47,7 +49,7 @@ export function PopularTools() {
                             <div className="absolute top-5 right-5">
                                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full border-2 border-amber-200 shadow-md">
                                     <Star size={14} className="text-amber-500 fill-amber-500" />
-                                    <span className="text-xs font-bold text-amber-700">Popular</span>
+                                    <span className="text-xs font-bold text-amber-700">{t("images.popular")}</span>
                                 </div>
                             </div>
                         )}
@@ -62,7 +64,7 @@ export function PopularTools() {
                                     onClick={() => router.push(tool.path)}
                                     className="text-sm font-bold bg-gradient-to-r from-[#7753ff] to-[#ec4899] bg-clip-text text-transparent hover:from-[#884cff] hover:to-[#f472b6] transition-all group-hover:translate-x-2 inline-flex items-center gap-1"
                                 >
-                                    Try now <span className="text-lg">→</span>
+                                    {t("images.tryNow")} <span className="text-lg">→</span>
                                 </button>
                             </div>
                         </div>

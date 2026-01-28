@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { FileText } from "lucide-react"
+import { useLanguage } from "@/context/LanguageContext"
 
 export function BriefAndConcept({ onRequestSuggestions, collectionData, suggestionsRequested: parentSuggestionsRequested, canEdit = true, onFormDataChange }) {
+    const { t } = useLanguage()
     const [description, setDescription] = useState("")
     const [targetAudience, setTargetAudience] = useState("")
     const [campaignSeason, setCampaignSeason] = useState("")
@@ -48,19 +50,19 @@ export function BriefAndConcept({ onRequestSuggestions, collectionData, suggesti
                     <FileText className="w-5 h-5 text-[#708090]" />
                 </div>
                 <div>
-                    <h3 className="font-bold text-[#1a1a1a]">Brief & Concept</h3>
-                    <p className="text-sm text-[#708090]">Define project vision and upload inspiration</p>
+                    <h3 className="font-bold text-[#1a1a1a]">{t("images.briefAndConcept")}</h3>
+                    <p className="text-sm text-[#708090]">{t("images.defineProjectVision")}</p>
                 </div>
             </div>
 
             <div className="space-y-4">
                 <div className="space-y-3">
-                    <label htmlFor="project-description" className="block text-sm font-medium text-[#1a1a1a]">Project Description <span className="text-[#708090] font-normal">(Optional)</span></label>
+                    <label htmlFor="project-description" className="block text-sm font-medium text-[#1a1a1a]">{t("images.projectDescriptionOptional")}</label>
                     <textarea
                         id="project-description"
                         value={description}
                         onChange={handleDescriptionChange}
-                        placeholder="Enter your project description (optional)..."
+                        placeholder={t("images.enterProjectDescription")}
                         className="w-full h-32 px-4 py-3 border border-[#e6e6e6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent resize-none disabled:bg-gray-50 disabled:cursor-not-allowed"
                         disabled={!canEdit}
                     />
@@ -68,26 +70,26 @@ export function BriefAndConcept({ onRequestSuggestions, collectionData, suggesti
                 <div className="flex justify-center w-full items-center gap-3">
 
                     <div className="space-y-3 w-1/2">
-                        <label htmlFor="target-audience" className="block text-sm font-medium text-[#1a1a1a]">Target Audience</label>
+                        <label htmlFor="target-audience" className="block text-sm font-medium text-[#1a1a1a]">{t("images.targetAudience")}</label>
                         <input
                             id="target-audience"
                             type="text"
                             value={targetAudience}
                             onChange={(e) => setTargetAudience(e.target.value)}
-                            placeholder="Enter target audience..."
+                            placeholder={t("images.enterTargetAudience")}
                             className="w-full px-4 py-3 border border-[#e6e6e6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
                             disabled={!canEdit}
                         />
                     </div>
 
                     <div className="space-y-3 w-1/2">
-                        <label htmlFor="campaign-season" className="block text-sm font-medium text-[#1a1a1a]">Campaign Season</label>
+                        <label htmlFor="campaign-season" className="block text-sm font-medium text-[#1a1a1a]">{t("images.campaignSeason")}</label>
                         <input
                             id="campaign-season"
                             type="text"
                             value={campaignSeason}
                             onChange={(e) => setCampaignSeason(e.target.value)}
-                            placeholder="Enter campaign season..."
+                            placeholder={t("images.enterCampaignSeason")}
                             className="w-full px-4 py-3 border border-[#e6e6e6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
                             disabled={!canEdit}
                         />

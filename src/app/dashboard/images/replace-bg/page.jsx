@@ -6,10 +6,12 @@ import { ChevronLeft, Star, Sparkles, Upload, Image as ImageIcon, Settings, Load
 import { apiService } from "@/lib/api"
 import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
+import { useLanguage } from "@/context/LanguageContext"
 import toast from "react-hot-toast"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 const BackgroundReplaceForm = () => {
     const router = useRouter()
+    const { t } = useLanguage()
     const [formData, setFormData] = useState({
         productImage: null,
         referenceImage: null,
@@ -104,7 +106,7 @@ const BackgroundReplaceForm = () => {
         if (!regenerateModal.prompt.trim()) {
             setRegenerateModal(prev => ({
                 ...prev,
-                error: 'Please enter a prompt for regeneration'
+                error: t("images.pleaseEnterPrompt")
             }))
             return
         }
@@ -133,7 +135,7 @@ const BackgroundReplaceForm = () => {
                     error: null
                 })
 
-                alert('Image regenerated successfully!')
+                alert(t("images.imageRegeneratedSuccess"))
             } else {
                 throw new Error(response.error || 'Regeneration failed')
             }
@@ -142,7 +144,7 @@ const BackgroundReplaceForm = () => {
             setRegenerateModal(prev => ({
                 ...prev,
                 loading: false,
-                error: error.response?.data?.error || error.message || 'Failed to regenerate image'
+                error: error.response?.data?.error || error.message || t("images.failedToRegenerate")
             }))
         }
     }
@@ -187,7 +189,7 @@ const BackgroundReplaceForm = () => {
         setResult(null)
 
         if (!formData.productImage) {
-            setError("Please upload a product image")
+            setError(t("images.pleaseUploadProductImage"))
             return
         }
 
@@ -200,7 +202,7 @@ const BackgroundReplaceForm = () => {
                 formDataToSend.append("background_image", formData.referenceImage)
             }
             formDataToSend.append("background_color", formData.backgroundColor)
-            formDataToSend.append("prompt", formData.prompt || "Change the background")
+            formDataToSend.append("prompt", formData.prompt || t("images.changeTheBackground"))
             formDataToSend.append("dimension", formData.dimension)
 
             const response = await apiService.changeBackground(formDataToSend, token)
@@ -208,11 +210,11 @@ const BackgroundReplaceForm = () => {
             if (response.success) {
                 setResult(response)
             } else {
-                setError(response.error || "Failed to generate image")
+                setError(response.error || t("images.failedToGenerate"))
             }
         } catch (err) {
             console.error("Error generating image:", err)
-            setError(err.message || "An error occurred while generating the image")
+            setError(err.message || t("images.errorGeneratingImage"))
         } finally {
             setIsLoading(false)
         }
@@ -235,14 +237,14 @@ const BackgroundReplaceForm = () => {
                         </div>
                         <div>
                             <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">
-                               Themed image 
+                               {t("images.themedImage")}
                             </h1>
-                            <p className="text-[#737373] mt-2">Replace product backgrounds with AI-powered precision</p>
+                            <p className="text-[#737373] mt-2">{t("images.aiPoweredTransformation")}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2 px-4 py-2 bg-[#7753ff]/10 rounded-full w-fit border border-[#7753ff]/20">
                         <Star className="w-4 h-4 text-[#7753ff]" />
-                        <span className="text-sm font-medium text-[#7753ff]">Most Popular Tool</span>
+                        <span className="text-sm font-medium text-[#7753ff]">{t("images.mostPopularTool")}</span>
                     </div>
                 </div>
 
@@ -255,7 +257,7 @@ const BackgroundReplaceForm = () => {
                             <div>
                                 <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
                                     <Upload className="w-5 h-5 text-[#7753ff]" />
-                                    Product Image<span className="text-red-500 ml-1">*</span>
+                                    {t("images.productImage")}<span className="text-red-500 ml-1">*</span>
                                 </label>
                                 <div
                                     className={`border-2 border-dashed rounded-2xl p-6 transition-all duration-300 cursor-pointer ${isDragging
@@ -280,8 +282,8 @@ const BackgroundReplaceForm = () => {
                                     ) : (
                                         <div className="text-center">
                                             <Upload className="w-12 h-12 text-[#7753ff] mx-auto mb-3" />
-                                            <p className="text-[#1a1a1a] font-medium mb-1">Upload Product Image</p>
-                                            <p className="text-[#737373] text-sm">PNG, JPG up to 10MB</p>
+                                            <p className="text-[#1a1a1a] font-medium mb-1">{t("images.uploadProductImage")}</p>
+                                            <p className="text-[#737373] text-sm">{t("images.pngJpgUpTo10MB")}</p>
                                         </div>
                                     )}
                                 </div>
@@ -344,12 +346,12 @@ const BackgroundReplaceForm = () => {
                             <div>
                                 <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
                                     <Sparkles className="w-5 h-5 text-[#7753ff]" />
-                                    Custom Prompt (Optional)
+                                    {t("images.customPrompt")} ({t("common.optional")})
                                 </label>
                                 <textarea
                                     value={formData.prompt}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, prompt: e.target.value }))}
-                                    placeholder="Add specific instructions for background replacement..."
+                                    placeholder={t("images.addSpecificInstructions")}
                                     className="w-full px-4 py-3 border border-[#e6e6e6] rounded-xl bg-white text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent resize-none"
                                     rows="3"
                                 />
@@ -366,7 +368,7 @@ const BackgroundReplaceForm = () => {
                             {error && (
                                 <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500" />
-                                    <p className="text-red-700 text-sm"> Oops! Something went wrong. Please try again.</p>
+                                    <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
                                 </div>
                             )}
 
@@ -378,7 +380,7 @@ const BackgroundReplaceForm = () => {
                                     className="flex items-center gap-3 px-6 py-3 text-[#7753ff] font-semibold hover:bg-[#7753ff]/10 rounded-xl transition-all duration-300 hover:scale-105"
                                 >
                                     <ChevronLeft className="w-5 h-5" />
-                                    Back
+                                    {t("common.back")}
                                 </button>
                                 <button
                                     type="submit"
@@ -388,12 +390,12 @@ const BackgroundReplaceForm = () => {
                                     {isLoading ? (
                                         <>
                                             <Loader2 className="w-5 h-5 animate-spin" />
-                                            Generating...
+                                            {t("images.generating")}
                                         </>
                                     ) : (
                                         <>
                                             <Sparkles className="w-5 h-5" />
-                                            Generate Image
+                                            {t("images.generateImage")}
                                         </>
                                     )}
                                 </button>
@@ -405,13 +407,13 @@ const BackgroundReplaceForm = () => {
                     <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
                         <h3 className="text-2xl font-bold text-[#1a1a1a] mb-6 flex items-center gap-2">
                             <CheckCircle className="w-6 h-6 text-[#7753ff]" />
-                            Result Preview
+                            {t("images.resultPreview")}
                         </h3>
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center h-[500px] text-center">
                                 <Loader2 className="w-16 h-16 text-[#7753ff] animate-spin mb-4" />
-                                <p className="text-[#737373] text-lg">Replacing background...</p>
-                                <p className="text-[#737373] text-sm mt-2">This may take a few moments</p>
+                                <p className="text-[#737373] text-lg">{t("images.replacingBackground")}</p>
+                                <p className="text-[#737373] text-sm mt-2">{t("images.mayTakeFewMoments")}</p>
                             </div>
                         ) : result ? (
                             <div className="space-y-6">
@@ -425,7 +427,7 @@ const BackgroundReplaceForm = () => {
                                 </div>
                                 <div className="space-y-3">
                                     <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                                        <p className="text-green-700 font-semibold">✓ Themed Image generated successfully!</p>
+                                        <p className="text-green-700 font-semibold">✓ {t("images.themedImageGeneratedSuccess")}</p>
                                     </div>
                                     <div className="space-y-3">
                                         <div className="grid grid-cols-3 gap-3">
@@ -434,7 +436,7 @@ const BackgroundReplaceForm = () => {
                                                 className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
                                             >
                                                 <Eye size={16} />
-                                                View
+                                                {t("images.view")}
                                             </button>
                                             <button
                                                 onClick={() =>
@@ -443,7 +445,7 @@ const BackgroundReplaceForm = () => {
                                                 className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
                                             >
                                                 <Download size={16} />
-                                                Download
+                                                {t("images.download")}
                                             </button>
 
                                             <button
@@ -451,7 +453,7 @@ const BackgroundReplaceForm = () => {
                                                 className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] rounded-xl font-semibold hover:bg-[#7753ff]/10 transition-all flex items-center justify-center gap-2"
                                             >
                                                 <RefreshCw size={18} />
-                                                Regenerate
+                                                {t("images.regenerate")}
                                             </button>
                                         </div>
                                         <button
@@ -469,7 +471,7 @@ const BackgroundReplaceForm = () => {
                                             }}
                                             className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
                                         >
-                                            New Image
+                                            {t("images.newImage")}
                                         </button>
                                     </div>
                                 </div>
@@ -479,8 +481,8 @@ const BackgroundReplaceForm = () => {
                                 <div className="w-24 h-24 bg-[#7753ff]/10 rounded-full flex items-center justify-center mb-4">
                                     <Sparkles className="w-12 h-12 text-[#7753ff]" />
                                 </div>
-                                <p className="text-[#737373] text-lg">Your generated image will appear here</p>
-                                <p className="text-[#737373] text-sm mt-2">Upload images and click generate to start</p>
+                                <p className="text-[#737373] text-lg">{t("images.generatedImageWillAppear")}</p>
+                                <p className="text-[#737373] text-sm mt-2">{t("images.uploadImagesAndClickGenerate")}</p>
                             </div>
                         )}
                     </div>
@@ -498,8 +500,8 @@ const BackgroundReplaceForm = () => {
                                         <RefreshCw className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">Regenerate Image</h2>
-                                        <p className="text-sm text-gray-500">Modify and regenerate your image</p>
+                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">{t("images.regenerateImage")}</h2>
+                                        <p className="text-sm text-gray-500">{t("images.modifyAndRegenerateYourImage")}</p>
                                     </div>
                                 </div>
                                 <button
@@ -514,7 +516,7 @@ const BackgroundReplaceForm = () => {
 
                         <div className="p-6 space-y-6">
                             <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-3">Current Image:</p>
+                                <p className="text-sm font-semibold text-gray-700 mb-3">{t("images.currentImage")}:</p>
                                 <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-gray-200">
                                     <Image
                                         src={result?.generated_image_url}
@@ -528,12 +530,12 @@ const BackgroundReplaceForm = () => {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <Sparkles className="w-4 h-4 text-[#7753ff]" />
-                                    What would you like to change?
+                                    {t("images.whatWouldYouLikeToChange")}
                                 </label>
                                 <textarea
                                     value={regenerateModal.prompt}
                                     onChange={(e) => setRegenerateModal(prev => ({ ...prev, prompt: e.target.value }))}
-                                    placeholder="E.g., 'Make it brighter', 'Change to blue background', 'Add more details'..."
+                                    placeholder={t("images.regeneratePromptPlaceholder")}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent resize-none"
                                     rows="4"
                                     disabled={regenerateModal.loading}
@@ -543,7 +545,7 @@ const BackgroundReplaceForm = () => {
                             {regenerateModal.error && (
                                 <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                    <p className="text-red-700 text-sm"> Oops! Something went wrong. Please try again.</p>
+                                    <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
                                 </div>
                             )}
 
@@ -553,7 +555,7 @@ const BackgroundReplaceForm = () => {
                                     disabled={regenerateModal.loading}
                                     className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
                                 >
-                                    Cancel
+                                    {t("common.cancel")}
                                 </button>
                                 <button
                                     onClick={submitRegenerate}
@@ -563,12 +565,12 @@ const BackgroundReplaceForm = () => {
                                     {regenerateModal.loading ? (
                                         <>
                                             <Loader2 className="w-5 h-5 animate-spin" />
-                                            Regenerating...
+                                            {t("images.regenerating")}
                                         </>
                                     ) : (
                                         <>
                                             <RefreshCw className="w-5 h-5" />
-                                            Regenerate
+                                            {t("images.regenerate")}
                                         </>
                                     )}
                                 </button>
@@ -577,7 +579,7 @@ const BackgroundReplaceForm = () => {
                             {regenerateModal.loading && (
                                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                                     <p className="text-yellow-800 text-sm text-center">
-                                        ⏱️ This may take 10-30 seconds. Please wait...
+                                        ⏱️ {t("images.mayTake10to30Seconds")}
                                     </p>
                                 </div>
                             )}

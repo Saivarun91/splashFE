@@ -8,9 +8,11 @@ import { RiAiGenerate2 } from "react-icons/ri";
 import PendingInvitations from "@/components/PendingInvitations";
 import { useAuth } from "@/context/AuthContext";
 import { apiService } from "@/lib/api";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Dashboard() {
     const { user, token } = useAuth();
+    const { t } = useLanguage();
     const [recentImages, setRecentImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [organizationCredits, setOrganizationCredits] = useState(null);
@@ -26,11 +28,11 @@ export default function Dashboard() {
     const currentHour = new Date().getHours();
     let greeting;
     if (currentHour < 12) {
-        greeting = "Good Morning";
+        greeting = t("dashboard.goodMorning");
     } else if (currentHour < 18) {
-        greeting = "Good Afternoon";
+        greeting = t("dashboard.goodAfternoon");
     } else {
-        greeting = "Good Evening";
+        greeting = t("dashboard.goodEvening");
     }
 
     // Get user display name
@@ -44,7 +46,7 @@ export default function Dashboard() {
         if (user?.email) {
             return user.email.split('@')[0];
         }
-        return "User";
+        return t("dashboard.user");
     };
 
     // Fetch organization credits
@@ -174,7 +176,7 @@ console.log("Organization ID:", organizationId);
                 <Link href="/my-account/billing">
                     <div className="p-4 bg-white border border-indigo-100 rounded-xl shadow-sm hover:shadow-lg hover:border-indigo-300 transition-all duration-300 cursor-pointer">
                         <div className="flex justify-between items-center pb-2">
-                            <span className="text-sm font-medium text-gray-500">Remaining Credits</span>
+                            <span className="text-sm font-medium text-gray-500">{t("dashboard.remainingCredits")}</span>
                             <FaCoins className="w-6 h-6 text-yellow-500" />
                         </div>
                         <div>
@@ -196,7 +198,7 @@ console.log("Organization ID:", organizationId);
                                         />
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1">
-                                        {organizationCredits.organizationName} • Organization Credits
+                                        {organizationCredits.organizationName} • {t("dashboard.organizationCredits")}
                                     </p>
                                 </>
                             ) : (
@@ -205,7 +207,7 @@ console.log("Organization ID:", organizationId);
                                     <div className="w-full bg-gray-200 h-2 rounded-full mt-2">
                                         <div className="bg-indigo-500 h-2 rounded-full w-0" />
                                     </div>
-                                    <p className="text-xs text-gray-500 mt-1">No organization assigned</p>
+                                    <p className="text-xs text-gray-500 mt-1">{t("dashboard.noOrganizationAssigned")}</p>
                                 </>
                             )}
                         </div>
@@ -215,7 +217,7 @@ console.log("Organization ID:", organizationId);
                 {/* Images Generated */}
                 <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
                     <div className="flex justify-between items-center pb-2">
-                        <span className="text-sm font-medium text-gray-500">Images Generated</span>
+                        <span className="text-sm font-medium text-gray-500">{t("dashboard.imagesGenerated")}</span>
                         <RiAiGenerate2  className="w-6 h-6 text-indigo-500" />
                     </div>
                     <div>
@@ -224,7 +226,7 @@ console.log("Organization ID:", organizationId);
                         </div>
                         <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
                             <TrendingUp className="w-3 h-3 text-green-500" />
-                            {loading ? "Loading..." : "Total images generated"}
+                            {loading ? t("common.loading") : t("dashboard.totalImagesGenerated")}
                         </p>
                     </div>
                 </div>
@@ -232,7 +234,7 @@ console.log("Organization ID:", organizationId);
                 {/* Active Projects */}
                 <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
                     <div className="flex justify-between items-center pb-2">
-                        <span className="text-sm font-medium text-gray-500">Active Projects</span>
+                        <span className="text-sm font-medium text-gray-500">{t("dashboard.activeProjects")}</span>
                         <FolderKanban className="w-6 h-6 text-indigo-500" />
                     </div>
                     <div>
@@ -240,7 +242,7 @@ console.log("Organization ID:", organizationId);
                             {loading ? "..." : stats.activeProjects}
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
-                            {loading ? "Loading..." : `${stats.inProgressProjects} in progress • ${stats.completedProjects} completed`}
+                            {loading ? t("common.loading") : `${stats.inProgressProjects} ${t("dashboard.inProgress")} • ${stats.completedProjects} ${t("dashboard.completed")}`}
                         </p>
                     </div>
                 </div>
@@ -263,7 +265,7 @@ console.log("Organization ID:", organizationId);
 
             {/* Quick Actions */}
             <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">Quick Actions</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-3">{t("dashboard.quickActions")}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Plain Image */}
                     <Link href="/dashboard/images/white-bg">
@@ -271,8 +273,8 @@ console.log("Organization ID:", organizationId);
                             <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-indigo-50 group-hover:bg-indigo-100 transition">
                                 <Image className="w-5 h-5 text-indigo-500" />
                             </div>
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1">Plain Image</h3>
-                            <p className="text-xs text-gray-500">Clean product shots</p>
+                            <h3 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.plainImage")}</h3>
+                            <p className="text-xs text-gray-500">{t("dashboard.cleanProductShots")}</p>
                         </div>
                     </Link>
 
@@ -282,8 +284,8 @@ console.log("Organization ID:", organizationId);
                             <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-yellow-50 group-hover:bg-yellow-100 transition">
                                 <Sparkles className="w-5 h-5 text-yellow-400" />
                             </div>
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1">Themed Image</h3>
-                            <p className="text-xs text-gray-500">Lifestyle shots</p>
+                            <h3 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.themedImage")}</h3>
+                            <p className="text-xs text-gray-500">{t("dashboard.lifestyleShots")}</p>
                         </div>
                     </Link>
 
@@ -293,8 +295,8 @@ console.log("Organization ID:", organizationId);
                             <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-indigo-50 group-hover:bg-indigo-100 transition">
                                 <Image className="w-5 h-5 text-indigo-500" />
                             </div>
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1">Model Images</h3>
-                            <p className="text-xs text-gray-500">AI or human models</p>
+                            <h3 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.modelImages")}</h3>
+                            <p className="text-xs text-gray-500">{t("dashboard.aiOrHumanModels")}</p>
                         </div>
                     </Link>
 
@@ -304,8 +306,8 @@ console.log("Organization ID:", organizationId);
                             <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-yellow-50 group-hover:bg-yellow-100 transition">
                                 <FolderKanban className="w-5 h-5 text-yellow-400" />
                             </div>
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1">New Project</h3>
-                            <p className="text-xs text-gray-500">Full campaign photoshoots</p>
+                            <h3 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.newProject")}</h3>
+                            <p className="text-xs text-gray-500">{t("dashboard.fullCampaignPhotoshoots")}</p>
                         </div>
                     </Link>
                 </div>
@@ -313,7 +315,7 @@ console.log("Organization ID:", organizationId);
 
             {/* Recent Images */}
             <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">My Recent Images</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-3">{t("dashboard.myRecentImages")}</h2>
                 {(() => {
                     if (loading) {
                         return (
@@ -355,7 +357,7 @@ console.log("Organization ID:", organizationId);
                     return (
                         <div className="text-center py-8 text-gray-500">
                             <Image className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                            <p>No recent images yet. Start generating images to see them here!</p>
+                            <p>{t("dashboard.noRecentImages")}</p>
                         </div>
                     );
                 })()}

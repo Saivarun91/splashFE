@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiService } from "@/lib/api";
+import { useLanguage } from "@/context/LanguageContext";
 import {
     Dialog,
     DialogContent,
@@ -13,8 +14,17 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export default function SignupForm() {
+    const { language, changeLanguage, t } = useLanguage();
     const [formData, setFormData] = useState({
         full_name: "",
         username: "",
@@ -96,7 +106,7 @@ export default function SignupForm() {
             }
         } catch (err) {
             console.error("Failed to fetch legal content:", err);
-            setMessage("Failed to load legal content. Please try again.");
+            setMessage(t("legal.failedToLoad"));
         }
     };
 
@@ -106,13 +116,13 @@ export default function SignupForm() {
         setMessage("");
 
         if (formData.password !== formData.confirm_password) {
-            setMessage("Passwords do not match");
+            setMessage(t("auth.passwordsNotMatch"));
             setLoading(false);
             return;
         }
 
         if (!formData.acceptTerms || !formData.acceptPrivacy || !formData.acceptGDPR) {
-            setMessage("Please accept all terms and conditions to continue");
+            setMessage(t("auth.acceptAllTerms"));
             setLoading(false);
             return;
         }
@@ -130,70 +140,86 @@ export default function SignupForm() {
     return (
         <div className="w-full max-w-md">
             <div className="mb-8">
-                <h1 className="text-4xl font-bold text-[#0c1421] mb-2">Sign Up</h1>
-                <p className="text-lg text-[#313957]">Create your account to get started</p>
+                <h1 className="text-4xl font-bold text-[#0c1421] mb-2">{t("auth.signup")}</h1>
+                <p className="text-lg text-[#313957]">{t("auth.createAccount")}</p>
+            </div>
+
+            {/* Language Selector */}
+            <div className="mb-6">
+                <Label className="block text-sm font-semibold text-[#0c1421] mb-2">
+                    {t("signup.selectLanguage")}
+                </Label>
+                <Select value={language} onValueChange={changeLanguage}>
+                    <SelectTrigger className="w-full bg-[#f3f9fa] border border-[#e6e6e6]">
+                        <SelectValue placeholder={t("signup.selectLanguage")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="en">{t("common.english")}</SelectItem>
+                        <SelectItem value="es">{t("common.spanish")}</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                    <label className="block text-sm font-semibold text-[#0c1421]">Full Name</label>
+                    <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.fullName")}</label>
                     <Input
                         type="text"
                         name="full_name"
                         value={formData.full_name}
                         onChange={handleChange}
-                        placeholder="John Doe"
+                        placeholder={t("auth.johnDoe")}
                         required
                         className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-semibold text-[#0c1421]">Username</label>
+                    <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.username")}</label>
                     <Input
                         type="text"
                         name="username"
                         value={formData.username}
                         onChange={handleChange}
-                        placeholder="johndoe123"
+                        placeholder={t("auth.johndoe123")}
                         required
                         className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-semibold text-[#0c1421]">Email</label>
+                    <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.email")}</label>
                     <Input
                         type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="example@email.com"
+                        placeholder={t("auth.exampleEmail")}
                         required
                         className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-semibold text-[#0c1421]">Password</label>
+                    <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.password")}</label>
                     <Input
                         type="password"
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
-                        placeholder="At least 8 characters"
+                        placeholder={t("auth.atLeast8Chars")}
                         required
                         className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-semibold text-[#0c1421]">Confirm Password</label>
+                    <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.confirmPassword")}</label>
                     <Input
                         type="password"
                         name="confirm_password"
                         value={formData.confirm_password}
                         onChange={handleChange}
-                        placeholder="Confirm your password"
+                        placeholder={t("auth.confirmYourPassword")}
                         required
                         className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
                     />
@@ -212,13 +238,13 @@ export default function SignupForm() {
                             className="mt-1 h-4 w-4 text-[#5533ff] border-gray-300 rounded focus:ring-[#5533ff]"
                         />
                         <label htmlFor="acceptTerms" className="text-sm text-[#313957]">
-                            I agree to the{" "}
+                            {t("signup.agreeTo")}{" "}
                             <button
                                 type="button"
                                 onClick={() => handleViewContent('terms')}
                                 className="text-[#5533ff] hover:underline font-semibold"
                             >
-                                Terms and Conditions
+                                {t("signup.termsAndConditions")}
                             </button>
                         </label>
                     </div>
@@ -234,13 +260,13 @@ export default function SignupForm() {
                             className="mt-1 h-4 w-4 text-[#5533ff] border-gray-300 rounded focus:ring-[#5533ff]"
                         />
                         <label htmlFor="acceptPrivacy" className="text-sm text-[#313957]">
-                            I agree to the{" "}
+                            {t("signup.agreeTo")}{" "}
                             <button
                                 type="button"
                                 onClick={() => handleViewContent('privacy')}
                                 className="text-[#5533ff] hover:underline font-semibold"
                             >
-                                Privacy Policy
+                                {t("signup.privacyPolicy")}
                             </button>
                         </label>
                     </div>
@@ -256,13 +282,13 @@ export default function SignupForm() {
                             className="mt-1 h-4 w-4 text-[#5533ff] border-gray-300 rounded focus:ring-[#5533ff]"
                         />
                         <label htmlFor="acceptGDPR" className="text-sm text-[#313957]">
-                            I agree to the{" "}
+                            {t("signup.agreeTo")}{" "}
                             <button
                                 type="button"
                                 onClick={() => handleViewContent('gdpr')}
                                 className="text-[#5533ff] hover:underline font-semibold"
                             >
-                                GDPR Compliance
+                                {t("signup.gdprCompliance")}
                             </button>
                         </label>
                     </div>
@@ -273,7 +299,7 @@ export default function SignupForm() {
                     disabled={loading}
                     className="w-full py-3 bg-[#5533ff] hover:bg-[#4422dd] text-white font-semibold rounded-full"
                 >
-                    {loading ? "Signing up..." : "Sign Up"}
+                    {loading ? t("auth.signingUp") : t("auth.signup")}
                 </Button>
             </form>
 
@@ -283,9 +309,9 @@ export default function SignupForm() {
 
             <div className="mt-8 text-center">
                 <p className="text-sm text-[#313957]">
-                    Already have an account?{" "}
+                    {t("auth.alreadyHaveAccount")}{" "}
                     <Link href="/login" className="font-semibold text-[#5533ff] hover:opacity-80">
-                        Login
+                        {t("auth.login")}
                     </Link>
                 </p>
             </div>
@@ -295,10 +321,10 @@ export default function SignupForm() {
                 <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>
-                            {selectedContent?.title || "Legal Document"}
+                            {selectedContent?.title || t("legal.legalDocument")}
                         </DialogTitle>
                         <DialogDescription>
-                            Please read the following content carefully
+                            {t("legal.readCarefully")}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="mt-4">
@@ -310,7 +336,7 @@ export default function SignupForm() {
                                 }}
                             />
                         ) : (
-                            <p className="text-[#313957]">Loading content...</p>
+                            <p className="text-[#313957]">{t("legal.loadingContent")}</p>
                         )}
                     </div>
                 </DialogContent>

@@ -8,10 +8,12 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Mail, Check, X, Clock, Users, Loader2, CheckCircle, XCircle } from "lucide-react"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
+import { useLanguage } from "@/context/LanguageContext"
 import Link from "next/link"
 
 export default function PendingInvitations() {
     const { token } = useAuth()
+    const { t } = useLanguage()
     const [invites, setInvites] = useState([])
     const [loading, setLoading] = useState(true)
     const [processingInvite, setProcessingInvite] = useState(null)
@@ -29,7 +31,7 @@ export default function PendingInvitations() {
             setInvites(data.pending_invites || [])
         } catch (err) {
             console.error("Error fetching invites:", err)
-            setErrorMessage("Failed to load invitations")
+            setErrorMessage(t("dashboard.failedToLoadActivity"))
         } finally {
             setLoading(false)
         }
@@ -40,12 +42,12 @@ export default function PendingInvitations() {
             setProcessingInvite(inviteId)
             setErrorMessage("")
             await apiService.acceptInviteById(inviteId, token)
-            setSuccessMessage(`You've joined ${projectName}! 🎉`)
+            setSuccessMessage(`${t("dashboard.accept")} ${projectName}! 🎉`)
             setTimeout(() => setSuccessMessage(""), 5000)
             // Refresh invites list
             fetchInvites()
         } catch (err) {
-            setErrorMessage(err.message || "Failed to accept invitation")
+            setErrorMessage(err.message || t("dashboard.failedToLoadActivity"))
         } finally {
             setProcessingInvite(null)
         }
@@ -56,12 +58,12 @@ export default function PendingInvitations() {
             setProcessingInvite(inviteId)
             setErrorMessage("")
             await apiService.rejectInvite(inviteId, token)
-            setSuccessMessage("Invitation declined")
+            setSuccessMessage(t("dashboard.decline"))
             setTimeout(() => setSuccessMessage(""), 3000)
             // Refresh invites list
             fetchInvites()
         } catch (err) {
-            setErrorMessage(err.message || "Failed to reject invitation")
+            setErrorMessage(err.message || t("dashboard.failedToLoadActivity"))
         } finally {
             setProcessingInvite(null)
         }
@@ -95,10 +97,10 @@ export default function PendingInvitations() {
         const now = new Date()
         const diffInSeconds = Math.floor((now - date) / 1000)
 
-        if (diffInSeconds < 60) return "just now"
-        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
-        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
-        return `${Math.floor(diffInSeconds / 86400)}d ago`
+        if (diffInSeconds < 60) return t("dashboard.justNow")
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}${t("dashboard.minutesAgo")}`
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}${t("dashboard.hoursAgo")}`
+        return `${Math.floor(diffInSeconds / 86400)}${t("dashboard.daysAgo")}`
     }
 
     if (loading) {
@@ -115,7 +117,7 @@ export default function PendingInvitations() {
         return (
             <Card className="p-8 border-2 border-purple-100 text-center">
                 <Mail className="w-12 h-12 text-[#708090] mx-auto mb-3 opacity-50" />
-                <p className="text-[#708090] text-sm">No pending invitations</p>
+                <p className="text-[#708090] text-sm">{t("dashboard.noPendingInvitations")}</p>
             </Card>
         )
     }
@@ -160,7 +162,7 @@ export default function PendingInvitations() {
                                         {invite.project_name}
                                     </h3>
                                     <p className="text-sm text-[#708090]">
-                                        Invited by <span className="font-medium text-[#1a1a2e]">{invite.inviter_name}</span>
+                                        {t("dashboard.invitedBy")} <span className="font-medium text-[#1a1a2e]">{invite.inviter_name}</span>
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -199,12 +201,12 @@ export default function PendingInvitations() {
                                     {processingInvite === invite.id ? (
                                         <>
                                             <Loader2 className="w-4 h-4 animate-spin" />
-                                            Processing...
+                                            {t("dashboard.processing")}
                                         </>
                                     ) : (
                                         <>
                                             <Check className="w-4 h-4" />
-                                            Accept
+                                            {t("dashboard.accept")}
                                         </>
                                     )}
                                 </Button>
@@ -215,7 +217,7 @@ export default function PendingInvitations() {
                                     className="flex-1 border-[#e6e6e6] hover:bg-red-50 hover:border-red-300 hover:text-red-600 gap-2"
                                 >
                                     <X className="w-4 h-4" />
-                                    Decline
+                                    {t("dashboard.decline")}
                                 </Button>
                                 <Link href={`/dashboard/projects/${invite.project_id}`}>
                                     <Button

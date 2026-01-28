@@ -3,47 +3,49 @@
 
 import { Zap, ImageIcon, Wand2, Users, Camera, ArrowRight } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useLanguage } from "@/context/LanguageContext"
 
 export function AllTools() {
     const router = useRouter()
+    const { t } = useLanguage()
 
     const tools = [
         {
             icon: Zap,
-            title: "Plain Background",
-            description: "Clean product shots with custom backgrounds",
+            title: t("images.plainBackground"),
+            description: t("images.cleanProductShots"),
             status: "active",
             gradient: "from-purple-500 to-pink-500",
             path: "/dashboard/images/white-bg"
         },
         {
             icon: ImageIcon,
-            title: "Background Replace",
-            description: "AI-Powered background Transformation",
+            title: t("images.backgroundReplace"),
+            description: t("images.aiPoweredTransformation"),
             status: "active",
             gradient: "from-blue-500 to-cyan-500",
             path: "/dashboard/images/replace-bg"
         },
         {
             icon: Wand2,
-            title: "AI Model",
-            description: "Generate with AI Model wearing Products",
+            title: t("images.aiModel"),
+            description: t("images.generateWithAIModel"),
             status: "active",
             gradient: "from-green-500 to-emerald-500",
             path: "/dashboard/images/ai-model"
         },
         {
             icon: Users,
-            title: "Real Model",
-            description: "Lifestyle shot with realistic models",
+            title: t("images.realModel"),
+            description: t("images.lifestyleShot"),
             status: "active",
             gradient: "from-orange-500 to-red-500",
             path: "/dashboard/images/real-model"
         },
         {
             icon: Camera,
-            title: "Campaign Shots",
-            description: "Marketing ready campaign Photography",
+            title: t("images.campaignShots"),
+            description: t("images.marketingReady"),
             status: "active",
             gradient: "from-indigo-500 to-purple-500",
             path: "/dashboard/images/campaign"
@@ -58,9 +60,9 @@ export function AllTools() {
         }
 
         const labels = {
-            active: "Available",
-            new: "New",
-            coming: "Coming Soon"
+            active: t("images.available"),
+            new: t("images.new"),
+            coming: t("images.comingSoon")
         }
 
         return (
@@ -73,9 +75,9 @@ export function AllTools() {
     return (
         <div>
             <div className="flex items-center justify-between mb-6 fade-in">
-                <h2 className="text-2xl font-extrabold bg-gradient-to-r from-[#7753ff] to-[#ec4899] bg-clip-text text-transparent">All Tools</h2>
+                <h2 className="text-2xl font-extrabold bg-gradient-to-r from-[#7753ff] to-[#ec4899] bg-clip-text text-transparent">{t("images.allTools")}</h2>
                 <button className="flex items-center gap-2 text-sm font-bold bg-gradient-to-r from-[#7753ff] to-[#ec4899] bg-clip-text text-transparent hover:from-[#884cff] hover:to-[#f472b6] transition-all group">
-                    View all tools
+                    {t("images.viewAllTools")}
                     <ArrowRight size={18} className="text-[#7753ff] group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>
@@ -102,7 +104,7 @@ export function AllTools() {
                                 : 'bg-gradient-to-r from-purple-50 to-pink-50 text-[#7753ff] border-2 border-purple-200 hover:from-[#7753ff] hover:to-[#a855f7] hover:text-white hover:border-transparent shadow-sm hover:shadow-lg hover:-translate-y-0.5'
                                 }`}
                         >
-                            {tool.status === 'coming' ? 'Coming Soon' : 'Get Started'}
+                            {tool.status === 'coming' ? t("images.comingSoon") : t("images.getStarted")}
                         </button>
                     </div>
                 ))}

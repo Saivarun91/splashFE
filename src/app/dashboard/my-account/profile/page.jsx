@@ -5,11 +5,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Save, Loader2 } from 'lucide-react';
+import { Save, Loader2, Building2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { apiService } from '@/lib/api';
+import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
+import { switchToOrganizationPortal, isOrganizationOwner } from '@/lib/portalSwitch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export const ProfileInfo = () => {
+  const { language, changeLanguage, t } = useLanguage();
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -17,6 +29,7 @@ export const ProfileInfo = () => {
     email: '',
     full_name: '',
     username: '',
+    organization_role: '',
   });
   const [formData, setFormData] = useState({
     full_name: '',
@@ -32,24 +45,24 @@ export const ProfileInfo = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       if (!token) {
-        toast.error('Please login to view your profile');
+        toast.error(t('profile.pleaseLogin'));
         return;
       }
 
       const response = await apiService.getUserProfile(token);
       if (response && response.success) {
-        const user = response.user;
-        setUserData(user);
+        const userProfile = response.user;
+        setUserData(userProfile);
         setFormData({
-          full_name: user.full_name || '',
-          username: user.username || '',
+          full_name: userProfile.full_name || '',
+          username: userProfile.username || '',
         });
       } else {
-        toast.error('Failed to load profile');
+        toast.error(t('profile.failedToLoad'));
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
-      toast.error('Failed to load profile');
+      toast.error(t('profile.failedToLoad'));
     } finally {
       setLoading(false);
     }
@@ -68,7 +81,7 @@ export const ProfileInfo = () => {
       setSaving(true);
       const token = localStorage.getItem('token');
       if (!token) {
-        toast.error('Please login to update your profile');
+        toast.error(t('profile.pleaseLoginUpdate'));
         return;
       }
 
@@ -76,13 +89,13 @@ export const ProfileInfo = () => {
       if (response && response.success) {
         setUserData(response.user);
         setIsEditing(false);
-        toast.success('Profile updated successfully!');
+        toast.success(t('profile.profileUpdated'));
       } else {
-        toast.error(response?.error || 'Failed to update profile');
+        toast.error(response?.error || t('profile.failedToUpdate'));
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error(error?.message || 'Failed to update profile');
+      toast.error(error?.message || t('profile.failedToUpdate'));
     } finally {
       setSaving(false);
     }
@@ -126,28 +139,28 @@ export const ProfileInfo = () => {
     <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Profile & Personal Info</h1>
-          <p className="text-muted-foreground">Manage your personal information</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t('profile.title')}</h1>
+          <p className="text-muted-foreground">{t('profile.subtitle')}</p>
         </div>
         {!isEditing ? (
           <Button onClick={() => setIsEditing(true)} className="bg-[#884cff] hover:bg-[#884cff]/90">
-            Edit Profile
+            {t('profile.editProfile')}
           </Button>
         ) : (
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleCancel} disabled={saving}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleSave} disabled={saving} className="bg-[#884cff] hover:bg-[#884cff]/90">
               {saving ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
+                  {t('profile.saving')}
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  Save Changes
+                  {t('profile.saveChanges')}
                 </>
               )}
             </Button>
@@ -157,8 +170,8 @@ export const ProfileInfo = () => {
 
       <Card className="shadow-elegant">
         <CardHeader>
-          <CardTitle>Profile Information</CardTitle>
-          <CardDescription>Your account details</CardDescription>
+          <CardTitle>{t('profile.profileInformation')}</CardTitle>
+          <CardDescription>{t('profile.accountDetails')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center gap-6">
@@ -168,36 +181,36 @@ export const ProfileInfo = () => {
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm text-muted-foreground">Profile Picture</p>
-              <p className="text-xs text-muted-foreground mt-1">Initials are generated from your name</p>
+              <p className="text-sm text-muted-foreground">{t('profile.profilePicture')}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('profile.initialsGenerated')}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="full_name">Full Name</Label>
+              <Label htmlFor="full_name">{t('profile.fullName')}</Label>
               <Input
                 id="full_name"
                 value={formData.full_name}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                placeholder="Enter your full name"
+                placeholder={t('profile.enterFullName')}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t('profile.username')}</Label>
               <Input
                 id="username"
                 value={formData.username}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                placeholder="Enter your username"
+                placeholder={t('profile.enterUsername')}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
+            <Label htmlFor="email">{t('profile.emailAddress')}</Label>
             <Input
               id="email"
               type="email"
@@ -205,10 +218,46 @@ export const ProfileInfo = () => {
               disabled
               className="bg-muted"
             />
-            <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+            <p className="text-xs text-muted-foreground">{t('profile.emailCannotBeChanged')}</p>
           </div>
+
+          {/* Language Settings - Only visible when editing */}
+          {isEditing && (
+            <div className="space-y-2 pt-4 border-t">
+              <Label htmlFor="language">{t('profile.currentLanguage')}</Label>
+              <Select value={language} onValueChange={changeLanguage}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t('profile.currentLanguage')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">{t('common.english')}</SelectItem>
+                  <SelectItem value="es">{t('common.spanish')}</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">{t('profile.changeLanguage')}</p>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Switch User Button - Only visible to organization owners */}
+      {(isOrganizationOwner(user) || isOrganizationOwner(userData)) && (
+        <Card className="shadow-elegant">
+          <CardHeader>
+            <CardTitle>{t('profile.organizationAccess')}</CardTitle>
+            <CardDescription>{t('profile.switchToOrganizationPortal')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={switchToOrganizationPortal}
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+            >
+              <Building2 className="w-4 h-4 mr-2" />
+              {t('profile.switchToOrganizationPortal')}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

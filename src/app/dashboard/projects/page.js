@@ -19,6 +19,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { apiService } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import toast from "react-hot-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
@@ -28,6 +29,7 @@ import { Button } from "@/components/ui/button"
 
 export default function Dashboard() {
     const { token } = useAuth();
+    const { t } = useLanguage();
     const [searchQuery, setSearchQuery] = useState("");
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -53,32 +55,32 @@ export default function Dashboard() {
     }, [token]);
 
     const handleDeleteProject = async (projectId) => {
-        if (!confirm("Are you sure you want to delete this project?")) return;
+        if (!confirm(t("dashboard.deleteConfirm"))) return;
         try {
             await apiService.deleteProject(projectId, token);
             setProjects((prev) => prev.filter((p) => p.id !== projectId));
         } catch (err) {
             console.error("Error deleting project:", err);
-            toast.error("Failed to delete project. Please try again.");
+            toast.error(t("dashboard.deleteFailed"));
         }
     };
 
     // Format time ago
     const getTimeAgo = (dateString) => {
-        if (!dateString) return "Unknown";
+        if (!dateString) return t("dashboard.unknown");
         const date = new Date(dateString);
         const now = new Date();
         const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
         const diffInDays = Math.floor(diffInHours / 24);
 
         if (diffInHours < 1) {
-            return "Just now";
+            return t("dashboard.justNow");
         } else if (diffInHours < 24) {
-            return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
+            return `${diffInHours} ${diffInHours === 1 ? t("dashboard.hour") : t("dashboard.hours")} ${t("dashboard.ago")}`;
         } else if (diffInDays === 1) {
-            return "1 day ago";
+            return `1 ${t("dashboard.day")} ${t("dashboard.ago")}`;
         } else {
-            return `${diffInDays} days ago`;
+            return `${diffInDays} ${t("dashboard.days")} ${t("dashboard.ago")}`;
         }
     };
 
@@ -89,10 +91,10 @@ export default function Dashboard() {
             .includes(searchQuery.toLowerCase());
 
         const matchesTab =
-            activeTab === "All" ||
-            (activeTab === "In Progress" && project.status === "progress") ||
-            (activeTab === "Completed" && project.status === "completed") ||
-            (activeTab === "Draft" && project.status === "draft");
+            activeTab === t("dashboard.all") ||
+            (activeTab === t("dashboard.inProgressTab") && project.status === "progress") ||
+            (activeTab === t("dashboard.completed") && project.status === "completed") ||
+            (activeTab === t("dashboard.draft") && project.status === "draft");
 
         return matchesSearch && matchesTab;
     });
@@ -134,12 +136,12 @@ export default function Dashboard() {
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">Projects</h1>
-                        <p className="text-gray-600">Organize full campaign photoshoots with multiple products</p>
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">{t("dashboard.projects")}</h1>
+                        <p className="text-gray-600">{t("dashboard.organizeCampaigns")}</p>
                     </div>
                     <Link href="/dashboard/projects/create">
                         <button className="bg-[linear-gradient(135deg,hsl(250,70%,60%),hsl(260,75%,65%))] text-white font-medium px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2">
-                            <Plus className="w-4 h-4" /> Create New Project
+                            <Plus className="w-4 h-4" /> {t("dashboard.createNewProject")}
                         </button>
                     </Link>
                 </div>
@@ -149,7 +151,7 @@ export default function Dashboard() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Search projects..."
+                        placeholder={t("dashboard.searchProjects")}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full bg-white border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-gray-900 placeholder-gray-500 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
@@ -158,7 +160,7 @@ export default function Dashboard() {
 
                 {/* Tabs */}
                 <div className="flex gap-3 border-b border-gray-200">
-                    {["All", "In Progress", "Completed"].map((tab) => (
+                    {[t("dashboard.all"), t("dashboard.inProgressTab"), t("dashboard.completed")].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -177,10 +179,10 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
                     {filteredProjects.map((project) => {
                         const statusText = project.status === "progress"
-                            ? "In Progress"
+                            ? t("dashboard.inProgressTab")
                             : project.status === "completed"
-                                ? "Completed"
-                                : "Draft";
+                                ? t("dashboard.completed")
+                                : t("dashboard.draft");
 
                         const statusBgColor = project.status === "progress"
                             ? "bg-orange-100 text-yellow-500"
@@ -295,7 +297,7 @@ export default function Dashboard() {
                             <Search size={24} className="text-gray-400" />
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                            {searchQuery ? "No projects found" : "No projects yet"}
+                            {searchQuery ? t("dashboard.noProjects") : t("dashboard.noProjects")}
                         </h3>
                         <p className="text-gray-600 mb-4">
                             {searchQuery

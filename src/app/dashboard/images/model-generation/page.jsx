@@ -6,6 +6,7 @@ import { ChevronLeft, Sparkles, Upload, Cpu, Users, Ruler, Zap, Loader2, CheckCi
 import { apiService } from "@/lib/api"
 import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
+import { useLanguage } from "@/context/LanguageContext"
 import { OrnamentSelection } from "@/components/images/OrnamentSelection"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 import toast from "react-hot-toast"
@@ -13,6 +14,7 @@ import { HiOutlineUserCircle } from "react-icons/hi";
 export default function ModelGenerationForm() {
     const router = useRouter()
     const { token } = useAuth()
+    const { t } = useLanguage()
     const [activeTab, setActiveTab] = useState("ai_model") // "ai_model" or "real_model"
 
     // AI Model State
@@ -95,7 +97,7 @@ export default function ModelGenerationForm() {
                 window.URL.revokeObjectURL(blobUrl);
             }, 200);
 
-            toast.success('Download started!');
+            toast.success(t("images.downloadStarted"));
         } catch (error) {
             console.error('Error downloading image:', error);
             // Fallback: try direct download link
@@ -110,12 +112,12 @@ export default function ModelGenerationForm() {
                 setTimeout(() => {
                     document.body.removeChild(link);
                 }, 200);
-                toast.success('Download started!');
+                toast.success(t("images.downloadStarted"));
             } catch (fallbackError) {
                 console.error('Fallback download also failed:', fallbackError);
                 // Last resort: open in new tab
                 window.open(url, '_blank');
-                toast.error('Download failed. Image opened in new tab.');
+                toast.error(t("images.downloadFailed"));
             }
         }
     };
@@ -172,7 +174,7 @@ export default function ModelGenerationForm() {
         if (!aiRegenerateModal.prompt.trim()) {
             setAiRegenerateModal(prev => ({
                 ...prev,
-                error: 'Please enter a prompt for regeneration'
+                error: t("images.pleaseEnterPrompt")
             }))
             return
         }
@@ -201,7 +203,7 @@ export default function ModelGenerationForm() {
                     error: null
                 })
 
-                alert('Image regenerated successfully!')
+                alert(t("images.imageRegeneratedSuccess"))
             } else {
                 throw new Error(response.error || 'Regeneration failed')
             }
@@ -210,7 +212,7 @@ export default function ModelGenerationForm() {
             setAiRegenerateModal(prev => ({
                 ...prev,
                 loading: false,
-                error: error.response?.data?.error || error.message || 'Failed to regenerate image'
+                error: error.response?.data?.error || error.message || t("images.failedToRegenerate")
             }))
         }
     }
@@ -232,7 +234,7 @@ export default function ModelGenerationForm() {
         setAiResult(null)
 
         if (!aiFormData.ornamentImage) {
-            setAiError("Please upload an ornament image")
+            setAiError(t("images.pleaseUploadOrnamentImage"))
             return
         }
 
@@ -244,7 +246,7 @@ export default function ModelGenerationForm() {
             if (aiFormData.poseImage) {
                 formDataToSend.append("pose_style", aiFormData.poseImage)
             }
-            formDataToSend.append("prompt", aiFormData.prompt || "Generate an AI model wearing this ornament")
+            formDataToSend.append("prompt", aiFormData.prompt || t("images.generateAIModelWearingOrnament"))
             formDataToSend.append("measurements", aiFormData.measurements || "")
             formDataToSend.append("ornament_type", aiOrnamentType || "")
             formDataToSend.append("ornament_measurements", JSON.stringify(aiOrnamentMeasurements))
@@ -255,11 +257,11 @@ export default function ModelGenerationForm() {
             if (response.status === "success") {
                 setAiResult(response)
             } else {
-                setAiError(response.message || "Failed to generate image")
+                setAiError(response.message || t("images.failedToGenerate"))
             }
         } catch (err) {
             console.error("Error generating image:", err)
-            setAiError(err.message || "An error occurred while generating the image")
+            setAiError(err.message || t("images.errorGeneratingImage"))
         } finally {
             setAiIsLoading(false)
         }
@@ -296,7 +298,7 @@ export default function ModelGenerationForm() {
         if (!realRegenerateModal.prompt.trim()) {
             setRealRegenerateModal(prev => ({
                 ...prev,
-                error: 'Please enter a prompt for regeneration'
+                error: t("images.pleaseEnterPrompt")
             }))
             return
         }
@@ -325,7 +327,7 @@ export default function ModelGenerationForm() {
                     error: null
                 })
 
-                alert('Image regenerated successfully!')
+                alert(t("images.imageRegeneratedSuccess"))
             } else {
                 throw new Error(response.error || 'Regeneration failed')
             }
@@ -334,7 +336,7 @@ export default function ModelGenerationForm() {
             setRealRegenerateModal(prev => ({
                 ...prev,
                 loading: false,
-                error: error.response?.data?.error || error.message || 'Failed to regenerate image'
+                error: error.response?.data?.error || error.message || t("images.failedToRegenerate")
             }))
         }
     }
@@ -356,12 +358,12 @@ export default function ModelGenerationForm() {
         setRealResult(null)
 
         if (!realFormData.modelImage) {
-            setRealError("Please upload a model image")
+            setRealError(t("images.pleaseUploadModelImage"))
             return
         }
 
         if (!realFormData.ornamentImage) {
-            setRealError("Please upload an ornament image")
+            setRealError(t("images.pleaseUploadOrnamentImage"))
             return
         }
 
@@ -374,7 +376,7 @@ export default function ModelGenerationForm() {
             if (realFormData.poseImage) {
                 formDataToSend.append("pose_style", realFormData.poseImage)
             }
-            formDataToSend.append("prompt", realFormData.prompt || "Generate realistic image with model wearing ornament")
+            formDataToSend.append("prompt", realFormData.prompt || t("images.generateRealisticImageWithModel"))
             formDataToSend.append("measurements", realFormData.measurements || "")
             formDataToSend.append("ornament_type", realOrnamentType || "")
             formDataToSend.append("ornament_measurements", JSON.stringify(realOrnamentMeasurements))
@@ -385,11 +387,11 @@ export default function ModelGenerationForm() {
             if (response.status === "success") {
                 setRealResult(response)
             } else {
-                setRealError(response.message || "Failed to generate image")
+                setRealError(response.message || t("images.failedToGenerate"))
             }
         } catch (err) {
             console.error("Error generating image:", err)
-            setRealError(err.message || "An error occurred while generating the image")
+            setRealError(err.message || t("images.errorGeneratingImage"))
         } finally {
             setRealIsLoading(false)
         }
@@ -406,9 +408,9 @@ export default function ModelGenerationForm() {
                         </div>
                         <div>
                             <h1 className="text-4xl font-bold text-[#7753ff]">
-                                Model Generation
+                                {t("images.modelGeneration")}
                             </h1>
-                            <p className="text-[#737373] mt-2">Generate AI models or use real models with your products</p>
+                            <p className="text-[#737373] mt-2">{t("images.generateAIModelsOrUseReal")}</p>
                         </div>
                     </div>
 
@@ -422,7 +424,7 @@ export default function ModelGenerationForm() {
                                 }`}
                         >
                             <Cpu className="w-5 h-5" />
-                            AI Model
+                            {t("images.aiModel")}
                         </button>
                         <button
                             onClick={() => setActiveTab("real_model")}
@@ -432,7 +434,7 @@ export default function ModelGenerationForm() {
                                 }`}
                         >
                             <Users className="w-5 h-5" />
-                            Real Model
+                            {t("images.realModel")}
                         </button>
                     </div>
                 </div>
@@ -447,7 +449,7 @@ export default function ModelGenerationForm() {
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
-                                        Ornament/Product Image<span className="text-red-500 ml-1">*</span>
+                                        {t("images.ornamentProductImage")}<span className="text-red-500 ml-1">*</span>
                                     </label>
                                     <div
                                         className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
@@ -467,7 +469,7 @@ export default function ModelGenerationForm() {
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
                                                 <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#7753ff] transition-colors" />
-                                                <p className="text-sm text-gray-500">PNG, JPG, WEBP up to 15MB</p>
+                                                <p className="text-sm text-gray-500">{t("images.pngJpgWebpUpTo15MB")}</p>
                                             </div>
                                         )}
                                     </div>
@@ -477,7 +479,7 @@ export default function ModelGenerationForm() {
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
-                                        Pose Style Reference (Optional)
+                                        {t("images.poseStyleReference")} ({t("common.optional")})
                                     </label>
                                     <div
                                         className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
@@ -497,7 +499,7 @@ export default function ModelGenerationForm() {
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
                                                 <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#7753ff] transition-colors" />
-                                                <p className="text-sm text-gray-500">Upload a reference pose image</p>
+                                                <p className="text-sm text-gray-500">{t("images.uploadReferencePoseImage")}</p>
                                             </div>
                                         )}
                                     </div>
@@ -515,12 +517,12 @@ export default function ModelGenerationForm() {
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <Sparkles className="w-4 h-4 text-[#7753ff]" />
-                                        Custom Instructions (Optional)
+                                        {t("images.customInstructions")} ({t("common.optional")})
                                     </label>
                                     <textarea
                                         value={aiFormData.prompt}
                                         onChange={(e) => setAiFormData((prev) => ({ ...prev, prompt: e.target.value }))}
-                                        placeholder="Add specific instructions for the AI model generation..."
+                                        placeholder={t("images.addSpecificInstructionsForAIModel")}
                                         className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent resize-none shadow-sm"
                                         rows="3"
                                     />
@@ -537,7 +539,7 @@ export default function ModelGenerationForm() {
                                 {aiError && (
                                     <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                         <AlertCircle className="w-5 h-5 text-red-500" />
-                                        <p className="text-red-700 text-sm"> Oops! Something went wrong. Please try again.</p>
+                                        <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
                                     </div>
                                 )}
 
@@ -549,7 +551,7 @@ export default function ModelGenerationForm() {
                                         className="flex items-center gap-2 text-[#7753ff] font-semibold hover:text-[#6a47e6] transition-colors group"
                                     >
                                         <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-                                        Back
+                                        {t("common.back")}
                                     </button>
                                     <button
                                         type="submit"
@@ -559,12 +561,12 @@ export default function ModelGenerationForm() {
                                         {aiIsLoading ? (
                                             <>
                                                 <Loader2 className="w-5 h-5 animate-spin" />
-                                                Generating...
+                                                {t("images.generating")}
                                             </>
                                         ) : (
                                             <>
                                                 <Zap className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                                Generate AI Model
+                                                {t("images.generateAIModel")}
                                             </>
                                         )}
                                     </button>
@@ -596,7 +598,7 @@ export default function ModelGenerationForm() {
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
                                                 <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#7753ff] transition-colors" />
-                                                <p className="text-sm text-gray-500">Upload model image</p>
+                                                <p className="text-sm text-gray-500">{t("images.uploadModelImage")}</p>
                                             </div>
                                         )}
                                     </div>
@@ -606,7 +608,7 @@ export default function ModelGenerationForm() {
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
-                                        Ornament/Product Image<span className="text-red-500 ml-1">*</span>
+                                        {t("images.ornamentProductImage")}<span className="text-red-500 ml-1">*</span>
                                     </label>
                                     <div
                                         className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
@@ -626,7 +628,7 @@ export default function ModelGenerationForm() {
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
                                                 <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#7753ff] transition-colors" />
-                                                <p className="text-sm text-gray-500">Upload ornament/product image</p>
+                                                <p className="text-sm text-gray-500">{t("images.uploadOrnamentProductImage")}</p>
                                             </div>
                                         )}
                                     </div>
@@ -636,7 +638,7 @@ export default function ModelGenerationForm() {
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
-                                        Pose Style Reference (Optional)
+                                        {t("images.poseStyleReference")} ({t("common.optional")})
                                     </label>
                                     <div
                                         className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
@@ -656,7 +658,7 @@ export default function ModelGenerationForm() {
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
                                                 <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#7753ff] transition-colors" />
-                                                <p className="text-sm text-gray-500">Upload reference pose (optional)</p>
+                                                <p className="text-sm text-gray-500">{t("images.uploadReferencePoseOptional")}</p>
                                             </div>
                                         )}
                                     </div>
@@ -689,12 +691,12 @@ export default function ModelGenerationForm() {
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <Sparkles className="w-4 h-4 text-[#7753ff]" />
-                                        Custom Instructions (Optional)
+                                        {t("images.customInstructions")} ({t("common.optional")})
                                     </label>
                                     <textarea
                                         value={realFormData.prompt}
                                         onChange={(e) => setRealFormData((prev) => ({ ...prev, prompt: e.target.value }))}
-                                        placeholder="Add specific instructions for placing the ornament on the model..."
+                                        placeholder={t("images.addSpecificInstructionsForPlacingOrnament")}
                                         className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent resize-none shadow-sm"
                                         rows="3"
                                     />
@@ -711,7 +713,7 @@ export default function ModelGenerationForm() {
                                 {realError && (
                                     <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                         <AlertCircle className="w-5 h-5 text-red-500" />
-                                        <p className="text-red-700 text-sm"> Oops! Something went wrong. Please try again.</p>
+                                        <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
                                     </div>
                                 )}
 
@@ -738,7 +740,7 @@ export default function ModelGenerationForm() {
                                         ) : (
                                             <>
                                                 <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                                Generate Image
+                                                {t("images.generateImage")}
                                             </>
                                         )}
                                     </button>
@@ -751,15 +753,15 @@ export default function ModelGenerationForm() {
                     <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
                         <h3 className="text-2xl font-bold text-[#1a1a1a] mb-6 flex items-center gap-2">
                             <CheckCircle className="w-6 h-6 text-[#7753ff]" />
-                            {activeTab === "ai_model" ? "Generated AI Model" : "Generated Image"}
+                            {activeTab === "ai_model" ? t("images.generatedAIModel") : t("images.generatedImage")}
                         </h3>
                         {currentState.isLoading ? (
                             <div className="flex flex-col items-center justify-center h-[500px] text-center">
                                 <Loader2 className="w-16 h-16 text-[#7753ff] animate-spin mb-4" />
                                 <p className="text-[#737373] text-lg">
-                                    {activeTab === "ai_model" ? "Generating AI model..." : "Generating realistic model image..."}
+                                    {activeTab === "ai_model" ? t("images.generatingAIModel") : t("images.generatingRealisticModel")}
                                 </p>
-                                <p className="text-[#737373] text-sm mt-2">This may take up to 30 seconds</p>
+                                <p className="text-[#737373] text-sm mt-2">{t("images.mayTakeUpTo30Seconds")}</p>
                             </div>
                         ) : currentState.result ? (
                             <div className="space-y-6">
@@ -774,7 +776,7 @@ export default function ModelGenerationForm() {
                                 <div className="space-y-3">
                                     <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
                                         <p className="text-green-700 font-semibold">
-                                            ✓ {activeTab === "ai_model" ? "AI model" : "Real model image"} generated successfully!
+                                            ✓ {activeTab === "ai_model" ? t("images.aiModelGeneratedSuccess") : t("images.realModelImageGeneratedSuccess")}
                                         </p>
 
                                     </div>
@@ -785,7 +787,7 @@ export default function ModelGenerationForm() {
                                                 className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
                                             >
                                                 <Eye size={16} />
-                                                View
+                                                {t("images.view")}
                                             </button>
                                             <button
                                                 onClick={() =>
@@ -794,7 +796,7 @@ export default function ModelGenerationForm() {
                                                 className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
                                             >
                                                 <Download size={16} />
-                                                Download
+                                                {t("images.download")}
                                             </button>
 
                                             <button
@@ -802,7 +804,7 @@ export default function ModelGenerationForm() {
                                                 className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] hover:bg-[#7753ff]/10 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
                                             >
                                                 <RefreshCw size={16} />
-                                                Regenerate
+                                                {t("images.regenerate")}
                                             </button>
                                         </div>
                                         <button
@@ -839,13 +841,13 @@ export default function ModelGenerationForm() {
                                             }}
                                             className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
                                         >
-                                            {activeTab === "ai_model" ? "New Model" : "New Image"}
+                                            {activeTab === "ai_model" ? t("images.newModel") : t("images.newImage")}
                                         </button>
                                     </div>
                                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                         <p className="text-blue-700 text-sm flex items-center gap-2">
                                             <Sparkles className="w-4 h-4" />
-                                            Click "Regenerate" to modify this {activeTab === "ai_model" ? "AI model" : "image"} with new instructions!
+                                            {activeTab === "ai_model" ? t("images.clickRegenerateToModifyAIModel") : t("images.clickRegenerateToModify")}
                                         </p>
                                     </div>
                                 </div>
@@ -860,12 +862,12 @@ export default function ModelGenerationForm() {
                                     )}
                                 </div>
                                 <p className="text-[#737373] text-lg">
-                                    Your {activeTab === "ai_model" ? "AI model" : "generated image"} will appear here
+                                    {activeTab === "ai_model" ? t("images.aiModelWillAppear") : t("images.generatedImageWillAppear")}
                                 </p>
                                 <p className="text-[#737373] text-sm mt-2">
                                     {activeTab === "ai_model"
-                                        ? "Upload an ornament and click generate to start"
-                                        : "Upload model and ornament images to start"}
+                                        ? t("images.uploadOrnamentAndClickGenerate")
+                                        : t("images.uploadModelAndOrnamentToStart")}
                                 </p>
                             </div>
                         )}
@@ -885,8 +887,8 @@ export default function ModelGenerationForm() {
                                         <RefreshCw className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">Regenerate AI Model</h2>
-                                        <p className="text-sm text-gray-500">Modify and regenerate this AI model image</p>
+                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">{t("images.regenerateAIModel")}</h2>
+                                        <p className="text-sm text-gray-500">{t("images.modifyAndRegenerateAIModel")}</p>
                                     </div>
                                 </div>
                                 <button
@@ -901,7 +903,7 @@ export default function ModelGenerationForm() {
 
                         <div className="p-6 space-y-6">
                             <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-3">Current Image:</p>
+                                <p className="text-sm font-semibold text-gray-700 mb-3">{t("images.currentImage")}:</p>
                                 <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-gray-200">
                                     <Image
                                         src={aiResult?.generated_image_url}
@@ -914,7 +916,7 @@ export default function ModelGenerationForm() {
 
                             {aiResult?.prompt && (
                                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                                    <p className="text-xs font-semibold text-blue-900 mb-2">Original Prompt:</p>
+                                    <p className="text-xs font-semibold text-blue-900 mb-2">{t("images.originalPrompt")}:</p>
                                     <p className="text-sm text-blue-700">{aiResult.prompt}</p>
                                 </div>
                             )}
@@ -922,18 +924,18 @@ export default function ModelGenerationForm() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <Sparkles className="w-4 h-4 text-[#7753ff]" />
-                                    What would you like to change?
+                                    {t("images.whatWouldYouLikeToChange")}
                                 </label>
                                 <textarea
                                     value={aiRegenerateModal.prompt}
                                     onChange={(e) => setAiRegenerateModal(prev => ({ ...prev, prompt: e.target.value }))}
-                                    placeholder="E.g., 'Change the model's pose', 'Adjust the lighting', 'Make it more dramatic'..."
+                                    placeholder={t("images.regenerateAIModelPlaceholder")}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent resize-none"
                                     rows="4"
                                     disabled={aiRegenerateModal.loading}
                                 />
                                 <p className="text-xs text-gray-500 mt-2">
-                                    💡 Your modification will be applied to regenerate the AI model
+                                    💡 {t("images.modificationWillBeAppliedToAIModel")}
                                 </p>
                             </div>
 
@@ -943,7 +945,7 @@ export default function ModelGenerationForm() {
                             {aiRegenerateModal.error && (
                                 <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                    <p className="text-red-700 text-sm"> Oops! Something went wrong. Please try again.</p>
+                                    <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
                                 </div>
                             )}
 
@@ -957,7 +959,7 @@ export default function ModelGenerationForm() {
                                     disabled={aiRegenerateModal.loading}
                                     className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
                                 >
-                                    Cancel
+                                    {t("common.cancel")}
                                 </button>
                                 <button
                                     onClick={submitAiRegenerate}
@@ -967,12 +969,12 @@ export default function ModelGenerationForm() {
                                     {aiRegenerateModal.loading ? (
                                         <>
                                             <Loader2 className="w-5 h-5 animate-spin" />
-                                            Regenerating...
+                                            {t("images.regenerating")}
                                         </>
                                     ) : (
                                         <>
                                             <RefreshCw className="w-5 h-5" />
-                                            Regenerate Image
+                                            {t("images.regenerateImage")}
                                         </>
                                     )}
                                 </button>
@@ -981,7 +983,7 @@ export default function ModelGenerationForm() {
                             {aiRegenerateModal.loading && (
                                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                                     <p className="text-yellow-800 text-sm text-center">
-                                        ⏱️ This may take up to 30 seconds. Please wait...
+                                        ⏱️ {t("images.mayTakeUpTo30Seconds")}
                                     </p>
                                 </div>
                             )}
@@ -1001,8 +1003,8 @@ export default function ModelGenerationForm() {
                                         <RefreshCw className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">Regenerate Real Model Image</h2>
-                                        <p className="text-sm text-gray-500">Modify and regenerate this real model image</p>
+                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">{t("images.regenerateRealModelImage")}</h2>
+                                        <p className="text-sm text-gray-500">{t("images.modifyAndRegenerateRealModel")}</p>
                                     </div>
                                 </div>
                                 <button
@@ -1017,7 +1019,7 @@ export default function ModelGenerationForm() {
 
                         <div className="p-6 space-y-6">
                             <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-3">Current Image:</p>
+                                <p className="text-sm font-semibold text-gray-700 mb-3">{t("images.currentImage")}:</p>
                                 <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-gray-200">
                                     <Image
                                         src={realResult?.generated_image_url}
@@ -1030,7 +1032,7 @@ export default function ModelGenerationForm() {
 
                             {realResult?.prompt && (
                                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                                    <p className="text-xs font-semibold text-blue-900 mb-2">Original Prompt:</p>
+                                    <p className="text-xs font-semibold text-blue-900 mb-2">{t("images.originalPrompt")}:</p>
                                     <p className="text-sm text-blue-700">{realResult.prompt}</p>
                                 </div>
                             )}
@@ -1038,18 +1040,18 @@ export default function ModelGenerationForm() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <Sparkles className="w-4 h-4 text-[#7753ff]" />
-                                    What would you like to change?
+                                    {t("images.whatWouldYouLikeToChange")}
                                 </label>
                                 <textarea
                                     value={realRegenerateModal.prompt}
                                     onChange={(e) => setRealRegenerateModal(prev => ({ ...prev, prompt: e.target.value }))}
-                                    placeholder="E.g., 'Adjust the lighting', 'Change the pose', 'Make it more realistic'..."
+                                    placeholder={t("images.regenerateRealModelPlaceholder")}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent resize-none"
                                     rows="4"
                                     disabled={realRegenerateModal.loading}
                                 />
                                 <p className="text-xs text-gray-500 mt-2">
-                                    💡 Your modification will be applied to regenerate the real model image
+                                    💡 {t("images.modificationWillBeAppliedToRealModel")}
                                 </p>
                             </div>
 
@@ -1066,7 +1068,7 @@ export default function ModelGenerationForm() {
                                     disabled={realRegenerateModal.loading}
                                     className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
                                 >
-                                    Cancel
+                                    {t("common.cancel")}
                                 </button>
                                 <button
                                     onClick={submitRealRegenerate}
@@ -1076,12 +1078,12 @@ export default function ModelGenerationForm() {
                                     {realRegenerateModal.loading ? (
                                         <>
                                             <Loader2 className="w-5 h-5 animate-spin" />
-                                            Regenerating...
+                                            {t("images.regenerating")}
                                         </>
                                     ) : (
                                         <>
                                             <RefreshCw className="w-5 h-5" />
-                                            Regenerate Image
+                                            {t("images.regenerateImage")}
                                         </>
                                     )}
                                 </button>
@@ -1090,7 +1092,7 @@ export default function ModelGenerationForm() {
                             {realRegenerateModal.loading && (
                                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                                     <p className="text-yellow-800 text-sm text-center">
-                                        ⏱️ This may take up to 30 seconds. Please wait...
+                                        ⏱️ {t("images.mayTakeUpTo30Seconds")}
                                     </p>
                                 </div>
                             )}

@@ -10,11 +10,13 @@ import { Input } from "@/components/ui/input"
 import { apiService } from "@/lib/api"
 import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
+import { useLanguage } from "@/context/LanguageContext"
 import toast from "react-hot-toast"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 
 const PlainBackgroundForm = () => {
     const router = useRouter()
+    const { t } = useLanguage()
     const [formData, setFormData] = useState({
         image: null,
         prompt: "",
@@ -209,7 +211,7 @@ const PlainBackgroundForm = () => {
         setResult(null)
 
         if (!formData.image) {
-            setError("Please upload an image")
+            setError(t("images.pleaseUploadImage"))
             return
         }
 
@@ -233,11 +235,11 @@ const PlainBackgroundForm = () => {
             if (response.success) {
                 setResult(response)
             } else {
-                setError(response.error || "Failed to generate image")
+                setError(response.error || t("images.failedToGenerate"))
             }
         } catch (err) {
             console.error("Error generating image:", err)
-            setError(err.message || "An error occurred while generating the image")
+            setError(err.message || t("images.errorGeneratingImage"))
         } finally {
             setIsLoading(false)
         }
@@ -258,9 +260,9 @@ const PlainBackgroundForm = () => {
                     </div>
                     <div>
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">
-                            Plain Background
+                            {t("images.plainBackground")}
                         </h1>
-                        <p className="text-[#737373] mt-2">Create stunning product images with custom backgrounds</p>
+                        <p className="text-[#737373] mt-2">{t("images.cleanProductShots")}</p>
                     </div>
                 </div>
 
@@ -273,7 +275,7 @@ const PlainBackgroundForm = () => {
                             <div>
                                 <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
                                     <Upload size={20} className="text-[#884cff]" />
-                                    Product Image<span className="text-red-500 ml-1">*</span>
+                                    {t("images.productImage")}<span className="text-red-500 ml-1">*</span>
                                 </label>
                                 <div
                                     className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 cursor-pointer ${isDragging
@@ -306,8 +308,8 @@ const PlainBackgroundForm = () => {
                                     ) : (
                                         <>
                                             <Upload className="w-12 h-12 text-[#884cff] mx-auto mb-4" />
-                                            <p className="text-[#1a1a1a] font-medium mb-2">Drag & drop your product image</p>
-                                            <p className="text-[#737373] text-sm">or click to browse files</p>
+                                            <p className="text-[#1a1a1a] font-medium mb-2">{t("images.dragDropProduct")}</p>
+                                            <p className="text-[#737373] text-sm">{t("images.clickToBrowse")}</p>
                                         </>
                                     )}
                                 </div>
@@ -317,11 +319,11 @@ const PlainBackgroundForm = () => {
                             <div>
                                 <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
                                     <Sparkles size={20} className="text-[#884cff]" />
-                                    Description / Prompt <span className="text-gray-400 text-sm font-normal">(Optional)</span>
+                                    {t("images.descriptionPrompt")} <span className="text-gray-400 text-sm font-normal">({t("common.optional")})</span>
                                 </label>
                                 <Input
                                     type="text"
-                                    placeholder="E.g., Remove background and place on white"
+                                    placeholder={t("images.removeBackgroundPlaceholder")}
                                     value={formData.prompt}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, prompt: e.target.value }))}
                                     className="w-full px-4 py-3 border border-[#e6e6e6] rounded-xl bg-white text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent"
@@ -387,7 +389,7 @@ const PlainBackgroundForm = () => {
                                     className="flex items-center gap-3 px-6 py-3 text-[#884cff] font-semibold hover:bg-[#f0e6ff] rounded-xl transition-all duration-300 hover:scale-105"
                                 >
                                     <ChevronLeft size={20} />
-                                    Back
+                                    {t("common.back")}
                                 </button>
                                 <Button
                                     type="submit"
@@ -397,12 +399,12 @@ const PlainBackgroundForm = () => {
                                     {isLoading ? (
                                         <>
                                             <Loader2 size={20} className="animate-spin" />
-                                            Generating...
+                                            {t("images.generating")}
                                         </>
                                     ) : (
                                         <>
                                             <Zap size={20} />
-                                            Generate Image
+                                            {t("images.generateImage")}
                                         </>
                                     )}
                                 </Button>
@@ -414,13 +416,13 @@ const PlainBackgroundForm = () => {
                     <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
                         <h3 className="text-2xl font-bold text-[#1a1a1a] mb-6 flex items-center gap-2">
                             <CheckCircle className="w-6 h-6 text-[#884cff]" />
-                            Result Preview
+                            {t("images.resultPreview")}
                         </h3>
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center h-[400px] text-center">
                                 <Loader2 className="w-16 h-16 text-[#884cff] animate-spin mb-4" />
-                                <p className="text-[#737373] text-lg">Generating your image...</p>
-                                <p className="text-[#737373] text-sm mt-2">This may take a few moments</p>
+                                <p className="text-[#737373] text-lg">{t("images.generatingYourImage")}</p>
+                                <p className="text-[#737373] text-sm mt-2">{t("images.mayTakeFewMoments")}</p>
                             </div>
                         ) : result ? (
                             <div className="space-y-6">
@@ -434,7 +436,7 @@ const PlainBackgroundForm = () => {
                                 </div>
                                 <div className="space-y-3">
                                     <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                                        <p className="text-green-700 font-semibold">✓ Image generated successfully!</p>
+                                        <p className="text-green-700 font-semibold">✓ {t("images.imageGeneratedSuccess")}</p>
 
                                     </div>
                                     <div className="grid grid-cols-3 gap-3">
@@ -443,7 +445,7 @@ const PlainBackgroundForm = () => {
                                             className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
                                         >
                                             <Eye size={16} />
-                                            View
+                                            {t("images.view")}
                                         </button>
                                         <button
                                             onClick={() =>
@@ -452,7 +454,7 @@ const PlainBackgroundForm = () => {
                                             className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
                                         >
                                             <Download size={16} />
-                                            Download
+                                            {t("images.download")}
                                         </button>
 
                                         <button
@@ -460,7 +462,7 @@ const PlainBackgroundForm = () => {
                                             className="px-4 py-3 border-2 border-[#884cff] text-[#884cff] rounded-xl font-semibold hover:bg-[#f0e6ff] transition-all flex items-center justify-center gap-2"
                                         >
                                             <RefreshCw size={16} />
-                                            Regenerate
+                                            {t("images.regenerate")}
                                         </button>
                                         <button
                                             onClick={() => {
@@ -475,13 +477,13 @@ const PlainBackgroundForm = () => {
                                             }}
                                             className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
                                         >
-                                            New Image
+                                            {t("images.newImage")}
                                         </button>
                                     </div>
                                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                         <p className="text-blue-700 text-sm flex items-center gap-2">
                                             <Sparkles className="w-4 h-4" />
-                                            Click "Regenerate" to modify this image with new instructions!
+                                            {t("images.clickRegenerateToModify")}
                                         </p>
                                     </div>
                                 </div>
@@ -491,8 +493,8 @@ const PlainBackgroundForm = () => {
                                 <div className="w-24 h-24 bg-gradient-to-br from-[#884cff]/10 to-[#5a2fcf]/10 rounded-full flex items-center justify-center mb-4">
                                     <Sparkles className="w-12 h-12 text-[#884cff]" />
                                 </div>
-                                <p className="text-[#737373] text-lg">Your generated image will appear here</p>
-                                <p className="text-[#737373] text-sm mt-2">Upload an image and click generate to start</p>
+                                <p className="text-[#737373] text-lg">{t("images.generatedImageWillAppear")}</p>
+                                <p className="text-[#737373] text-sm mt-2">{t("images.uploadAndClickGenerate")}</p>
                             </div>
                         )}
                     </div>
@@ -511,8 +513,8 @@ const PlainBackgroundForm = () => {
                                         <RefreshCw className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">Regenerate Image</h2>
-                                        <p className="text-sm text-gray-500">Modify and regenerate this image</p>
+                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">{t("images.regenerateImage")}</h2>
+                                        <p className="text-sm text-gray-500">{t("images.modifyAndRegenerate")}</p>
                                     </div>
                                 </div>
                                 <button
