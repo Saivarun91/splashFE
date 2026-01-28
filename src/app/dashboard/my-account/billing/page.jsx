@@ -17,6 +17,8 @@ export const SubscriptionBilling = () => {
   const [loading, setLoading] = useState(true);
   const [currentPlan, setCurrentPlan] = useState(null);
   const [organizationCredits, setOrganizationCredits] = useState(null);
+  const [userCredits, setUserCredits] = useState(null);
+  const [isSingleUser, setIsSingleUser] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
@@ -43,7 +45,7 @@ export const SubscriptionBilling = () => {
     if (!token || !user) return;
     
     try {
-      // Fetch user profile to get organization
+      // Fetch user profile to get organization or single user data
       const userProfile = await apiService.getUserProfile(token);
       if (userProfile?.success && userProfile?.user) {
         const currentUser = userProfile.user;
@@ -58,11 +60,13 @@ export const SubscriptionBilling = () => {
         }
         
         if (organizationId) {
+          // User belongs to organization
+          setIsSingleUser(false);
           const orgData = await apiService.getOrganization(organizationId, token);
           if (orgData) {
             setOrganizationCredits({
               balance: orgData.credit_balance || 0,
-              total: orgData.credit_balance || 0, // You may want to track total credits separately
+              total: orgData.credit_balance || 0,
             });
             
             // Set current plan if organization has one
@@ -74,10 +78,26 @@ export const SubscriptionBilling = () => {
               }
             }
           }
+        } else {
+          // Individual user - not in any organization
+          setIsSingleUser(true);
+          setUserCredits({
+            balance: currentUser.credit_balance || 0,
+            total: currentUser.credit_balance || 0,
+          });
+          
+          // Set current plan if user has one
+          if (currentUser.plan) {
+            const planId = typeof currentUser.plan === 'object' ? currentUser.plan.id : currentUser.plan;
+            const planResponse = await apiService.getPlan(planId);
+            if (planResponse?.success && planResponse?.plan) {
+              setCurrentPlan(planResponse.plan);
+            }
+          }
         }
       }
     } catch (error) {
-      console.error('Failed to fetch organization data:', error);
+      console.error('Failed to fetch user data:', error);
     }
   };
 
@@ -94,7 +114,7 @@ export const SubscriptionBilling = () => {
 
     setProcessingPayment(true);
     try {
-      // Get organization ID
+      // Get user profile to check if single user or organization
       const userProfile = await apiService.getUserProfile(token);
       if (!userProfile?.success || !userProfile?.user) {
         throw new Error('Failed to get user profile');
@@ -111,40 +131,42 @@ export const SubscriptionBilling = () => {
         }
       }
 
-      if (!organizationId) {
-        throw new Error('No organization found. Please contact support.');
+      // Create Razorpay order for plan subscription (works for both organization and single user)
+      const orderData = {
+        amount: plan.price,
+        credits: plan.credits_per_month,
+        plan_id: plan.id,
+        plan_name: plan.name,
+      };
+      
+      // Only include organization_id if user belongs to an organization
+      if (organizationId) {
+        orderData.organization_id = organizationId;
       }
 
-      // Create Razorpay order for plan subscription
       const orderResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/payments/razorpay/create-order/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          organization_id: organizationId,
-          amount: plan.price,
-          credits: plan.credits_per_month,
-          plan_id: plan.id,
-          plan_name: plan.name,
-        }),
+        body: JSON.stringify(orderData),
       });
 
-      const orderData = await orderResponse.json();
+      const responseData = await orderResponse.json();
       
-      if (!orderData.success) {
-        throw new Error(orderData.error || 'Failed to create payment order');
+      if (!responseData.success) {
+        throw new Error(responseData.error || 'Failed to create payment order');
       }
 
       // Initialize Razorpay checkout
       const options = {
-        key: orderData.key_id,
-        amount: orderData.order.amount,
-        currency: orderData.order.currency,
+        key: responseData.key_id,
+        amount: responseData.amount * 100, // Convert to paise (smallest currency unit)
+        currency: responseData.currency || 'INR',
         name: 'Tarinika',
         description: `${plan.name} Plan Subscription`,
-        order_id: orderData.order_id,
+        order_id: responseData.order_id,
         handler: async function (response) {
           // Verify payment
           try {
@@ -165,7 +187,7 @@ export const SubscriptionBilling = () => {
             
             if (verifyData.success) {
               toast.success('Plan subscription successful!');
-              // Refresh organization data
+              // Refresh user/organization data
               await fetchOrganizationData();
               await fetchPlans();
             } else {
@@ -202,8 +224,9 @@ export const SubscriptionBilling = () => {
     }
   };
 
-  const creditsPercentage = organizationCredits 
-    ? ((organizationCredits.balance / (organizationCredits.total || 1000)) * 100)
+  const credits = isSingleUser ? userCredits : organizationCredits;
+  const creditsPercentage = credits 
+    ? ((credits.balance / (credits.total || 1000)) * 100)
     : 0;
 
   // --- Color Palette ---
@@ -302,7 +325,7 @@ export const SubscriptionBilling = () => {
                         </p>
                       </div>
                       <p style={{ color: colors.accent }} className="text-2xl font-bold">
-                        {organizationCredits?.balance || 0}
+                        {credits?.balance || 0}
                         <span style={{ color: colors.mutedForeground }} className="text-sm font-normal">
                           /{currentPlan.credits_per_month}
                         </span>
