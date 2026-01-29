@@ -103,11 +103,12 @@ console.log("Organization ID:", organizationId);
                     setOrganizationCredits({
                         balance: orgData.credit_balance || 0,
                         organizationName: orgData.name || 'Organization'
+
                     });
                 }
             } catch (error) {
                 console.error("Error fetching organization credits:", error);
-                console.error("Organization ID attempted:", organizationId);
+                console.error("Organization ID attempted:", organizationId );
             } finally {
                 setCreditsLoading(false);
             }
