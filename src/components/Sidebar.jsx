@@ -405,22 +405,25 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
 
     // Check user organization membership and filter nav items
     const [navItems, setNavItems] = useState(() => {
-        // Initialize with all items, but without Subscription (safer default)
-        return allNavItems.map(item => {
-            if (item.label === "My Account" && item.children) {
-                return {
-                    ...item,
-                    children: item.children.filter(child => child.label !== "Subscription")
-                };
-            }
-            return item;
-        });
+        // Initialize with all items, but without Subscription and Payments (safer default - assume user belongs to org)
+        const paymentsLabel = t("dashboard.payments") || "Payments";
+        return allNavItems
+            .filter(item => item.label !== paymentsLabel)
+            .map(item => {
+                if (item.label === "My Account" && item.children) {
+                    return {
+                        ...item,
+                        children: item.children.filter(child => child.label !== "Subscription")
+                    };
+                }
+                return item;
+            });
     });
 
     useEffect(() => {
         const checkUserOrganization = async () => {
             if (!token) {
-                // If no token, show all items including Subscription (user not logged in)
+                // If no token, show all items including Subscription and Payments (user not logged in, so not in org)
                 setNavItems(allNavItems);
                 return;
             }
@@ -461,28 +464,57 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                         }
                     }
 
-                    // Filter nav items - hide Subscription if user belongs to organization
-                    const filteredNavItems = allNavItems.map(item => {
-                        if (item.label === myAccountLabel && item.children) {
-                            return {
-                                ...item,
-                                children: item.children.filter(child => {
-                                    // Hide Subscription if user belongs to any organization
-                                    if (child.label === subscriptionLabel && belongsToOrganization) {
-                                        return false;
-                                    }
-                                    // Show Subscription only if user doesn't belong to organization
-                                    return true;
-                                })
-                            };
-                        }
-                        return item;
-                    });
+                    // Filter nav items - hide Subscription and Payments if user belongs to organization
+                    const paymentsLabel = t("dashboard.payments") || "Payments";
+                    const filteredNavItems = allNavItems
+                        .filter(item => {
+                            // Hide entire Payments menu if user belongs to organization
+                            if (item.label === paymentsLabel && belongsToOrganization) {
+                                return false;
+                            }
+                            return true;
+                        })
+                        .map(item => {
+                            if (item.label === myAccountLabel && item.children) {
+                                return {
+                                    ...item,
+                                    children: item.children.filter(child => {
+                                        // Hide Subscription if user belongs to any organization
+                                        if (child.label === subscriptionLabel && belongsToOrganization) {
+                                            return false;
+                                        }
+                                        // Show Subscription only if user doesn't belong to organization
+                                        return true;
+                                    })
+                                };
+                            }
+                            return item;
+                        });
 
                     setNavItems(filteredNavItems);
                 } else {
-                    // If profile fetch fails, hide subscriptions by default
-                    const filteredNavItems = allNavItems.map(item => {
+                    // If profile fetch fails, hide subscriptions and payments by default (assume user belongs to org)
+                    const paymentsLabel = t("dashboard.payments") || "Payments";
+                    const filteredNavItems = allNavItems
+                        .filter(item => item.label !== paymentsLabel)
+                        .map(item => {
+                            if (item.label === myAccountLabel && item.children) {
+                                return {
+                                    ...item,
+                                    children: item.children.filter(child => child.label !== subscriptionLabel)
+                                };
+                            }
+                            return item;
+                        });
+                    setNavItems(filteredNavItems);
+                }
+            } catch (error) {
+                console.error('Failed to fetch user profile:', error);
+                // On error, hide subscriptions and payments by default (assume user belongs to org)
+                const paymentsLabel = t("dashboard.payments") || "Payments";
+                const filteredNavItems = allNavItems
+                    .filter(item => item.label !== paymentsLabel)
+                    .map(item => {
                         if (item.label === myAccountLabel && item.children) {
                             return {
                                 ...item,
@@ -491,20 +523,6 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                         }
                         return item;
                     });
-                    setNavItems(filteredNavItems);
-                }
-            } catch (error) {
-                console.error('Failed to fetch user profile:', error);
-                // On error, hide subscriptions by default
-                const filteredNavItems = allNavItems.map(item => {
-                    if (item.label === myAccountLabel && item.children) {
-                        return {
-                            ...item,
-                            children: item.children.filter(child => child.label !== subscriptionLabel)
-                        };
-                    }
-                    return item;
-                });
                 setNavItems(filteredNavItems);
             }
         };
