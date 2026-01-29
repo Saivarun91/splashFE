@@ -323,7 +323,7 @@ const PlainBackgroundForm = () => {
                                 </label>
                                 <Input
                                     type="text"
-                                    placeholder={t("images.removeBackgroundPlaceholder")}
+                                    // placeholder={t("images.removeBackgroundPlaceholder")}
                                     value={formData.prompt}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, prompt: e.target.value }))}
                                     className="w-full px-4 py-3 border border-[#e6e6e6] rounded-xl bg-white text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent"

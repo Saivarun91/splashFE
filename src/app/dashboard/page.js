@@ -52,86 +52,60 @@ export default function Dashboard() {
 
     // Fetch organization credits
     useEffect(() => {
-        const fetchOrganizationCredits = async () => {
-            if (!token || !user) {
-                setCreditsLoading(false);
-                return;
-            }
-
-            let organizationId = null;
-
-            // First, try to get the latest user profile to ensure we have the organization
-            try {
-                const userProfile = await apiService.getUserProfile(token);
-                if (userProfile?.success && userProfile?.user) {
-                    const currentUser = userProfile.user;
-                    
-                    // Check organization from profile - handle both object and string/ObjectId formats
-                    if (currentUser?.organization) {
-                        if (typeof currentUser.organization === 'object' && currentUser.organization.id) {
-                            organizationId = currentUser.organization.id;
-                        } else if (typeof currentUser.organization === 'string') {
-                            organizationId = currentUser.organization;
-                        }
-                    } else if (currentUser?.organization_id) {
-                        organizationId = currentUser.organization_id;
-                    }
-                }
-            } catch (error) {
-                console.error("Error fetching user profile:", error);
-            }
-console.log("Organization ID:", organizationId);
-            // Fallback: Check if user object from context has organization
-            if (!organizationId && user?.organization) {
-                if (typeof user.organization === 'object' && user.organization.id) {
-                    organizationId = user.organization.id;
-                } else if (typeof user.organization === 'string') {
-                    organizationId = user.organization;
+        const fetchCredits = async () => {
+          if (!token) {
+            setCreditsLoading(false);
+            return;
+          }
+      
+          try {
+            // Always get fresh user profile
+            const userProfile = await apiService.getUserProfile(token);
+            console.log("userProfile", userProfile);
+            if (userProfile?.success && userProfile?.user) {
+              const currentUser = userProfile.user;
+      
+              let organizationId = null;
+      
+              if (currentUser.organization) {
+                if (typeof currentUser.organization === "object" && currentUser.organization.id) {
+                  organizationId = currentUser.organization.id;
                 } else {
-                    // Try to get organization ID from the object directly (ObjectId)
-                    organizationId = String(user.organization);
+                  organizationId = String(currentUser.organization);
                 }
-            }
-
-            if (organizationId) {
-                try {
-                    const orgData = await apiService.getOrganization(organizationId, token);
-                    if (orgData) {
-                        setOrganizationCredits({
-                            balance: orgData.credit_balance || 0,
-                            organizationName: orgData.name || 'Organization'
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error fetching organization credits:", error);
-                    console.error("Organization ID attempted:", organizationId);
-                } finally {
-                    setCreditsLoading(false);
-                }
-                return;
-            }
-
-            // No organization → show individual user credits (if any)
-            try {
+              }
+      
+              // ✅ CASE 1: Organization user
+              if (organizationId) {
                 const orgData = await apiService.getOrganization(organizationId, token);
-                if (orgData) {
-                    setOrganizationCredits({
-                        balance: orgData.credit_balance || 0,
-                        organizationName: orgData.name || 'Organization'
-
-                    });
-                }
-            } catch (error) {
-                console.error("Error fetching organization credits:", error);
-                console.error("Organization ID attempted:", organizationId );
-            } finally {
-                setCreditsLoading(false);
+      
+                setOrganizationCredits({
+                  balance: orgData.credit_balance || 0,
+                  organizationName: orgData.name || "Organization"
+                });
+      
+                setUserCredits(null);
+              } 
+              // ✅ CASE 2: Individual user
+              else {
+                setUserCredits({
+                  balance: currentUser.credit_balance || 0
+                });
+                console.log("userCredits", currentUser.credit_balance);
+      
+                setOrganizationCredits(null);
+              }
             }
+          } catch (error) {
+            console.error("Error fetching credits:", error);
+          } finally {
+            setCreditsLoading(false);
+          }
         };
-
-        fetchOrganizationCredits();
-    }, [token, user]);
-
+      
+        fetchCredits();
+      }, [token]);
+      
     // Fetch projects data
     useEffect(() => {
         const fetchDashboardData = async () => {
