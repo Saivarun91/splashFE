@@ -169,7 +169,11 @@
     "tutorials": "Tutorials",
     "helpCenter": "Help Center",
     "myAccount": "My Account",
+    "payments": "Billing & Payments",
+    "paymentHistory": "Payment History",
+    "creditsLogs": "Credits Usage",
     "subscription": "Subscription",
+
     "security": "Security",
     "notifications": "Notifications",
     "promptMaster": "Prompt Master",
@@ -373,5 +377,14 @@
     "generic": "An error occurred. Please try again.",
     "network": "Network error. Please check your connection.",
     "validation": "Please check your input and try again."
+  },
+  "credits": {
+    "logsTitle": "Credits Usage",
+    "logsSubtitle": "See how your credits are being consumed for image generation.",
+    "date": "Date",
+    "change": "Change",
+    "balance": "Balance After",
+    "reason": "Reason",
+    "noLogs": "No credit usage found yet."
   }
 }

@@ -16,6 +16,7 @@ export default function Dashboard() {
     const [recentImages, setRecentImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [organizationCredits, setOrganizationCredits] = useState(null);
+    const [userCredits, setUserCredits] = useState(null);
     const [creditsLoading, setCreditsLoading] = useState(true);
     const [stats, setStats] = useState({
         activeProjects: 0,
@@ -92,22 +93,35 @@ console.log("Organization ID:", organizationId);
                 }
             }
 
-            if (!organizationId) {
-                setCreditsLoading(false);
+            if (organizationId) {
+                try {
+                    const orgData = await apiService.getOrganization(organizationId, token);
+                    if (orgData) {
+                        setOrganizationCredits({
+                            balance: orgData.credit_balance || 0,
+                            organizationName: orgData.name || 'Organization'
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error fetching organization credits:", error);
+                    console.error("Organization ID attempted:", organizationId);
+                } finally {
+                    setCreditsLoading(false);
+                }
                 return;
             }
 
+            // No organization → show individual user credits (if any)
             try {
-                const orgData = await apiService.getOrganization(organizationId, token);
-                if (orgData) {
-                    setOrganizationCredits({
-                        balance: orgData.credit_balance || 0,
-                        organizationName: orgData.name || 'Organization'
+                if (userProfile?.success && userProfile?.user) {
+                    const currentUser = userProfile.user;
+                    setUserCredits({
+                        balance: currentUser.credit_balance || 0,
+                        userName: currentUser.full_name || currentUser.username || currentUser.email || 'User'
                     });
                 }
-            } catch (error) {
-                console.error("Error fetching organization credits:", error);
-                console.error("Organization ID attempted:", organizationId);
+            } catch (e) {
+                console.error("Error reading individual user credits:", e);
             } finally {
                 setCreditsLoading(false);
             }
@@ -201,13 +215,34 @@ console.log("Organization ID:", organizationId);
                                         {organizationCredits.organizationName} • {t("dashboard.organizationCredits")}
                                     </p>
                                 </>
+                            ) : userCredits ? (
+                                <>
+                                    <div className="text-2xl font-bold text-gray-900">
+                                        {userCredits.balance.toLocaleString()}
+                                    </div>
+                                    <div className="w-full bg-gray-200 h-2 rounded-full mt-2">
+                                        <div 
+                                            className="bg-indigo-500 h-2 rounded-full transition-all"
+                                            style={{ 
+                                                width: userCredits.balance > 0 
+                                                    ? `${Math.min((userCredits.balance / 10000) * 100, 100)}%` 
+                                                    : '0%' 
+                                            }}
+                                        />
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {t("dashboard.individualCredits") || "Individual user credits"}
+                                    </p>
+                                </>
                             ) : (
                                 <>
                                     <div className="text-2xl font-bold text-gray-900">0</div>
                                     <div className="w-full bg-gray-200 h-2 rounded-full mt-2">
                                         <div className="bg-indigo-500 h-2 rounded-full w-0" />
                                     </div>
-                                    <p className="text-xs text-gray-500 mt-1">{t("dashboard.noOrganizationAssigned")}</p>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {t("dashboard.noOrganizationAssigned")}
+                                    </p>
                                 </>
                             )}
                         </div>

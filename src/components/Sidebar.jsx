@@ -330,6 +330,7 @@ import {
     CreditCard,
     Shield,
     FileText,
+    Zap,
 } from "lucide-react";
 import { MdPhotoSizeSelectLarge } from "react-icons/md";
 import { SiGooglecampaignmanager360  } from "react-icons/si";
@@ -383,10 +384,21 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
             path: "/dashboard/account",
             children: [
                 { label: t("profile.title").split(" & ")[0], icon: User, path: "/dashboard/my-account/profile" },
-                { label: t("dashboard.subscription"), icon: CreditCard, path: "/dashboard/my-account/billing" },
+                // { label: t("dashboard.subscription"), icon: CreditCard, path: "/dashboard/my-account/billing" },
                 { label: t("dashboard.security"), icon: Shield, path: "/dashboard/my-account/security" },
                 { label: t("dashboard.notifications"), icon: Bell, path: "/dashboard/my-account/notification" },
                 { label: t("dashboard.promptMaster"), icon: FileText, path: "/dashboard/my-account/prompt-master" },
+                
+            ],
+        },
+        {
+            label: t("dashboard.payments") || "Payments",
+            icon: CreditCard,
+            path: "/dashboard/payments",
+            children: [
+                { label: t("dashboard.subscription"), icon: CreditCard, path: "/dashboard/my-account/billing" },
+                { label: t("dashboard.paymentHistory") || "Payment History", icon: CreditCard, path: "/dashboard/payments/history" },
+                { label: t("dashboard.creditsLogs") || "Credits Usage", icon: Zap, path: "/dashboard/credits/logs" },
             ],
         },
     ];
