@@ -1,24 +1,45 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, Bell, User, X, Check, Mail, Clock, Loader2, Building2 } from "lucide-react";
+import {
+    Search,
+    Bell,
+    User,
+    X,
+    Check,
+    Mail,
+    Clock,
+    Loader2,
+    Building2,
+    ChevronDown,
+    Building
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { apiService } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { switchToOrganizationPortal } from "@/lib/portalSwitch";
 
 export function Topbar({ collapsed }) {
     const { token, user } = useAuth();
     const { t } = useLanguage();
+    const router = useRouter();
+
     const [showNotifications, setShowNotifications] = useState(false);
     const [invites, setInvites] = useState([]);
     const [loading, setLoading] = useState(true);
     const [processingInvite, setProcessingInvite] = useState(null);
     const notificationRef = useRef(null);
+
     const [organizationInfo, setOrganizationInfo] = useState(null);
     const [loadingOrg, setLoadingOrg] = useState(true);
 
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const profileRef = useRef(null);
+
+    /* -------------------- Fetch Invites -------------------- */
     const fetchInvites = useCallback(async () => {
         if (!token) return;
         try {
@@ -32,12 +53,33 @@ export function Topbar({ collapsed }) {
         }
     }, [token]);
 
-    // Fetch pending invitations on mount and when token changes
     useEffect(() => {
         fetchInvites();
     }, [fetchInvites]);
 
-    // Fetch organization information
+
+
+    const getUserDisplayName = () => {
+        if (user?.full_name) return user.full_name;
+       
+        if (user?.email) return user.email.split("@")[0];
+        return "User";
+    };
+    const isOrganizationOwner = (user) => {
+        return user?.organization_role === 'owner';
+    };
+
+    const getUserInitials = () => {
+        const name = getUserDisplayName();
+        return name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2);
+    };
+
+    /* -------------------- Fetch Organization -------------------- */
     useEffect(() => {
         const fetchOrganizationInfo = async () => {
             if (!token) {
@@ -47,56 +89,37 @@ export function Topbar({ collapsed }) {
 
             try {
                 setLoadingOrg(true);
-                // Get user profile to check for organization
                 const userProfile = await apiService.getUserProfile(token);
+
                 if (userProfile?.success && userProfile?.user) {
                     const currentUser = userProfile.user;
                     let organizationId = null;
-                    let organizationRole = currentUser?.organization_role || null;
 
-                    // Check organization from profile - handle both object and string/ObjectId formats
                     if (currentUser?.organization) {
-                        if (typeof currentUser.organization === 'object' && currentUser.organization.id) {
+                        if (typeof currentUser.organization === "object") {
                             organizationId = currentUser.organization.id;
-                        } else if (typeof currentUser.organization === 'string') {
+                        } else {
                             organizationId = currentUser.organization;
                         }
                     } else if (currentUser?.organization_id) {
                         organizationId = currentUser.organization_id;
                     }
 
-                    // Fallback: Check if user object from context has organization
-                    if (!organizationId && user?.organization) {
-                        if (typeof user.organization === 'object' && user.organization.id) {
-                            organizationId = user.organization.id;
-                        } else if (typeof user.organization === 'string') {
-                            organizationId = user.organization;
-                        } else {
-                            organizationId = String(user.organization);
-                        }
-                    }
-
                     if (!organizationId) {
                         setOrganizationInfo(null);
-                        setLoadingOrg(false);
                         return;
                     }
 
-                    // Fetch organization details to get the name
                     const orgData = await apiService.getOrganization(organizationId, token);
                     if (orgData) {
                         setOrganizationInfo({
-                            name: orgData.name || 'Organization',
-                            role: organizationRole
+                            name: orgData.name,
+                            role: currentUser.organization_role
                         });
-                    } else {
-                        setOrganizationInfo(null);
                     }
-                } else {
-                    setOrganizationInfo(null);
                 }
             } catch (error) {
-                console.error("Error fetching organization info:", error);
+                console.error("Organization fetch error:", error);
                 setOrganizationInfo(null);
             } finally {
                 setLoadingOrg(false);
@@ -104,266 +127,139 @@ export function Topbar({ collapsed }) {
         };
 
         fetchOrganizationInfo();
-    }, [token, user]);
+    }, [token]);
 
-    // Refresh invites when notification sidebar is opened
+    /* -------------------- Outside Click Handlers -------------------- */
     useEffect(() => {
-        if (showNotifications) {
-            fetchInvites();
-        }
-    }, [showNotifications, fetchInvites]);
-
-    // Close notification sidebar when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-                // Check if click is not on the bell icon
-                const bellButton = event.target.closest('button[data-notification-button]');
-                if (!bellButton) {
-                    setShowNotifications(false);
-                }
+        const handleOutside = (e) => {
+            if (notificationRef.current && !notificationRef.current.contains(e.target)) {
+                setShowNotifications(false);
+            }
+            if (profileRef.current && !profileRef.current.contains(e.target)) {
+                setShowProfileMenu(false);
             }
         };
 
-        if (showNotifications) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
+        document.addEventListener("mousedown", handleOutside);
+        return () => document.removeEventListener("mousedown", handleOutside);
+    }, []);
 
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [showNotifications]);
-
-    const handleAccept = async (inviteId, projectName) => {
-        try {
-            setProcessingInvite(inviteId);
-            await apiService.acceptInviteById(inviteId, token);
-            fetchInvites();
-        } catch (err) {
-            console.error("Failed to accept invitation:", err);
-        } finally {
-            setProcessingInvite(null);
-        }
-    };
-
-    const handleReject = async (inviteId) => {
-        try {
-            setProcessingInvite(inviteId);
-            await apiService.rejectInvite(inviteId, token);
-            fetchInvites();
-        } catch (err) {
-            console.error("Failed to reject invitation:", err);
-        } finally {
-            setProcessingInvite(null);
-        }
-    };
-
+    /* -------------------- Helpers -------------------- */
     const getRoleBadgeColor = (role) => {
         switch (role?.toLowerCase()) {
             case "owner":
-                return "bg-[#a020f0] text-white";
-            case "chief_editor":
-                return "bg-[#8b5cf6] text-white";
-            case "editor":
-                return "bg-[#7753ff] text-white";
+                return "bg-purple-600 text-white";
             case "admin":
-                return "bg-[#6366f1] text-white";
-            case "member":
-                return "bg-[#708090] text-white";
-            case "viewer":
-                return "bg-[#708090] text-white";
+                return "bg-indigo-600 text-white";
+            case "editor":
+                return "bg-blue-600 text-white";
             default:
                 return "bg-gray-500 text-white";
         }
     };
 
-    const getInitials = (name) => {
-        if (!name) return "?";
-        return name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2);
-    };
-
     const getTimeAgo = (dateString) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInSeconds = Math.floor((now - date) / 1000);
-
-        if (diffInSeconds < 60) return t("dashboard.justNow");
-        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}${t("dashboard.minutesAgo")}`;
-        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}${t("dashboard.hoursAgo")}`;
-        return `${Math.floor(diffInSeconds / 86400)}${t("dashboard.daysAgo")}`;
+        const diff = Math.floor((new Date() - new Date(dateString)) / 1000);
+        if (diff < 60) return "Just now";
+        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+        return `${Math.floor(diff / 86400)}d ago`;
     };
 
     const pendingCount = invites.length;
 
+    /* ======================= JSX ======================= */
     return (
-        <>
-            <header
-                className={`fixed top-0 right-0 z-30 h-16 flex items-center  bg-white border-b border-white shadow px-6 transition-all duration-300 ${collapsed ? "left-16" : "left-64"
-                    }`}
-            >
-                {/* Left Section - Organization Info */}
-                {!loadingOrg && organizationInfo && (
-                    <div className="flex items-center ml-6">
-                        <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg shadow-sm">
-                            <Building2 className="w-8 h-8 text-indigo-600" />
-                            <span className="text-indigo-900 font-semibold text-xl">
-                                {organizationInfo.name}
-                            </span>
-                            {organizationInfo.role && (
-                                <Badge className={`${getRoleBadgeColor(organizationInfo.role)} text-xs px-2 py-0.5 font-medium`}>
-                                    {organizationInfo.role}
-                                </Badge>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* Middle Section (Search) */}
-                <div className="flex-1 flex justify-center">
-                    <div className="relative w-1/3">
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            className="w-full border-b border-black text-black text-sm px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-black"
-                        />
-                        <Search className="absolute right-3 top-2.5 w-4 h-4 text-black" />
-                    </div>
+        <header
+            className={`fixed top-0 right-0 z-30 h-16 flex items-center bg-white border-b shadow px-6 transition-all ${
+                collapsed ? "left-16" : "left-64"
+            }`}
+        >
+            {/* Organization */}
+            {!loadingOrg && organizationInfo && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 border rounded-lg">
+                    <Building2 className="text-indigo-600" />
+                    <span className="font-semibold">{organizationInfo.name}</span>
+                    <Badge className={getRoleBadgeColor(organizationInfo.role)}>
+                        {organizationInfo.role}
+                    </Badge>
                 </div>
+            )}
 
+            {/* Search */}
+            <div className="flex-1 flex justify-center">
+                <div className="relative w-1/3">
+                    <input
+                        placeholder="Search..."
+                        className="w-full border-b px-4 py-2 focus:outline-none"
+                    />
+                    <Search className="absolute right-3 top-3 w-4 h-4" />
+                </div>
+            </div>
 
-                {/* Right Section */}
-                <div className="flex items-center gap-4">
-                    <div className="relative" ref={notificationRef}>
-                        <button
-                            data-notification-button
-                            onClick={() => setShowNotifications(!showNotifications)}
-                            className="relative p-2 rounded-md hover:bg-gray-100 transition-colors"
-                        >
-                            <Bell className="w-5 h-5 text-black cursor-pointer" />
-                            {pendingCount > 0 && (
-                                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                                    {pendingCount > 9 ? '9+' : pendingCount}
-                                </span>
-                            )}
-                        </button>
+            {/* Right Section */}
+            <div className="flex items-center gap-4">
 
-                        {/* Notification Sidebar Modal */}
-                        {showNotifications && (
-                            <div className="absolute right-0 top-12 w-96 bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-[600px] overflow-hidden flex flex-col">
-                                {/* Header */}
-                                <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50">
-                                    <div className="flex items-center gap-2">
-                                        <Bell className="w-5 h-5 text-indigo-600" />
-                                        <h3 className="font-semibold text-gray-900">Notifications</h3>
-                                        {pendingCount > 0 && (
-                                            <Badge className="bg-indigo-600 text-white">
-                                                {pendingCount}
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    <button
-                                        onClick={() => setShowNotifications(false)}
-                                        className="p-1 rounded-md hover:bg-gray-200 transition-colors"
-                                    >
-                                        <X className="w-4 h-4 text-gray-600" />
-                                    </button>
-                                </div>
-
-                                {/* Content */}
-                                <div className="flex-1 overflow-y-auto">
-                                    {loading ? (
-                                        <div className="p-8 flex items-center justify-center">
-                                            <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
-                                        </div>
-                                    ) : invites.length === 0 ? (
-                                        <div className="p-8 text-center">
-                                            <Mail className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                            <p className="text-gray-500 text-sm">{t("dashboard.noPendingInvitations")}</p>
-                                        </div>
-                                    ) : (
-                                        <div className="p-4 space-y-3">
-                                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                                                {t("dashboard.pendingInvitations")}
-                                            </p>
-                                            {invites.map((invite) => (
-                                                <div
-                                                    key={invite.id}
-                                                    className="p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:shadow-md transition-all bg-white"
-                                                >
-                                                    <div className="flex items-start gap-3 mb-3">
-                                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#a020f0] to-[#7753ff] flex items-center justify-center text-white font-bold text-sm shadow-md flex-shrink-0">
-                                                            {getInitials(invite.project_name)}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <h4 className="font-semibold text-gray-900 text-sm truncate">
-                                                                {invite.project_name}
-                                                            </h4>
-                                                            <p className="text-xs text-gray-500 truncate">
-                                                                {t("dashboard.invitedBy")} {invite.inviter_name}
-                                                            </p>
-                                                            <div className="flex items-center gap-2 mt-1">
-                                                                <Badge className={`${getRoleBadgeColor(invite.role)} text-xs px-1.5 py-0`}>
-                                                                    {invite.role}
-                                                                </Badge>
-                                                                <div className="flex items-center gap-1 text-xs text-gray-400">
-                                                                    <Clock className="w-3 h-3" />
-                                                                    {getTimeAgo(invite.created_at)}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex items-center gap-2">
-                                                        <Button
-                                                            onClick={() => handleAccept(invite.id, invite.project_name)}
-                                                            disabled={processingInvite === invite.id}
-                                                            size="sm"
-                                                            className="flex-1 bg-gradient-to-r from-[#a020f0] to-[#7753ff] hover:from-[#8f1cda] hover:to-[#6642e6] text-white text-xs h-8"
-                                                        >
-                                                            {processingInvite === invite.id ? (
-                                                                <>
-                                                                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                                                                    {t("dashboard.processing")}
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <Check className="w-3 h-3 mr-1" />
-                                                                    {t("dashboard.accept")}
-                                                                </>
-                                                            )}
-                                                        </Button>
-                                                        <Button
-                                                            onClick={() => handleReject(invite.id)}
-                                                            disabled={processingInvite === invite.id}
-                                                            size="sm"
-                                                            variant="outline"
-                                                            className="flex-1 border-gray-300 hover:bg-red-50 hover:border-red-300 hover:text-red-600 text-xs h-8"
-                                                        >
-                                                            <X className="w-3 h-3 mr-1" />
-                                                            {t("dashboard.decline")}
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                {/* Notifications */}
+                <div className="relative" ref={notificationRef}>
+                    <button
+                        onClick={() => setShowNotifications(!showNotifications)}
+                        className="relative p-2 hover:bg-gray-100 rounded"
+                    >
+                        <Bell />
+                        {pendingCount > 0 && (
+                            <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-xs text-white rounded-full flex items-center justify-center">
+                                {pendingCount}
+                            </span>
                         )}
-                    </div>
-                    <button className="flex items-center gap-2 p-2 rounded-md">
-                        <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-sm font-semibold">
-                            <User className="w-5 h-5 text-white" />
-                        </div>
-                        <span className="text-black text-sm hidden md:inline">{t("profile.title").split(" & ")[0]}</span>
                     </button>
                 </div>
-            </header>
-        </>
+
+                {/* Profile Dropdown */}
+                
+                <div className="relative" ref={profileRef}>
+                <button
+                        onClick={() => setShowProfileMenu(!showProfileMenu)} 
+                        className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
+                        
+                    >
+                        <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-sm font-semibold text-white">
+                            {getUserInitials()}
+                        </div>
+                        <span className="text-gray-900 text-sm hidden md:inline">
+                            {getUserDisplayName()}
+                        </span>
+                        <ChevronDown className="w-4 h-4 text-gray-600" />
+                    </button>
+
+                    {showProfileMenu && (
+                        <div className="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow z-50">
+                            <div className="px-4 py-3 border-b bg-gray-50"> 
+                                <p className="font-semibold">{getUserDisplayName()}</p>
+                                <p className="text-xs text-gray-500">{user?.email}</p>
+                            </div>
+
+                            <button
+                                onClick={() => router.push("/dashboard/my-account/profile")}
+                                className="w-full px-4 py-2 flex items-center gap-2 hover:bg-indigo-50"
+                            >
+                                <User className="w-4 h-4 text-indigo-600" />
+                                Profile
+                            </button>
+
+                            {organizationInfo && isOrganizationOwner(user) && (
+                                <button
+                                onClick={switchToOrganizationPortal}
+                                    className="w-full px-4 py-2 flex items-center gap-2 hover:bg-purple-50"
+                                >
+                                    <Building2  className="w-4 h-4 text-purple-600" />
+                                    Organization Panel
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </header>
     );
 }
