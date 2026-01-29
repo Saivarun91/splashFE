@@ -1,15 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { CreditCard, Download, Calendar, Zap, Check, Crown, Loader2 } from "lucide-react";
+import { CreditCard, Check, X, Calendar, DollarSign, Loader2, AlertCircle, Crown } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { apiService } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import Script from "next/script";
+
+const DEFAULT_CREDIT_OPTIONS = [
+  { amount: 50, credits: 50 },
+  { amount: 100, credits: 100 },
+  { amount: 300, credits: 300 },
+];
 
 export const SubscriptionBilling = () => {
   const { user, token } = useAuth();
@@ -21,18 +22,47 @@ export const SubscriptionBilling = () => {
   const [isSingleUser, setIsSingleUser] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const [selectedCreditOption, setSelectedCreditOption] = useState(0);
+  const [showBillingModal, setShowBillingModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [billingDetails, setBillingDetails] = useState({
+    billing_name: "",
+    billing_address: "",
+    billing_phone: "",
+    billing_gst_number: "",
+    billing_type: "individual",
+  });
+  const [invoiceConfig, setInvoiceConfig] = useState({ tax_rate: 18 });
 
   useEffect(() => {
     fetchPlans();
     fetchOrganizationData();
+    fetchInvoiceConfig();
   }, [token, user]);
 
+  const fetchInvoiceConfig = async () => {
+    // Use default tax rate - invoice config can be fetched from backend if needed
+    // For now, using default 18% GST
+    setInvoiceConfig({ tax_rate: 18 });
+  };
+
   const fetchPlans = async () => {
+    setLoading(true);
     try {
-      const response = await apiService.getPlans(true); // Fetch only active plans
+      const response = await apiService.getPlans(true);
+      let allPlans = [];
       if (response.success && response.plans) {
-        setPlans(response.plans);
+        allPlans = response.plans;
+      } else if (response.plans) {
+        allPlans = Array.isArray(response.plans) ? response.plans : [];
       }
+      // Filter to only Pro and Enterprise plans, Pro first
+      const proPlan = allPlans.find((p) => (p.name || "").toLowerCase() === "pro");
+      const enterprisePlan = allPlans.find((p) => (p.name || "").toLowerCase() === "enterprise");
+      const filteredPlans = [];
+      if (proPlan) filteredPlans.push(proPlan);
+      if (enterprisePlan) filteredPlans.push(enterprisePlan);
+      setPlans(filteredPlans);
     } catch (error) {
       console.error('Failed to fetch plans:', error);
       toast.error('Failed to load plans');
@@ -45,7 +75,6 @@ export const SubscriptionBilling = () => {
     if (!token || !user) return;
     
     try {
-      // Fetch user profile to get organization or single user data
       const userProfile = await apiService.getUserProfile(token);
       if (userProfile?.success && userProfile?.user) {
         const currentUser = userProfile.user;
@@ -60,7 +89,6 @@ export const SubscriptionBilling = () => {
         }
         
         if (organizationId) {
-          // User belongs to organization
           setIsSingleUser(false);
           const orgData = await apiService.getOrganization(organizationId, token);
           if (orgData) {
@@ -69,7 +97,6 @@ export const SubscriptionBilling = () => {
               total: orgData.credit_balance || 0,
             });
             
-            // Set current plan if organization has one
             if (orgData.plan) {
               const planId = typeof orgData.plan === 'object' ? orgData.plan.id : orgData.plan;
               const planResponse = await apiService.getPlan(planId);
@@ -79,14 +106,12 @@ export const SubscriptionBilling = () => {
             }
           }
         } else {
-          // Individual user - not in any organization
           setIsSingleUser(true);
           setUserCredits({
             balance: currentUser.credit_balance || 0,
             total: currentUser.credit_balance || 0,
           });
           
-          // Set current plan if user has one
           if (currentUser.plan) {
             const planId = typeof currentUser.plan === 'object' ? currentUser.plan.id : currentUser.plan;
             const planResponse = await apiService.getPlan(planId);
@@ -112,8 +137,36 @@ export const SubscriptionBilling = () => {
       return;
     }
 
+    setSelectedPlan(plan);
+    setShowBillingModal(true);
+  };
+
+  const startPaymentWithBilling = async () => {
+    if (!token || !user || !razorpayLoaded || !selectedPlan) {
+      return;
+    }
+
+    const plan = selectedPlan;
     setProcessingPayment(true);
+
     try {
+      // For Pro plan, use selected credit option; for Enterprise, use plan price
+      let baseAmount = plan.price;
+      let creditsToAdd = plan.credits_per_month || 0;
+      
+      if ((plan.name || "").toLowerCase() === "pro") {
+        const creditOptions = plan.credit_options || plan.custom_settings?.credit_options || [];
+        const selectedOption = creditOptions[selectedCreditOption] || creditOptions[0];
+        if (selectedOption) {
+          baseAmount = selectedOption.amount || plan.price;
+          creditsToAdd = selectedOption.credits || 0;
+        }
+      }
+
+      const taxRate = invoiceConfig?.tax_rate || 18;
+      const taxAmount = (baseAmount * taxRate) / 100;
+      const totalAmount = baseAmount + taxAmount;
+
       // Get user profile to check if single user or organization
       const userProfile = await apiService.getUserProfile(token);
       if (!userProfile?.success || !userProfile?.user) {
@@ -131,15 +184,18 @@ export const SubscriptionBilling = () => {
         }
       }
 
-      // Create Razorpay order for plan subscription (works for both organization and single user)
       const orderData = {
-        amount: plan.price,
-        credits: plan.credits_per_month,
+        amount: baseAmount,
+        credits: creditsToAdd,
         plan_id: plan.id,
         plan_name: plan.name,
+        billing_name: billingDetails.billing_name,
+        billing_address: billingDetails.billing_address,
+        billing_phone: billingDetails.billing_phone,
+        billing_gst_number: billingDetails.billing_gst_number,
+        billing_type: billingDetails.billing_type,
       };
       
-      // Only include organization_id if user belongs to an organization
       if (organizationId) {
         orderData.organization_id = organizationId;
       }
@@ -159,16 +215,14 @@ export const SubscriptionBilling = () => {
         throw new Error(responseData.error || 'Failed to create payment order');
       }
 
-      // Initialize Razorpay checkout
       const options = {
         key: responseData.key_id,
-        amount: responseData.amount * 100, // Convert to paise (smallest currency unit)
+        amount: (responseData.total_amount || totalAmount) * 100,
         currency: responseData.currency || 'INR',
         name: 'Tarinika',
-        description: `${plan.name} Plan Subscription`,
+        description: `Subscribe to ${plan.name} plan`,
         order_id: responseData.order_id,
         handler: async function (response) {
-          // Verify payment
           try {
             const verifyResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/payments/razorpay/verify/`, {
               method: 'POST',
@@ -186,8 +240,9 @@ export const SubscriptionBilling = () => {
             const verifyData = await verifyResponse.json();
             
             if (verifyData.success) {
-              toast.success('Plan subscription successful!');
-              // Refresh user/organization data
+              const creditsAdded = creditsToAdd;
+              toast.success(`Payment successful! ${plan.name} plan activated. ${creditsAdded} credits added to account.`);
+              setShowBillingModal(false);
               await fetchOrganizationData();
               await fetchPlans();
             } else {
@@ -201,14 +256,15 @@ export const SubscriptionBilling = () => {
           }
         },
         prefill: {
-          name: user.full_name || user.username || '',
+          name: billingDetails.billing_name || user.full_name || user.username || '',
           email: user.email || '',
+          contact: billingDetails.billing_phone || '',
         },
         theme: {
-          color: '#3b82f6',
+          color: '#884cff',
         },
         modal: {
-          ondismiss: function() {
+          ondismiss: function () {
             setProcessingPayment(false);
           },
         },
@@ -216,37 +272,17 @@ export const SubscriptionBilling = () => {
 
       const razorpay = new window.Razorpay(options);
       razorpay.open();
-      
     } catch (error) {
-      console.error('Plan purchase error:', error);
-      toast.error(error.message || 'Failed to initiate payment');
+      console.error('Payment error:', error);
+      toast.error('Failed to initiate payment: ' + (error.message || 'Unknown error'));
       setProcessingPayment(false);
     }
-  };
-
-  const credits = isSingleUser ? userCredits : organizationCredits;
-  const creditsPercentage = credits 
-    ? ((credits.balance / (credits.total || 1000)) * 100)
-    : 0;
-
-  // --- Color Palette ---
-  const colors = {
-    foreground: "hsl(0, 0%, 15%)",
-    mutedForeground: "hsl(0, 0%, 40%)",
-    accent: "hsl(180, 45%, 45%)",
-    accentBg: "hsla(180, 45%, 45%, 0.1)",
-    destructive: "hsl(0, 84%, 60%)",
-    success: "hsl(142, 76%, 36%)",
-    muted: "hsl(46, 34%, 92%)",
-    cardBg: "hsl(0, 0%, 100%)",
-    border: "hsl(0, 0%, 90%)",
-    shadowElegant: "0 8px 30px -8px rgba(71, 71, 71, 0.15)",
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: colors.accent }} />
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -259,281 +295,405 @@ export const SubscriptionBilling = () => {
         onError={() => toast.error('Failed to load payment gateway')}
       />
       
-      <div className="space-y-6 max-w-6xl mx-auto" style={{ animation: "fade-in 0.3s ease-in-out" }}>
-        {/* Header */}
-        <div>
-          <h1 style={{ color: colors.foreground }} className="text-3xl font-bold mb-2">
-            Subscription, Credits & Billing
-          </h1>
-          <p style={{ color: colors.mutedForeground }}>
-            Manage your plan, credits, and billing information
-          </p>
+      <div className="p-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Subscription & Billing</h1>
+          <p className="text-gray-600">Purchase credits and manage your subscription</p>
         </div>
 
-        {/* Current Plan + Payment */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Current Plan */}
-          <Card style={{ boxShadow: colors.shadowElegant, background: colors.cardBg }} className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle style={{ color: colors.foreground }}>Current Plan</CardTitle>
-              <CardDescription style={{ color: colors.mutedForeground }}>
-                Your active subscription details
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {currentPlan ? (
-                <>
-                  <div className="flex items-start justify-between">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+          <div className="p-6">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Plans & Subscriptions</h2>
+              
+              {currentPlan && (
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 style={{ color: colors.foreground }} className="text-2xl font-bold">
-                          {currentPlan.name} Plan
-                        </h3>
-                        <Badge style={{ backgroundColor: colors.accent, color: "#fff" }}>
-                          <Crown className="w-3 h-3 mr-1" />
-                          Active
-                        </Badge>
-                      </div>
-                      <p style={{ color: colors.foreground }} className="text-3xl font-bold">
-                        {(currentPlan.currency === 'INR' ? '₹' : '$')}{currentPlan.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        <span style={{ color: colors.mutedForeground }} className="text-base font-normal">
-                          /{currentPlan.billing_cycle === 'yearly' ? 'year' : 'month'}
-                        </span>
+                      <p className="text-sm text-blue-700 font-medium">Current Plan</p>
+                      <p className="text-lg font-bold text-blue-900">{currentPlan.name}</p>
+                      <p className="text-sm text-blue-600">
+                        {currentPlan.credits_per_month?.toLocaleString() || 0} credits/month • 
+                        {(currentPlan.currency === 'INR' ? '₹' : '$')}{currentPlan.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/{currentPlan.billing_cycle === 'yearly' ? 'year' : 'month'}
                       </p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      style={{
-                        borderColor: colors.border,
-                        color: colors.foreground,
-                      }}
-                    >
-                      Manage Plan
-                    </Button>
+                    </div>  
+                    <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-medium">
+                      Active
+                    </span>
                   </div>
-
-                  <Separator style={{ backgroundColor: colors.border }} />
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p style={{ color: colors.foreground }} className="text-sm font-medium">
-                          Credits Remaining
-                        </p>
-                        <p style={{ color: colors.mutedForeground }} className="text-xs">
-                          {currentPlan.credits_per_month} credits/month
-                        </p>
-                      </div>
-                      <p style={{ color: colors.accent }} className="text-2xl font-bold">
-                        {credits?.balance || 0}
-                        <span style={{ color: colors.mutedForeground }} className="text-sm font-normal">
-                          /{currentPlan.credits_per_month}
-                        </span>
-                      </p>
-                    </div>
-                    <Progress
-                      value={creditsPercentage}
-                      className="h-3"
-                      style={{
-                        backgroundColor: colors.muted,
-                        "--progress-color": colors.accent,
-                      }}
-                    />
-                    
-                    {/* Display custom settings dynamically from current plan */}
-                    {currentPlan?.custom_settings && typeof currentPlan.custom_settings === 'object' && Object.keys(currentPlan.custom_settings).length > 0 && (
-                      <div className="border-t pt-4 mt-4 space-y-2" style={{ borderColor: colors.border }}>
-                        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: colors.mutedForeground }}>
-                          Additional Details
-                        </p>
-                        {Object.entries(currentPlan.custom_settings).map(([key, value]) => (
-                          <div key={key} className="flex items-center gap-2 text-sm">
-                            <Check className="w-4 h-4 flex-shrink-0" style={{ color: colors.success }} />
-                            <span style={{ color: colors.mutedForeground }}>
-                              <strong style={{ color: colors.foreground }}>{String(key).replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong> {String(value)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-8">
-                  <p style={{ color: colors.mutedForeground }}>No active plan. Select a plan below to get started.</p>
                 </div>
               )}
 
-              <div
-                className="flex items-center justify-between p-4 rounded-lg"
-                style={{ backgroundColor: colors.muted }}
-              >
-                <div>
-                  <p style={{ color: colors.foreground }} className="text-sm font-medium">
-                    Need more credits?
-                  </p>
-                  <p style={{ color: colors.mutedForeground }} className="text-xs">
-                    Purchase additional credits anytime
-                  </p>
+              {!razorpayLoaded && (
+                <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-yellow-600" />
+                  <p className="text-yellow-700 text-sm">Loading payment gateway...</p>
                 </div>
-                <Button
-                  size="sm"
-                  style={{
-                    background: `linear-gradient(to right, ${colors.accent}, hsla(180,45%,45%,0.8))`,
-                    color: "#fff",
-                  }}
-                >
-                  <Zap className="w-4 h-4 mr-2" />
-                  Buy Credits
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              )}
 
-          {/* Payment Method */}
-          <Card style={{ boxShadow: colors.shadowElegant, background: colors.cardBg }}>
-            <CardHeader>
-              <CardTitle style={{ color: colors.foreground }}>Payment Method</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div
-                className="p-4 rounded-lg"
-                style={{
-                  border: `1px solid ${colors.border}`,
-                }}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <CreditCard className="w-8 h-8" style={{ color: colors.accent }} />
-                  <Badge variant="outline" style={{ borderColor: colors.border, color: colors.mutedForeground }}>
-                    Razorpay
-                  </Badge>
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                  <span className="ml-3 text-gray-600">Loading plans...</span>
                 </div>
-                <p style={{ color: colors.foreground }} className="font-medium mb-1">
-                  Secure Payment Gateway
-                </p>
-                <p style={{ color: colors.mutedForeground }} className="text-sm">
-                  Powered by Razorpay
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Available Plans */}
-        <div>
-          <h2 style={{ color: colors.foreground }} className="text-2xl font-bold mb-4">
-            Available Plans
-          </h2>
-          {plans.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {plans.map((plan) => {
-                const isCurrentPlan = currentPlan && currentPlan.id === plan.id;
-                return (
-                  <Card
-                    key={plan.id}
-                    className="shadow-md hover:-translate-y-1 transition-all"
-                    style={{
-                      boxShadow: plan.is_popular ? colors.shadowElegant : "0 4px 6px rgba(0,0,0,0.08)",
-                      border: plan.is_popular ? `2px solid ${colors.accent}` : `1px solid ${colors.border}`,
-                    }}
-                  >
-                    {plan.is_popular && (
-                      <div
-                        className="text-white text-center py-2 text-sm font-semibold"
-                        style={{
-                          background: `linear-gradient(to right, ${colors.accent}, hsla(180,45%,45%,0.8))`,
-                        }}
-                      >
-                        Most Popular
-                      </div>
-                    )}
-                    <CardHeader>
-                      <CardTitle style={{ color: colors.foreground }}>{plan.name}</CardTitle>
-                      <div className="mt-4">
-                        <p style={{ color: colors.foreground }} className="text-4xl font-bold">
-                          {(plan.currency === 'INR' ? '₹' : '$')}{plan.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          <span style={{ color: colors.mutedForeground }} className="text-base font-normal">
-                            /{plan.billing_cycle === 'yearly' ? 'yr' : 'mo'}
-                          </span>
-                        </p>
-                        {plan.original_price && plan.original_price > plan.price && (
-                          <p style={{ color: colors.mutedForeground }} className="text-sm mt-1 line-through">
-                            {(plan.currency === 'INR' ? '₹' : '$')}{plan.original_price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/{plan.billing_cycle === 'yearly' ? 'yr' : 'mo'}
-                          </p>
-                        )}
-                        <p style={{ color: colors.mutedForeground }} className="text-sm mt-1">
-                          {plan.credits_per_month} credits/month
-                        </p>
-                        {plan.description && (
-                          <p style={{ color: colors.mutedForeground }} className="text-sm mt-2">
-                            {plan.description}
-                          </p>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {plan.features && plan.features.length > 0 && (
-                        <ul className="space-y-3">
-                          {plan.features.map((feature, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-sm">
-                              <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: colors.success }} />
-                              <span style={{ color: colors.mutedForeground }}>{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+              ) : plans.length === 0 ? (
+                <div className="text-center py-12">
+                  <CreditCard className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">No plans available at the moment.</p>
+                </div>
+              ) : (
+                <div className="flex justify-center">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto w-full">
+                    {plans.map((plan) => {
+                      const isCurrentPlan = currentPlan && currentPlan.id === plan.id;
+                      const isPro = (plan.name || "").toLowerCase() === "pro";
+                      const isEnterprise = (plan.name || "").toLowerCase() === "enterprise";
                       
-                      {/* Display custom settings dynamically from plan data */}
-                      {plan.custom_settings && typeof plan.custom_settings === 'object' && Object.keys(plan.custom_settings).length > 0 && (
-                        <div className="border-t pt-4 mt-4 space-y-2" style={{ borderColor: colors.border }}>
-                          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: colors.mutedForeground }}>
-                            Additional Details
-                          </p>
-                          {Object.entries(plan.custom_settings).map(([key, value]) => (
-                            <div key={key} className="flex items-center gap-2 text-sm">
-                              <Check className="w-4 h-4 flex-shrink-0" style={{ color: colors.success }} />
-                              <span style={{ color: colors.mutedForeground }}>
-                                <strong style={{ color: colors.foreground }}>{String(key).replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong> {String(value)}
+                      // Get credit options for Pro plan
+                      const creditOptions = isPro 
+                        ? (plan.credit_options || plan.custom_settings?.credit_options || [])
+                        : [];
+                      const selectedOption = creditOptions[selectedCreditOption] || creditOptions[0];
+                      
+                      // Amount display: Pro uses selected option, Enterprise uses custom display
+                      let displayAmount = plan.price;
+                      let amountLabel = "";
+                      if (isPro && selectedOption) {
+                        displayAmount = selectedOption.amount || plan.price;
+                        amountLabel = "one-time";
+                      } else if (isEnterprise) {
+                        const amountDisplay = plan.custom_settings?.amount_display || plan.amount_display || "As you go";
+                        displayAmount = null;
+                        amountLabel = amountDisplay;
+                      } else {
+                        amountLabel = `/${plan.billing_cycle === 'yearly' ? 'year' : 'month'}`;
+                      }
+                      
+                      const ctaText = plan.custom_settings?.cta_text || plan.cta_text || (isPro ? "Pay" : "Contact Sales");
+                      
+                      return (
+                        <div
+                          key={plan.id}
+                          className={`border-2 rounded-xl p-6 relative ${
+                            isPro
+                              ? "border-purple-200 bg-gradient-to-b from-purple-50 to-white shadow-lg"
+                              : isEnterprise
+                              ? "border-gray-200 bg-white shadow-lg"
+                              : isCurrentPlan
+                              ? "border-green-500 shadow-md"
+                              : "border-gray-200 hover:shadow-md"
+                          }`}
+                        >
+                          {isCurrentPlan && (
+                            <div className="absolute top-4 right-4">
+                              <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                                Current
                               </span>
                             </div>
-                          ))}
+                          )}
+                          <div className="text-center mb-6">
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                            {plan.description && (
+                              <p className="text-gray-600 mt-1 text-sm">{plan.description}</p>
+                            )}
+                            <div className="mt-4">
+                              {displayAmount !== null ? (
+                                <div className="flex items-baseline justify-center gap-2">
+                                  <span className="text-4xl font-bold text-gray-900">
+                                    {(plan.currency === 'INR' ? '₹' : '$')}{displayAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                  </span>
+                                  {amountLabel && (
+                                    <span className="text-gray-600">{amountLabel}</span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-3xl font-bold text-gray-900">{amountLabel}</span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Credit options dropdown for Pro plan */}
+                          {isPro && creditOptions.length > 0 && (
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Choose credits
+                              </label>
+                              <select
+                                value={selectedCreditOption}
+                                onChange={(e) => setSelectedCreditOption(Number(e.target.value))}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                              >
+                                {creditOptions.map((opt, index) => (
+                                  <option key={index} value={index}>
+                                    ${opt.amount} – {opt.credits} credits
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+                          
+                          {plan.features && plan.features.length > 0 && (
+                            <ul className="space-y-3 mb-6">
+                              {plan.features.map((feature, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                                  <span className="text-gray-700">{feature}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          
+                          {isEnterprise ? (
+                            <a
+                              href="mailto:sales@example.com"
+                              className={`w-full py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 border-2 border-gray-300 text-gray-900 hover:bg-gray-50 ${
+                                isCurrentPlan ? "opacity-50 cursor-not-allowed" : ""
+                              }`}
+                            >
+                              {ctaText}
+                            </a>
+                          ) : (
+                            <button
+                              onClick={() => handlePlanPurchase(plan)}
+                              disabled={processingPayment || !razorpayLoaded || isCurrentPlan}
+                              className={`w-full py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
+                                isCurrentPlan
+                                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                                  : isPro
+                                  ? "bg-purple-600 text-white hover:bg-purple-700"
+                                  : "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                              } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            >
+                              {processingPayment ? (
+                                <>
+                                  <Loader2 className="w-5 h-5 animate-spin" />
+                                  Processing...
+                                </>
+                              ) : isCurrentPlan ? (
+                                "Current Plan"
+                              ) : (
+                                ctaText
+                              )}
+                            </button>
+                          )}
                         </div>
-                      )}
-                      <Button
-                        className="w-full"
-                        disabled={isCurrentPlan || processingPayment}
-                        onClick={() => handlePlanPurchase(plan)}
-                        style={{
-                          background:
-                            isCurrentPlan
-                              ? colors.muted
-                              : `linear-gradient(to right, ${colors.accent}, hsla(180,45%,45%,0.8))`,
-                          color: isCurrentPlan ? colors.mutedForeground : "#fff",
-                          cursor: isCurrentPlan ? "not-allowed" : "pointer",
-                        }}
-                      >
-                        {processingPayment ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Processing...
-                          </>
-                        ) : isCurrentPlan ? (
-                          "Current Plan"
-                        ) : (
-                          `Subscribe to ${plan.name}`
-                        )}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-200">
-              <p style={{ color: colors.mutedForeground }}>No plans available at the moment.</p>
-            </div>
-          )}
+          </div>
         </div>
+
+        {/* Billing Details Modal */}
+        {showBillingModal && selectedPlan && (
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50">
+            <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 space-y-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Billing Details
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowBillingModal(false);
+                    setProcessingPayment(false);
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <p className="text-sm text-gray-600">
+                Please enter billing details required for GST invoice.
+              </p>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Billing Name
+                  </label>
+                  <input
+                    type="text"
+                    value={billingDetails.billing_name}
+                    onChange={(e) =>
+                      setBillingDetails((prev) => ({
+                        ...prev,
+                        billing_name: e.target.value,
+                      }))
+                    }
+                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Billing Address
+                  </label>
+                  <textarea
+                    value={billingDetails.billing_address}
+                    onChange={(e) =>
+                      setBillingDetails((prev) => ({
+                        ...prev,
+                        billing_address: e.target.value,
+                      }))
+                    }
+                    rows={3}
+                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Billing Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={billingDetails.billing_phone}
+                    onChange={(e) =>
+                      setBillingDetails((prev) => ({
+                        ...prev,
+                        billing_phone: e.target.value,
+                      }))
+                    }
+                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    GST Number (optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={billingDetails.billing_gst_number}
+                    onChange={(e) =>
+                      setBillingDetails((prev) => ({
+                        ...prev,
+                        billing_gst_number: e.target.value,
+                      }))
+                    }
+                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <span className="block text-sm font-medium text-gray-700 mb-1">
+                  Billing Type
+                </span>
+                <div className="flex gap-4 text-sm">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="billing_type"
+                      value="individual"
+                      checked={billingDetails.billing_type === "individual"}
+                      onChange={(e) =>
+                        setBillingDetails((prev) => ({
+                          ...prev,
+                          billing_type: e.target.value,
+                        }))
+                      }
+                    />
+                    <span>Individual</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="billing_type"
+                      value="business"
+                      checked={billingDetails.billing_type === "business"}
+                      onChange={(e) =>
+                        setBillingDetails((prev) => ({
+                          ...prev,
+                          billing_type: e.target.value,
+                        }))
+                      }
+                    />
+                    <span>Business</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* GST Summary */}
+              <div className="mt-2 rounded-md bg-gray-50 border border-gray-200 p-3 text-sm">
+                <p className="font-semibold text-gray-800 mb-1">
+                  Order Summary
+                </p>
+                <div className="flex justify-between text-gray-700">
+                  <span>Plan amount</span>
+                  <span className="font-semibold">
+                    ₹{(() => {
+                      if ((selectedPlan.name || "").toLowerCase() === "pro") {
+                        const creditOptions = selectedPlan.credit_options || selectedPlan.custom_settings?.credit_options || [];
+                        const selectedOption = creditOptions[selectedCreditOption] || creditOptions[0];
+                        return (selectedOption?.amount || selectedPlan.price).toFixed(2);
+                      }
+                      return selectedPlan.price.toFixed(2);
+                    })()}
+                  </span>
+                </div>
+                <div className="flex justify-between text-gray-700 mt-1">
+                  <span>
+                    GST ({invoiceConfig?.tax_rate ?? 18}%)
+                  </span>
+                  <span className="font-semibold">
+                    ₹{(() => {
+                      let baseAmount = selectedPlan.price;
+                      if ((selectedPlan.name || "").toLowerCase() === "pro") {
+                        const creditOptions = selectedPlan.credit_options || selectedPlan.custom_settings?.credit_options || [];
+                        const selectedOption = creditOptions[selectedCreditOption] || creditOptions[0];
+                        baseAmount = selectedOption?.amount || selectedPlan.price;
+                      }
+                      return (baseAmount * (invoiceConfig?.tax_rate ?? 18) / 100).toFixed(2);
+                    })()}
+                  </span>
+                </div>
+                <div className="flex justify-between text-gray-900 font-semibold mt-2 border-t border-gray-200 pt-2">
+                  <span>Total payable</span>
+                  <span>
+                    ₹
+                    {(() => {
+                      let baseAmount = selectedPlan.price;
+                      if ((selectedPlan.name || "").toLowerCase() === "pro") {
+                        const creditOptions = selectedPlan.credit_options || selectedPlan.custom_settings?.credit_options || [];
+                        const selectedOption = creditOptions[selectedCreditOption] || creditOptions[0];
+                        baseAmount = selectedOption?.amount || selectedPlan.price;
+                      }
+                      const taxAmount = baseAmount * (invoiceConfig?.tax_rate ?? 18) / 100;
+                      return (baseAmount + taxAmount).toFixed(2);
+                    })()}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  onClick={() => {
+                    setShowBillingModal(false);
+                    setProcessingPayment(false);
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={startPaymentWithBilling}
+                  disabled={processingPayment}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {processingPayment ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin inline" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Proceed to pay"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
