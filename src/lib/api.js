@@ -1201,6 +1201,27 @@ async request(endpoint, options = {}) {
         });
     }
 
+    // Get credit usage for current user (individual, not scoped to org)
+    async getUserCreditUsage(token) {
+        return this.get('/api/credits/user/usage/', {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    // Get payment history for current user (works for both org and individual users)
+    async getPaymentHistory(token, organizationId = null) {
+        const url = organizationId 
+            ? `/api/payments/history/?organization_id=${organizationId}`
+            : '/api/payments/history/';
+        return this.get(url, {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
     // Get credit settings (public read-only)
     async getCreditSettings() {
         return this.request('/api/credits/settings/');
