@@ -4,13 +4,16 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { apiService } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
-import { CreditCard, Check, X, Calendar, DollarSign, Loader2 } from "lucide-react";
+import { CreditCard, Check, X, Calendar, DollarSign, Loader2, FileText } from "lucide-react";
+import { InvoiceView } from "@/components/InvoiceView";
 
 export default function PaymentHistoryPage() {
   const { token } = useAuth();
   const { t } = useLanguage();
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [invoicePaymentData, setInvoicePaymentData] = useState(null);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -100,6 +103,9 @@ export default function PaymentHistoryPage() {
                   <th className="px-4 py-3 text-left font-medium text-gray-500">
                     Transaction ID
                   </th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-500">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -121,7 +127,7 @@ export default function PaymentHistoryPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 text-gray-800">
                         <DollarSign className="w-4 h-4 text-gray-400" />
-                        <span>₹{p.amount?.toFixed(2) ?? "0.00"}</span>
+                        <span>₹{p.total_amount?.toFixed(2) || p.amount?.toFixed(2) || "0.00"}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-gray-800">
@@ -131,6 +137,22 @@ export default function PaymentHistoryPage() {
                     <td className="px-4 py-3 text-xs text-gray-500 font-mono">
                       {p.razorpay_payment_id || p.razorpay_order_id || p.id}
                     </td>
+                    <td className="px-4 py-3">
+                      {p.status === "completed" ? (
+                        <button
+                          onClick={() => {
+                            setInvoicePaymentData(p);
+                            setSelectedInvoice(p.id);
+                          }}
+                          className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+                        >
+                          <FileText className="w-4 h-4" />
+                          View Invoice
+                        </button>
+                      ) : (
+                        <span className="text-gray-400 text-sm">-</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -138,6 +160,18 @@ export default function PaymentHistoryPage() {
           </div>
         )}
       </div>
+
+      {/* Invoice Modal */}
+      {selectedInvoice && invoicePaymentData && (
+        <InvoiceView
+          transactionId={selectedInvoice}
+          paymentData={invoicePaymentData}
+          onClose={() => {
+            setSelectedInvoice(null);
+            setInvoicePaymentData(null);
+          }}
+        />
+      )}
     </div>
   );
 }

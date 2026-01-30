@@ -1246,6 +1246,15 @@ async request(endpoint, options = {}) {
             body: JSON.stringify(data),
         });
     }
+
+    // Invoice endpoints
+    async getInvoiceConfig(token) {
+        return this.get('/api/invoices/config/', {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
 }
 
 // Configure axios to add token to all requests
