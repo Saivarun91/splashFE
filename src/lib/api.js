@@ -1238,6 +1238,15 @@ async request(endpoint, options = {}) {
     async getPlan(planId) {
         return this.request(`/api/plans/${planId}/`);
     }
+
+    // Invoice endpoints
+    async getInvoiceConfig(token) {
+        return this.get('/api/invoices/config/', {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
 }
 
 // Configure axios to add token to all requests
