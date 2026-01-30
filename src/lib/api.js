@@ -1238,6 +1238,14 @@ async request(endpoint, options = {}) {
     async getPlan(planId) {
         return this.request(`/api/plans/${planId}/`);
     }
+
+    // Contact Sales (Enterprise lead form) - no auth required
+    async submitContactSales(data) {
+        return this.request('/api/payments/contact-sales/', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
 }
 
 // Configure axios to add token to all requests
