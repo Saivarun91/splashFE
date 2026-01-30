@@ -398,5 +398,9 @@
     "balance": "Balance After",
     "reason": "Reason",
     "noLogs": "No credit usage found yet."
+  },
+  "status": {
+    "completed": "Completed",
+    "pending": "Pending"
   }
 }
