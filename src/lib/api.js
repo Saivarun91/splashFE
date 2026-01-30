@@ -1239,6 +1239,14 @@ async request(endpoint, options = {}) {
         return this.request(`/api/plans/${planId}/`);
     }
 
+    // Contact Sales (Enterprise lead form) - no auth required
+    async submitContactSales(data) {
+        return this.request('/api/payments/contact-sales/', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
     // Invoice endpoints
     async getInvoiceConfig(token) {
         return this.get('/api/invoices/config/', {

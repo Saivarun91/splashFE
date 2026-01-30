@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import { apiService } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import Script from "next/script";
+import { ContactSalesModal } from "@/components/ContactSalesModal";
 
 const DEFAULT_CREDIT_OPTIONS = [
   { amount: 50, credits: 50 },
@@ -24,6 +25,7 @@ export const SubscriptionBilling = () => {
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [selectedCreditOption, setSelectedCreditOption] = useState(0);
   const [showBillingModal, setShowBillingModal] = useState(false);
+  const [showContactSalesModal, setShowContactSalesModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [billingDetails, setBillingDetails] = useState({
     billing_name: "",
@@ -456,14 +458,16 @@ export const SubscriptionBilling = () => {
                           )}
                           
                           {isEnterprise ? (
-                            <a
-                              href="mailto:sales@example.com"
+                            <button
+                              type="button"
+                              onClick={() => setShowContactSalesModal(true)}
+                              disabled={isCurrentPlan}
                               className={`w-full py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 border-2 border-gray-300 text-gray-900 hover:bg-gray-50 ${
                                 isCurrentPlan ? "opacity-50 cursor-not-allowed" : ""
                               }`}
                             >
                               {ctaText}
-                            </a>
+                            </button>
                           ) : (
                             <button
                               onClick={() => handlePlanPurchase(plan)}
@@ -706,6 +710,8 @@ export const SubscriptionBilling = () => {
             </div>
           </div>
         )}
+
+        <ContactSalesModal open={showContactSalesModal} onOpenChange={setShowContactSalesModal} />
       </div>
     </>
   );
