@@ -41,9 +41,21 @@ export const SubscriptionBilling = () => {
   }, [token, user]);
 
   const fetchInvoiceConfig = async () => {
-    // Use default tax rate - invoice config can be fetched from backend if needed
-    // For now, using default 18% GST
-    setInvoiceConfig({ tax_rate: 18 });
+    try {
+      if (token) {
+        const data = await apiService.getInvoiceConfig(token);
+        if (data) {
+          setInvoiceConfig(data);
+        } else {
+          setInvoiceConfig({ tax_rate: 18 });
+        }
+      } else {
+        setInvoiceConfig({ tax_rate: 18 });
+      }
+    } catch (error) {
+      console.warn("Failed to fetch invoice config, using default:", error);
+      setInvoiceConfig({ tax_rate: 18 });
+    }
   };
 
   const fetchPlans = async () => {
