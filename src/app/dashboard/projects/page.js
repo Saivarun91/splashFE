@@ -197,7 +197,7 @@ export default function Dashboard() {
                         return (
                             <Link
                                 key={project.id}
-                                href={`/dashboard/projects/${project.id}`}
+                                href={`/dashboard/projects/${project.slug ? project.slug : project.id}`}
                                 className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 relative block cursor-pointer"
                             >
                                 {/* Top Right Menu */}

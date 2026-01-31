@@ -36,7 +36,7 @@ const CreateProjectPage = () => {
             }
             const response = await apiService.createProject(projectData, token)
             console.log(response)
-            router.push(`/dashboard/projects/${response.id}`)
+            router.push(`/dashboard/projects/${response.slug}`)
         } catch (err) {
             console.error('Error creating project:', err)
             setError(err.message || 'Failed to create project. Please try again.')

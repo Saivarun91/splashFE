@@ -5,54 +5,68 @@ import Link from "next/link"
 import { useState, useEffect, use } from "react"
 import { apiService } from "@/lib/api"
 
-export default function ProjectPage({ params }) {
+export default function ProjectPageBySlug({ params }) {
     // Unwrap params Promise using React.use()
     const resolvedParams = use(params)
-    const projectId = resolvedParams.id
+    const projectSlug = resolvedParams.slug
     const [project, setProject] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [userRole, setUserRole] = useState(null)
     const [permissions, setPermissions] = useState(null)
-console.log("projectId :", projectId)
+
     const fetchProject = async () => {
         try {
             setLoading(true)
             const token = localStorage.getItem('token')
-            const projectData = await apiService.getProject(projectId, token)
+            // API service getProject now supports both ID and slug (backend handles both)
+            const projectData = await apiService.getProject(projectSlug, token)
             setProject(projectData)
-
-            // Get user role and permissions
+            console.log("projectData", projectData)
+            // Get user role and permissions (backend supports both ID and slug)
             if (token) {
                 try {
-                    const roleData = await apiService.getUserRole(projectId, token)
+                    // Use slug since backend supports it, fallback to ID if needed
+                    const roleData = await apiService.getUserRole(projectSlug, token)
                     if (roleData.success) {
                         setUserRole(roleData.role)
                         setPermissions(roleData.permissions)
                     }
                 } catch (roleErr) {
                     console.error('Error fetching user role:', roleErr)
+                    // Fallback to using project ID if slug lookup fails
+                    if (projectData?.id) {
+                        try {
+                            const roleData = await apiService.getUserRole(projectData.id, token)
+                            if (roleData.success) {
+                                setUserRole(roleData.role)
+                                setPermissions(roleData.permissions)
+                            }
+                        } catch (fallbackErr) {
+                            console.error('Error fetching user role with ID fallback:', fallbackErr)
+                        }
+                    }
                 }
             }
         } catch (err) {
             console.error('Error fetching project:', err)
-            setError(err.message)
+            setError(err.message || 'Failed to load project')
         } finally {
             setLoading(false)
         }
     }
 
     useEffect(() => {
-        if (projectId) {
+        if (projectSlug) {
             fetchProject()
         }
-    }, [projectId])
+    }, [projectSlug])
 
     const handleProjectUpdate = async (updatedProject) => {
         // Refetch the project to ensure we have the latest data from the backend
         try {
             const token = localStorage.getItem('token')
-            const projectData = await apiService.getProject(projectId, token)
+            const projectData = await apiService.getProject(projectSlug, token)
             setProject(projectData)
         } catch (err) {
             console.error('Error refetching project:', err)
@@ -93,6 +107,7 @@ console.log("projectId :", projectId)
     // Transform backend data to match frontend expectations
     const transformedProject = {
         id: project.id,
+        slug: project.slug || projectSlug, // Include slug in transformed project
         title: project.name,
         status: project.status,
         description: project.about,

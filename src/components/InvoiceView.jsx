@@ -242,21 +242,21 @@ export function InvoiceView({ transactionId, onClose, paymentData }) {
                                 <tr>
                                     <td style={styles.td}>{invoiceData.plan_name || invoiceData.plan || "Credit Purchase"}</td>
                                     <td style={styles.td}>1</td>
-                                    <td style={styles.td}>₹{baseAmount.toFixed(2)}</td>
-                                    <td style={styles.td}>₹{baseAmount.toFixed(2)}</td>
+                                    <td style={styles.td}>${baseAmount.toFixed(2)}</td>
+                                    <td style={styles.td}>${baseAmount.toFixed(2)}</td>
                                 </tr>
                                 <tr>
                                     <td style={styles.td}>GST</td>
                                     <td style={styles.td}>{taxRate}%</td>
-                                    <td style={styles.td}>₹{tax.toFixed(2)}</td>
-                                    <td style={styles.td}>₹{tax.toFixed(2)}</td>
+                                    <td style={styles.td}>${tax.toFixed(2)}</td>
+                                    <td style={styles.td}>${tax.toFixed(2)}</td>
                                 </tr>
                             </tbody>
                         </table>
 
                         <div style={styles.totalBox}>
                             <span>Total</span>
-                            <span>₹{total.toFixed(2)}</span>
+                            <span>${total.toFixed(2)}</span>
                         </div>
 
                         <div style={styles.footer}>

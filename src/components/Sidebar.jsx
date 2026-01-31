@@ -378,19 +378,19 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                 { label: t("dashboard.helpCenter"), icon: FileQuestion, path: "/dashboard/help/help-center" },
             ],
         },
-        {
-            label: t("dashboard.myAccount"),
-            icon: User,
-            path: "/dashboard/account",
-            children: [
-                { label: t("profile.title").split(" & ")[0], icon: User, path: "/dashboard/my-account/profile" },
+        // {
+            // label: t("dashboard.myAccount"),
+            // icon: User,
+            // path: "/dashboard/account",
+            // children: [
+            //     { label: t("profile.title").split(" & ")[0], icon: User, path: "/dashboard/my-account/profile" },
                 // { label: t("dashboard.subscription"), icon: CreditCard, path: "/dashboard/my-account/billing" },
                 // { label: t("dashboard.security"), icon: Shield, path: "/dashboard/my-account/security" },
                 // { label: t("dashboard.notifications"), icon: Bell, path: "/dashboard/my-account/notification" },
                 // { label: t("dashboard.promptMaster"), icon: FileText, path: "/dashboard/my-account/prompt-master" },
                 
-            ],
-        },
+            // ],
+        // },
         {
             label: t("dashboard.payments") || "Payments",
             icon: CreditCard,
