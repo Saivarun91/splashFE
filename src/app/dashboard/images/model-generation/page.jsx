@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import { OrnamentSelection } from "@/components/images/OrnamentSelection"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
+import { ReferenceImagesModal } from "@/components/images/ReferenceImagesModal"
 import toast from "react-hot-toast"
 import { HiOutlineUserCircle } from "react-icons/hi";
 export default function ModelGenerationForm() {
@@ -16,6 +17,7 @@ export default function ModelGenerationForm() {
     const { token } = useAuth()
     const { t } = useLanguage()
     const [activeTab, setActiveTab] = useState("ai_model") // "ai_model" or "real_model"
+    const [showReferenceModal, setShowReferenceModal] = useState(false)
 
     // AI Model State
     const [aiFormData, setAiFormData] = useState({
@@ -407,7 +409,7 @@ export default function ModelGenerationForm() {
                             <HiOutlineUserCircle className="w-8 h-8 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-4xl font-bold text-[#7753ff]">
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">
                                 {t("images.modelGeneration")}
                             </h1>
                             <p className="text-[#737373] mt-2">{t("images.generateAIModelsOrUseReal")}</p>
@@ -447,9 +449,11 @@ export default function ModelGenerationForm() {
                             <form onSubmit={handleAiSubmit} className="space-y-6">
                                 {/* Ornament Image */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2 flex-wrap">
                                         <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
-                                        {t("images.ornamentProductImage")}<span className="text-red-500 ml-1">*</span>
+                                        {t("images.ornamentProductImage")}<span className="text-red-500 ml-1">*</span> <br />
+                                        <span className="text-xs text-gray-500 font-normal">upload the product image which is captured with the help of scale for better measurements.</span>
+                                        <button type="button" onClick={(e) => { e.preventDefault(); setShowReferenceModal(true); }} className="text-xs text-blue-600 hover:underline font-medium">(View reference)</button>
                                     </label>
                                     <div
                                         className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
@@ -606,9 +610,11 @@ export default function ModelGenerationForm() {
 
                                 {/* Ornament Image */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2 flex-wrap">
                                         <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
-                                        {t("images.ornamentProductImage")}<span className="text-red-500 ml-1">*</span>
+                                        {t("images.ornamentProductImage")}<span className="text-red-500 ml-1">*</span> <br />
+                                        <span className="text-xs text-gray-500 font-normal">upload the product image which is captured with the help of scale for better measurements.</span>
+                                        <button type="button" onClick={(e) => { e.preventDefault(); setShowReferenceModal(true); }} className="text-xs text-blue-600 hover:underline font-medium">(View reference)</button>
                                     </label>
                                     <div
                                         className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
@@ -874,6 +880,8 @@ export default function ModelGenerationForm() {
                     </div>
                 </div>
             </div>
+
+            <ReferenceImagesModal open={showReferenceModal} onOpenChange={setShowReferenceModal} />
 
             {/* Regenerate Modals */}
             {/* AI Model Regenerate Modal */}

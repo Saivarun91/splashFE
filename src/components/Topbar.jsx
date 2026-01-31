@@ -12,7 +12,7 @@ import {
     Loader2,
     Building2,
     ChevronDown,
-    Building
+    LogOut
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { switchToOrganizationPortal } from "@/lib/portalSwitch";
 
 export function Topbar({ collapsed }) {
-    const { token, user } = useAuth();
+    const { token, user, logout, isGenerating } = useAuth();
     const { t } = useLanguage();
     const router = useRouter();
 
@@ -256,6 +256,13 @@ export function Topbar({ collapsed }) {
                                     Organization Panel
                                 </button>
                             )}
+                            
+                            <button
+                                onClick={() => !isGenerating && logout()}
+                                className="w-full px-4 py-2 flex items-center gap-2 hover:bg-red-50"
+                            >
+                                <LogOut className="w-4 h-4 text-red-600" /> <span>{t("dashboard.logout")}</span>
+                            </button>
                         </div>
                     )}
                 </div>

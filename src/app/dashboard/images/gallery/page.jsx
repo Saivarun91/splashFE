@@ -206,7 +206,7 @@ export default function GalleryPage() {
         <div className="min-h-screen bg-[#fcfcfc] p-8">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-4">
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">{t("dashboard.myImages")}</h1>
                     <p className="text-[#737373] text-lg">{t("images.allVisualsInOnePlace")}</p>
                 </div>
