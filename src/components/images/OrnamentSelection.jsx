@@ -362,7 +362,7 @@ export function OrnamentSelection({
             <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-purple-600" />
-                    Ornament Type
+                    Ornament Type <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                     <button
@@ -377,7 +377,7 @@ export function OrnamentSelection({
                                     <span>{selectedOrnament.name}</span>
                                 </>
                             ) : (
-                                <span className="text-gray-400">Select ornament type</span>
+                                <span className="text-gray-400">Select ornament type </span>
                             )}
                         </div>
                         <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -406,8 +406,11 @@ export function OrnamentSelection({
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                         <Ruler className="w-4 h-4 text-purple-600" />
-                        Measurements
+                        Measurements (Optional)
                     </label>
+                    <p className="text-xs text-gray-500 mb-2">
+                        💡 Providing accurate measurements helps generate more realistic images
+                    </p>
                     <div className="grid grid-cols-1 gap-3">
                         {selectedOrnament.measurements.map((measurement) => (
                             <div key={measurement.id} className="flex items-center gap-2">
@@ -431,9 +434,7 @@ export function OrnamentSelection({
                             </div>
                         ))}
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                        💡 Providing accurate measurements helps generate more realistic images
-                    </p>
+                    
                 </div>
             )}
 

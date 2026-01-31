@@ -200,7 +200,7 @@ export default function Dashboard() {
                                         <div 
                                             className="bg-indigo-500 h-2 rounded-full transition-all"
                                             style={{ 
-                                                width: userCredits.balance > 0 
+                                                width: userCredits.balance && userCredits.balance > 0 
                                                     ? `${Math.min((userCredits.balance / 10000) * 100, 100)}%` 
                                                     : '0%' 
                                             }}

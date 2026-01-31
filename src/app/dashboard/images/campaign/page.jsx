@@ -9,6 +9,7 @@ import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
+import { ReferenceImagesModal } from "@/components/images/ReferenceImagesModal"
 import toast from "react-hot-toast"
 import { SiGooglecampaignmanager360  } from "react-icons/si";
 export default function CampaignForm() {
@@ -28,6 +29,7 @@ export default function CampaignForm() {
     const [ornamentPreviews, setOrnamentPreviews] = useState([])
     const [themePreviews, setThemePreviews] = useState([])
     const [isLoading, setIsLoading] = useState(false)
+    const [showReferenceModal, setShowReferenceModal] = useState(false)
     const [result, setResult] = useState(null)
     const [error, setError] = useState(null)
     const [regenerateModal, setRegenerateModal] = useState({
@@ -352,9 +354,11 @@ export default function CampaignForm() {
 
                             {/* Ornament Images */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2 flex-wrap">
                                     <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
                                     {t("images.ornamentImages")}<span className="text-red-500 ml-1">*</span>
+                                    <span className="text-xs text-gray-500 font-normal">upload the product image which is captured with the help of scale for better measurements.</span>
+                                    <button type="button" onClick={(e) => { e.preventDefault(); setShowReferenceModal(true); }} className="text-xs text-blue-600 hover:underline font-medium">(View reference)</button>
                                 </label>
                                 <div
                                     className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
@@ -592,6 +596,8 @@ export default function CampaignForm() {
                     </div>
                 </div>
             </div>
+
+            <ReferenceImagesModal open={showReferenceModal} onOpenChange={setShowReferenceModal} />
 
             {/* Regenerate Modal */}
             {regenerateModal.isOpen && (

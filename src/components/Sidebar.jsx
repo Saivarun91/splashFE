@@ -368,14 +368,15 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
             icon: FolderKanban,
             path: "/dashboard/projects",
         },
+
         {
-            label: t("dashboard.helpLearning"),
-            icon: HelpCircle,
-            path: "/dashboard/help",
+            label: t("dashboard.payments") || "Payments",
+            icon: CreditCard,
+            path: "/dashboard/payments",
             children: [
-                { label: t("dashboard.feedback"), icon: MessageSquare, path: "/dashboard/help/feedback" },
-                { label: t("dashboard.tutorials"), icon: BookOpen, path: "/dashboard/help/tutorials" },
-                { label: t("dashboard.helpCenter"), icon: FileQuestion, path: "/dashboard/help/help-center" },
+                { label: t("dashboard.subscription"), icon: CreditCard, path: "/dashboard/my-account/billing" },
+                { label: t("dashboard.paymentHistory") || "Payment History", icon: CreditCard, path: "/dashboard/payments/history" },
+                { label: t("dashboard.creditsLogs") || "Credits Usage", icon: Zap, path: "/dashboard/credits/logs" },
             ],
         },
         {
@@ -392,13 +393,13 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
             ],
         },
         {
-            label: t("dashboard.payments") || "Payments",
-            icon: CreditCard,
-            path: "/dashboard/payments",
+            label: t("dashboard.helpLearning"),
+            icon: HelpCircle,
+            path: "/dashboard/help",
             children: [
-                { label: t("dashboard.subscription"), icon: CreditCard, path: "/dashboard/my-account/billing" },
-                { label: t("dashboard.paymentHistory") || "Payment History", icon: CreditCard, path: "/dashboard/payments/history" },
-                { label: t("dashboard.creditsLogs") || "Credits Usage", icon: Zap, path: "/dashboard/credits/logs" },
+                { label: t("dashboard.feedback"), icon: MessageSquare, path: "/dashboard/help/feedback" },
+                { label: t("dashboard.tutorials"), icon: BookOpen, path: "/dashboard/help/tutorials" },
+                { label: t("dashboard.helpCenter"), icon: FileQuestion, path: "/dashboard/help/help-center" },
             ],
         },
     ];
