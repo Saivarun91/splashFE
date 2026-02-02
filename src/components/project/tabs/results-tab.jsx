@@ -1,11 +1,13 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import Image from "next/image"
 import { Download, Image as ImageIcon, Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductImagesDisplay } from "../product-images-display"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
+import { dataCache, cacheKeys } from "@/lib/data-cache"
 
 export default function ResultsTab({ project }) {
 
@@ -31,80 +33,116 @@ export default function ResultsTab({ project }) {
     const { token } = useAuth()
 
     const loadData = async () => {
-        if (!project?.collection?.id) return;
+        if (!project?.collection?.id || !token) return;
 
         setLoading(true);
         try {
-            const data = await apiService.getCollection(project.collection.id, token);
-            console.log("data", data);
-            setCollectionData(data);
+            // Try cache first for instant display
+            const collectionCacheKey = cacheKeys.collection(project.collection.id);
+            const modelStatsCacheKey = cacheKeys.modelStats(project.collection.id);
+            const historyCacheKey = cacheKeys.collectionHistory(project.collection.id);
+            
+            const cachedCollection = dataCache.get(collectionCacheKey);
+            const cachedModelStats = dataCache.get(modelStatsCacheKey);
+            const cachedHistory = dataCache.get(historyCacheKey);
+            
+            if (cachedCollection) {
+                setCollectionData(cachedCollection);
+                if (cachedModelStats) {
+                    setModelStats(cachedModelStats);
+                }
+                if (cachedHistory) {
+                    setHistoryData(cachedHistory);
+                }
+                setLoading(false);
+            }
 
-            // Calculate stats
-            if (data?.items?.[0]) {
-                const item = data.items[0];
-                const products = item.product_images || [];
-                const totalGenerated = products.reduce(
-                    (sum, p) => sum + (p.generated_images?.length || 0),
-                    0
-                );
+            // Fetch all data in parallel with caching for better performance
+            const [dataResult, modelUsageResult, historyResult] = await Promise.allSettled([
+                dataCache.getOrFetch(
+                    collectionCacheKey,
+                    () => apiService.getCollection(project.collection.id, token),
+                    2 * 60 * 1000
+                ),
+                dataCache.getOrFetch(
+                    modelStatsCacheKey,
+                    () => apiService.getModelUsageStats(project.collection.id, token).then(r => r.success ? r : null),
+                    2 * 60 * 1000
+                ).catch(() => null),
+                dataCache.getOrFetch(
+                    historyCacheKey,
+                    () => apiService.getCollectionHistory(project.collection.id, token).then(r => r.success ? r : null),
+                    2 * 60 * 1000
+                ).catch(() => null)
+            ]);
 
-                const completionSteps = [
-                    data.description ? 1 : 0,
-                    item.selected_model ? 1 : 0,
-                    products.length > 0 ? 1 : 0,
-                    totalGenerated > 0 ? 1 : 0
-                ].reduce((a, b) => a + b, 0);
+            // Process collection data
+            if (dataResult.status === 'fulfilled') {
+                const data = dataResult.value;
+                setCollectionData(data);
 
-                setStats({
-                    totalImages: totalGenerated,
-                    products: products.length,
-                    variations: products.length > 0 ? Math.floor(totalGenerated / products.length) : 0,
-                    completion: Math.floor((completionSteps / 4) * 100)
+                // Calculate stats
+                if (data?.items?.[0]) {
+                    const item = data.items[0];
+                    const products = item.product_images || [];
+                    const totalGenerated = products.reduce(
+                        (sum, p) => sum + (p.generated_images?.length || 0),
+                        0
+                    );
+
+                    const completionSteps = [
+                        data.description ? 1 : 0,
+                        item.selected_model ? 1 : 0,
+                        products.length > 0 ? 1 : 0,
+                        totalGenerated > 0 ? 1 : 0
+                    ].reduce((a, b) => a + b, 0);
+
+                    setStats({
+                        totalImages: totalGenerated,
+                        products: products.length,
+                        variations: products.length > 0 ? Math.floor(totalGenerated / products.length) : 0,
+                        completion: Math.floor((completionSteps / 4) * 100)
+                    });
+                }
+            }
+
+            // Process model usage statistics
+            if (modelUsageResult.status === 'fulfilled' && modelUsageResult.value?.success) {
+                setModelStats({
+                    total_models_used: modelUsageResult.value.total_models_used || 0,
+                    models_breakdown: modelUsageResult.value.models_breakdown || [],
+                    total_generations: modelUsageResult.value.total_generations || 0
                 });
             }
 
-            // Fetch model usage statistics
-            try {
-                const modelUsageData = await apiService.getModelUsageStats(project.collection.id, token);
-                if (modelUsageData.success) {
-                    setModelStats({
-                        total_models_used: modelUsageData.total_models_used || 0,
-                        models_breakdown: modelUsageData.models_breakdown || [],
-                        total_generations: modelUsageData.total_generations || 0
-                    });
-                }
-            } catch (err) {
-                console.error('Error fetching model statistics:', err);
-            }
+            // Process history data
+            setHistoryLoading(true);
+            if (historyResult.status === 'fulfilled' && historyResult.value?.success) {
+                const historyResponse = historyResult.value;
+                const historyProjectId = historyResponse.project_id;
+                const currentProjectId = project?.id;
 
-            // Fetch collection history (filtered by project)
-            try {
-                setHistoryLoading(true);
-                const historyResponse = await apiService.getCollectionHistory(project.collection.id, token);
-                if (historyResponse.success) {
-                    // Verify that the history belongs to the current project
-                    const historyProjectId = historyResponse.project_id;
-                    const currentProjectId = project?.id;
-
-                    if (historyProjectId && currentProjectId && historyProjectId === currentProjectId) {
-                        // History matches the current project
-                        setHistoryData(historyResponse);
-                    } else if (!historyProjectId && historyResponse.collection_id === project.collection.id) {
-                        // If no project_id in response but collection matches, still show it
-                        setHistoryData(historyResponse);
-                    } else {
-                        // Project mismatch - don't show history
-                        console.warn('History project ID mismatch. Expected:', currentProjectId, 'Got:', historyProjectId);
-                        setHistoryData(null);
-                    }
+                if (historyProjectId && currentProjectId && historyProjectId === currentProjectId) {
+                    setHistoryData(historyResponse);
+                } else if (!historyProjectId && historyResponse.collection_id === project.collection.id) {
+                    setHistoryData(historyResponse);
                 } else {
                     setHistoryData(null);
                 }
-            } catch (err) {
-                console.error('Error fetching collection history:', err);
+            } else {
                 setHistoryData(null);
-            } finally {
-                setHistoryLoading(false);
+            }
+            setHistoryLoading(false);
+            
+            // Cache successful results
+            if (dataResult.status === 'fulfilled') {
+                dataCache.set(collectionCacheKey, dataResult.value, 2 * 60 * 1000);
+            }
+            if (modelUsageResult.status === 'fulfilled' && modelUsageResult.value?.success) {
+                dataCache.set(modelStatsCacheKey, modelUsageResult.value, 2 * 60 * 1000);
+            }
+            if (historyResult.status === 'fulfilled' && historyResult.value?.success) {
+                dataCache.set(historyCacheKey, historyResult.value, 2 * 60 * 1000);
             }
         } catch (err) {
             console.error("Error loading results:", err);
@@ -116,7 +154,7 @@ export default function ResultsTab({ project }) {
 
     useEffect(() => {
         loadData()
-    }, [project])
+    }, [project?.collection?.id, project?.id, token])
 
     // Reset to page 1 when filter changes
     useEffect(() => {
@@ -421,12 +459,25 @@ export default function ResultsTab({ project }) {
         });
     }
 
-    if (loading) {
+    // Show skeleton only if no cached data - never block with spinner
+    if (loading && !collectionData) {
         return (
-            <div className="flex items-center justify-center py-12">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#884cff] mx-auto mb-4"></div>
-                    <p className="text-[#708090]">Loading results...</p>
+            <div className="space-y-8">
+                <div className="grid grid-cols-4 gap-6 mb-8">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6 animate-pulse">
+                            <div className="h-10 bg-gray-200 rounded mb-3"></div>
+                            <div className="h-8 bg-gray-200 rounded"></div>
+                        </div>
+                    ))}
+                </div>
+                <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-8 animate-pulse">
+                    <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+                    <div className="grid grid-cols-4 gap-4">
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                            <div key={i} className="aspect-square bg-gray-100 rounded"></div>
+                        ))}
+                    </div>
                 </div>
             </div>
         )
@@ -657,14 +708,14 @@ export default function ResultsTab({ project }) {
                                 <div className="grid grid-cols-4 gap-4 mb-6">
                                     {paginatedImages.map((image, index) => (
                                         <div key={image.id || index} className="group relative aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm hover:shadow-md transition-all">
-                                            <img
+                                            <Image
                                                 src={image.image_url}
                                                 alt="Generated"
-                                                className="w-full h-full object-cover cursor-pointer"
+                                                fill
+                                                className="object-cover cursor-pointer"
                                                 onClick={() => window.open(image.image_url, "_blank")}
-                                                onError={(e) => {
-                                                    e.target.src = '/placeholder-image.png';
-                                                }}
+                                                sizes="(max-width: 768px) 50vw, 25vw"
+                                                unoptimized={image.image_url?.includes('cloudinary') || image.image_url?.includes('imagekit')}
                                             />
                                             {/* Hover Overlay */}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">

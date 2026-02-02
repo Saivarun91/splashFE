@@ -300,7 +300,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -546,6 +546,27 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
         }
     };
 
+    // Prefetch route on hover for instant navigation
+    const handleLinkHover = useCallback((path) => {
+        if (!isGenerating && path) {
+            router.prefetch(path);
+        }
+    }, [router, isGenerating]);
+
+    // Prefetch common routes on mount for instant navigation
+    useEffect(() => {
+        if (!isGenerating) {
+            // Prefetch most common routes
+            const commonRoutes = [
+                '/dashboard',
+                '/dashboard/projects',
+                '/dashboard/images',
+                '/dashboard/projects/create'
+            ];
+            commonRoutes.forEach(route => router.prefetch(route));
+        }
+    }, [router, isGenerating]);
+
     const isActive = (path, hasChildren = false) => {
         if (hasChildren) {
             return pathname === path || pathname.startsWith(path + "/");
@@ -653,6 +674,8 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                                                     key={child.path}
                                                     href={child.path}
                                                     onClick={(e) => handleLinkClick(e, child.path)}
+                                                    onMouseEnter={() => handleLinkHover(child.path)}
+                                                    prefetch={true}
                                                     className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors
                                                         ${isActive(child.path)
                                                             ? "bg-white/10 backdrop-blur-md border border-white/10 text-white shadow-md"
@@ -684,6 +707,8 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                                 <Link
                                     href={item.path}
                                     onClick={(e) => handleLinkClick(e, item.path)}
+                                    onMouseEnter={() => handleLinkHover(item.path)}
+                                    prefetch={true}
                                     className={`flex items-center ${isExpanded ? "gap-3" : "justify-center my-3"} 
                                         px-3 py-2 rounded-md text-sm font-medium transition-colors my-3
                                         ${isActive(item.path)

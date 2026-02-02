@@ -234,14 +234,15 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
+import Image from "next/image"
 import { CircleDot, Clock, Calendar, FileText, Image as ImageIcon, Package, User, CheckCircle, Palette, MapPin, Camera, Sparkles } from "lucide-react"
 import { ProductImagesDisplay } from "../product-images-display"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
+import { dataCache, cacheKeys } from "@/lib/data-cache"
 
 export default function OverviewTab({ project }) {
-    console.log("project", project);
     const [collectionData, setCollectionData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [stats, setStats] = useState({
@@ -258,48 +259,73 @@ export default function OverviewTab({ project }) {
     const { token } = useAuth()
 
     const loadData = async () => {
-        if (!project?.collection?.id) {
+        if (!project?.collection?.id || !token) {
             setLoading(false)
             return
         }
 
         try {
             setLoading(true)
-            const data = await apiService.getCollection(project.collection.id, token)
-            setCollectionData(data)
-
-            if (data?.items?.[0]) {
-                const item = data.items[0]
-                const products = item.product_images || []
-                const totalGenerated = products.reduce((sum, p) => sum + (p.generated_images?.length || 0), 0)
-
-                const completionSteps = [
-                    data.description ? 1 : 0,
-                    item.selected_model ? 1 : 0,
-                    products.length > 0 ? 1 : 0,
-                    totalGenerated > 0 ? 1 : 0
-                ].reduce((a, b) => a + b, 0)
-
-                setStats({
-                    totalImages: totalGenerated,
-                    products: products.length,
-                    variations: products.length > 0 ? Math.floor(totalGenerated / products.length) : 0,
-                    completion: Math.floor((completionSteps / 4) * 100)
-                })
+            
+            // Try cache first for instant display
+            const collectionCacheKey = cacheKeys.collection(project.collection.id);
+            const modelStatsCacheKey = cacheKeys.modelStats(project.collection.id);
+            const cachedCollection = dataCache.get(collectionCacheKey);
+            const cachedModelStats = dataCache.get(modelStatsCacheKey);
+            
+            if (cachedCollection) {
+                setCollectionData(cachedCollection);
+                if (cachedModelStats) {
+                    setModelStats(cachedModelStats);
+                }
+                setLoading(false);
             }
 
-            // Fetch model usage statistics
-            try {
-                const modelUsageData = await apiService.getModelUsageStats(project.collection.id, token)
-                if (modelUsageData.success) {
-                    setModelStats({
-                        total_models_used: modelUsageData.total_models_used || 0,
-                        models_breakdown: modelUsageData.models_breakdown || [],
-                        total_generations: modelUsageData.total_generations || 0
+            // Fetch collection and model stats in parallel with caching
+            const [data, modelUsageData] = await Promise.allSettled([
+                dataCache.getOrFetch(
+                    collectionCacheKey,
+                    () => apiService.getCollection(project.collection.id, token),
+                    2 * 60 * 1000 // 2 minutes cache
+                ),
+                dataCache.getOrFetch(
+                    modelStatsCacheKey,
+                    () => apiService.getModelUsageStats(project.collection.id, token).then(r => r.success ? r : null),
+                    2 * 60 * 1000
+                ).catch(() => null)
+            ])
+
+            if (data.status === 'fulfilled') {
+                const collectionData = data.value
+                setCollectionData(collectionData)
+
+                if (collectionData?.items?.[0]) {
+                    const item = collectionData.items[0]
+                    const products = item.product_images || []
+                    const totalGenerated = products.reduce((sum, p) => sum + (p.generated_images?.length || 0), 0)
+
+                    const completionSteps = [
+                        collectionData.description ? 1 : 0,
+                        item.selected_model ? 1 : 0,
+                        products.length > 0 ? 1 : 0,
+                        totalGenerated > 0 ? 1 : 0
+                    ].reduce((a, b) => a + b, 0)
+
+                    setStats({
+                        totalImages: totalGenerated,
+                        products: products.length,
+                        variations: products.length > 0 ? Math.floor(totalGenerated / products.length) : 0,
+                        completion: Math.floor((completionSteps / 4) * 100)
                     })
                 }
-            } catch (err) {
-                console.error('Error fetching model statistics:', err)
+            }
+
+            if (modelUsageData.status === 'fulfilled' && modelUsageData.value?.success) {
+                setModelStats({
+                    total_models_used: modelUsageData.value.total_models_used || 0,
+                    models_breakdown: modelUsageData.value.models_breakdown || [],
+                    total_generations: modelUsageData.value.total_generations || 0
+                })
             }
         } catch (err) {
             console.error('Error loading overview:', err)
@@ -310,46 +336,61 @@ export default function OverviewTab({ project }) {
 
     useEffect(() => {
         loadData()
-    }, [project])
+    }, [project?.collection?.id, token])
 
-    if (loading) {
+    // Calculate generation status counts - memoized (must be before early return)
+    const item = collectionData?.items?.[0] || {}
+    const generationStats = useMemo(() => {
+        const stats = {
+            whiteBackground: 0,
+            backgroundReplace: 0,
+            modelImages: 0,
+            campaignImages: 0,
+            regenerated: 0
+        }
+
+        if (item?.product_images) {
+            item.product_images.forEach(product => {
+                if (product.generated_images) {
+                    product.generated_images.forEach(img => {
+                        if (img.type === 'white_background') stats.whiteBackground++
+                        else if (img.type === 'background_replace') stats.backgroundReplace++
+                        else if (img.type === 'model_image') stats.modelImages++
+                        else if (img.type === 'campaign_image') stats.campaignImages++
+
+                        // Count regenerated images
+                        if (img.regenerated_images) {
+                            stats.regenerated += img.regenerated_images.length
+                        }
+                    })
+                }
+            })
+        }
+        return stats
+    }, [item?.product_images])
+
+    // Show skeleton only if no cached data - never block with spinner
+    if (loading && !collectionData) {
         return (
-            <div className="flex items-center justify-center py-12">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#884cff] mx-auto mb-4"></div>
-                    <p className="text-[#708090]">Loading overview...</p>
+            <div className="space-y-8">
+                <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-8 animate-pulse">
+                    <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+                    <div className="grid grid-cols-2 gap-6">
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="h-20 bg-gray-100 rounded"></div>
+                        ))}
+                    </div>
+                </div>
+                <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-8 animate-pulse">
+                    <div className="h-8 bg-gray-200 rounded w-64 mb-6"></div>
+                    <div className="space-y-4">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="h-24 bg-gray-100 rounded"></div>
+                        ))}
+                    </div>
                 </div>
             </div>
         )
-    }
-
-    const item = collectionData?.items?.[0] || {}
-
-    // Calculate generation status counts
-    const generationStats = {
-        whiteBackground: 0,
-        backgroundReplace: 0,
-        modelImages: 0,
-        campaignImages: 0,
-        regenerated: 0
-    }
-
-    if (item.product_images) {
-        item.product_images.forEach(product => {
-            if (product.generated_images) {
-                product.generated_images.forEach(img => {
-                    if (img.type === 'white_background') generationStats.whiteBackground++
-                    else if (img.type === 'background_replace') generationStats.backgroundReplace++
-                    else if (img.type === 'model_image') generationStats.modelImages++
-                    else if (img.type === 'campaign_image') generationStats.campaignImages++
-
-                    // Count regenerated images
-                    if (img.regenerated_images) {
-                        generationStats.regenerated += img.regenerated_images.length
-                    }
-                })
-            }
-        })
     }
 
     return (
@@ -466,12 +507,15 @@ export default function OverviewTab({ project }) {
                                     <p className="text-sm text-[#708090] mb-2">Uploaded Color Images:</p>
                                     <div className="grid grid-cols-4 gap-4">
                                         {item.uploaded_color_images.map((img, idx) => (
-                                            <img
-                                                key={idx}
-                                                src={img.cloud_url || img.local_url}
-                                                alt={`Color ${idx + 1}`}
-                                                className="w-full h-24 object-cover rounded-lg border border-[#e6e6e6]"
-                                            />
+                                            <div key={idx} className="relative w-full h-24 rounded-lg border border-[#e6e6e6] overflow-hidden">
+                                                <Image
+                                                    src={img.cloud_url || img.local_url}
+                                                    alt={`Color ${idx + 1}`}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="(max-width: 768px) 25vw, 25vw"
+                                                />
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
@@ -502,11 +546,15 @@ export default function OverviewTab({ project }) {
                     {item.selected_model ? (
                         <div className="space-y-3">
                             <div className="flex items-center gap-3">
-                                <img
-                                    src={item.selected_model.cloud || item.selected_model.local}
-                                    alt="Selected Model"
-                                    className="w-20 h-20 object-cover rounded-lg border-2 border-[#884cff]"
-                                />
+                                <div className="relative w-20 h-20 rounded-lg border-2 border-[#884cff] overflow-hidden">
+                                    <Image
+                                        src={item.selected_model.cloud || item.selected_model.local}
+                                        alt="Selected Model"
+                                        fill
+                                        className="object-cover"
+                                        sizes="80px"
+                                    />
+                                </div>
                                 <div>
                                     <p className="text-sm font-medium text-[#1a1a1a] capitalize">
                                         {item.selected_model.type === 'ai' ? 'AI Model' : 'Real Model'}
@@ -657,12 +705,15 @@ const SelectionSection = ({ title, icon, selected, uploadedImages }) => (
                 <p className="text-sm text-[#708090] mb-2">Uploaded {title} Images:</p>
                 <div className="grid grid-cols-4 gap-4">
                     {uploadedImages.map((img, idx) => (
-                        <img
-                            key={idx}
-                            src={img.cloud_url || img.local_url}
-                            alt={`${title} ${idx + 1}`}
-                            className="w-full h-24 object-cover rounded-lg border border-[#e6e6e6]"
-                        />
+                        <div key={idx} className="relative w-full h-24 rounded-lg border border-[#e6e6e6] overflow-hidden">
+                            <Image
+                                src={img.cloud_url || img.local_url}
+                                alt={`${title} ${idx + 1}`}
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 768px) 25vw, 25vw"
+                            />
+                        </div>
                     ))}
                 </div>
             </div>

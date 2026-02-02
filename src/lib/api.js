@@ -186,7 +186,6 @@ async request(endpoint, options = {}) {
 
     // Project endpoints
     async getProjects(token) {
-        console.log('Getting projects with token:', token);
         return this.request('/probackendapp/api/projects/', {
             headers: {
                 'Authorization': `Bearer ${token}`,
