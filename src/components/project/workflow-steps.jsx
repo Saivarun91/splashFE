@@ -2,7 +2,7 @@
 
 import { Check } from "lucide-react"
 
-export function WorkflowSteps({ activeStep, setActiveStep, savedSteps, isStepUnlocked, isGenerating = false }) {
+export function WorkflowSteps({ activeStep, setActiveStep, savedSteps, setSavedSteps, isStepUnlocked, isGenerating = false }) {
     const steps = [
         { number: 1, title: "Brief & Concept" },
         { number: 2, title: "Moodboard Setup" },
@@ -35,6 +35,7 @@ export function WorkflowSteps({ activeStep, setActiveStep, savedSteps, isStepUnl
                                         onClick={() => {
                                             if (canClick) {
                                                 setActiveStep(step.number)
+                                               
                                             }
                                         }}
                                         onKeyDown={(e) => {

@@ -546,26 +546,68 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
         }
     };
 
-    // Prefetch route on hover for instant navigation
+    // Prefetch route on hover for instant navigation - aggressive prefetching
     const handleLinkHover = useCallback((path) => {
         if (!isGenerating && path) {
             router.prefetch(path);
         }
     }, [router, isGenerating]);
 
-    // Prefetch common routes on mount for instant navigation
+    // Aggressive prefetching: Prefetch ALL dashboard routes on mount for instant navigation
     useEffect(() => {
-        if (!isGenerating) {
-            // Prefetch most common routes
-            const commonRoutes = [
-                '/dashboard',
-                '/dashboard/projects',
-                '/dashboard/images',
-                '/dashboard/projects/create'
-            ];
-            commonRoutes.forEach(route => router.prefetch(route));
+        if (!isGenerating && token && navItems.length > 0) {
+            // Collect all routes from nav items (including children) - memoized
+            const allRoutes = new Set();
+            navItems.forEach(item => {
+                if (item.path) {
+                    allRoutes.add(item.path);
+                }
+                if (item.children) {
+                    item.children.forEach(child => {
+                        if (child.path) {
+                            allRoutes.add(child.path);
+                        }
+                    });
+                }
+            });
+            
+            // Prefetch all routes for instant navigation - batch prefetch
+            Array.from(allRoutes).forEach(route => {
+                router.prefetch(route);
+            });
         }
-    }, [router, isGenerating]);
+    }, [router, isGenerating, token]); // Removed navItems from deps to prevent loops
+
+    // Prefetch on sidebar hover - even more aggressive prefetching
+    const prefetchAllRoutes = useCallback(() => {
+        if (!isGenerating && token && navItems.length > 0) {
+            const allRoutes = new Set();
+            navItems.forEach(item => {
+                if (item.path) allRoutes.add(item.path);
+                if (item.children) {
+                    item.children.forEach(child => {
+                        if (child.path) allRoutes.add(child.path);
+                    });
+                }
+            });
+            
+            // Prefetch all routes when user hovers over sidebar
+            Array.from(allRoutes).forEach(route => {
+                router.prefetch(route);
+            });
+        }
+    }, [router, isGenerating, token, navItems]);
+
+    // Prefetch on hover with debounce to avoid excessive prefetching
+    useEffect(() => {
+        if (hovered) {
+            const timeoutId = setTimeout(() => {
+                prefetchAllRoutes();
+            }, 100); // Small delay to batch prefetch requests
+            
+            return () => clearTimeout(timeoutId);
+        }
+    }, [hovered, prefetchAllRoutes]);
 
     const isActive = (path, hasChildren = false) => {
         if (hasChildren) {
@@ -589,7 +631,7 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
             <div className="flex items-center h-16 px-3 border-b border-gray-800">
                 {isGenerating ? (
                     <div className="flex items-center gap-2 flex-1 group cursor-not-allowed opacity-50">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center transition-transform duration-200">
+                        <div className="w-10 h-10 rounded-xl bg-linear-to-r from-indigo-500 to-purple-500 flex items-center justify-center transition-transform duration-200">
                             <Sparkles className="w-5 h-5 text-white" />
                         </div>
                         {isExpanded && (
@@ -600,7 +642,7 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                     </div>
                 ) : (
                     <Link href="/dashboard" className="flex items-center gap-2 flex-1 group">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+                        <div className="w-10 h-10 rounded-xl bg-linear-to-r from-indigo-500 to-purple-500 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
                             <Sparkles className="w-5 h-5 text-white" />
                         </div>
                         {isExpanded && (

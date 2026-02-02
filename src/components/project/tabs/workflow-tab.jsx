@@ -41,6 +41,7 @@ export function WorkflowTab({ project }) {
     // Step 1 is always accessible, but not necessarily saved
     const [savedSteps, setSavedSteps] = useState(new Set())
 
+    console.log("savedSteps", savedSteps)
     // State to hold current form data from BriefAndConcept
     const [briefFormData, setBriefFormData] = useState({
         description: "",
@@ -202,6 +203,13 @@ export function WorkflowTab({ project }) {
                             (item.selected_themes && item.selected_themes.length > 0) ||
                             (item.selected_backgrounds && item.selected_backgrounds.length > 0) ||
                             (item.selected_colors && item.selected_colors.length > 0) ||
+                            (item.selected_poses && item.selected_poses.length > 0) ||
+                            (item.selected_locations && item.selected_locations.length > 0) ||
+                            (item.uploaded_theme_images && item.uploaded_theme_images.length > 0) ||
+                            (item.uploaded_background_images && item.uploaded_background_images.length > 0) ||
+                            (item.uploaded_pose_images && item.uploaded_pose_images.length > 0) ||
+                            (item.uploaded_location_images && item.uploaded_location_images.length > 0) ||
+                            (item.uploaded_color_images && item.uploaded_color_images.length > 0) ||
                             (item.global_instructions && item.global_instructions.trim())
                         )
                         if (hasSelections) {
@@ -246,6 +254,7 @@ export function WorkflowTab({ project }) {
 
         fetchCollectionData()
     }, [project?.collection?.id, token])
+    console.log("step steps : ", savedSteps)
 
     const handleStepSave = async (stepData) => {
         try {
@@ -532,6 +541,7 @@ export function WorkflowTab({ project }) {
                 savedSteps={savedSteps}
                 isStepUnlocked={isStepUnlocked}
                 isGenerating={isGenerating}
+                setSavedSteps={setSavedSteps}
             />
 
             {renderStepContent()}

@@ -47,31 +47,38 @@ export default function Dashboard() {
             try {
                 setLoading(true);
                 
-                // Try cache first for instant display
+                // Use getOrFetch for automatic cache-first strategy + request deduplication
                 const cacheKey = cacheKeys.projectsList();
-                const cached = dataCache.get(cacheKey);
-                if (cached) {
-                    setProjects(cached);
-                    setLoading(false);
-                }
-
-                // Fetch fresh data
-                const response = await apiService.getProjects(token);
-                const projectsData = response.projects || [];
-                setProjects(projectsData);
+                const projectsData = await dataCache.getOrFetch(
+                    cacheKey,
+                    async () => {
+                        const response = await apiService.getProjects(token);
+                        return response.projects || [];
+                    },
+                    2 * 60 * 1000 // 2 minutes cache
+                );
                 
-                // Cache for instant future loads
-                dataCache.set(cacheKey, projectsData, 2 * 60 * 1000); // 2 minutes
+                setProjects(projectsData);
+                setLoading(false);
 
-                // Prefetch project detail pages for instant navigation
-                projectsData.slice(0, 5).forEach(project => {
+                // Prefetch project detail pages for instant navigation - batch prefetch
+                // Prefetch top 5 projects immediately, rest in background
+                const projectsToPrefetch = projectsData.slice(0, 5);
+                projectsToPrefetch.forEach(project => {
                     const projectPath = `/dashboard/projects/${project.slug || project.id}`;
                     router.prefetch(projectPath);
                 });
+                
+                // Prefetch remaining projects in background (non-blocking)
+                setTimeout(() => {
+                    projectsData.slice(5, 10).forEach(project => {
+                        const projectPath = `/dashboard/projects/${project.slug || project.id}`;
+                        router.prefetch(projectPath);
+                    });
+                }, 100);
             } catch (err) {
                 console.error("Error fetching projects:", err);
                 setError(err.message);
-            } finally {
                 setLoading(false);
             }
         };
@@ -148,13 +155,13 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 text-gray-900">
+        <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 text-gray-900">
             <div className="max-w-7xl mx-auto p-6 space-y-8 animate-fade-in">
 
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">{t("dashboard.projects")}</h1>
+                        <h1 className="text-4xl font-bold bg-linear-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">{t("dashboard.projects")}</h1>
                         <p className="text-gray-600">{t("dashboard.organizeCampaigns")}</p>
                     </div>
                     <Link href="/dashboard/projects/create">

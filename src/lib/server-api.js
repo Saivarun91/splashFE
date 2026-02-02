@@ -7,10 +7,15 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 /**
- * Server-side fetch with caching support
+ * Server-side fetch with aggressive caching for instant navigation
+ * Uses force-cache + revalidate for optimal performance
  */
 async function serverFetch(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
+    
+    // Determine cache strategy
+    const cacheStrategy = options.cache || 'force-cache'; // Default to aggressive caching
+    const revalidateTime = options.revalidate || 60; // Default 60 seconds
     
     const config = {
         ...options,
@@ -18,9 +23,11 @@ async function serverFetch(endpoint, options = {}) {
             'Content-Type': 'application/json',
             ...options.headers,
         },
-        // Next.js fetch caching
+        // Next.js fetch caching - aggressive caching for instant navigation
+        cache: cacheStrategy,
         next: {
-            revalidate: options.revalidate || 60, // Default 60 seconds
+            revalidate: cacheStrategy === 'no-store' ? 0 : revalidateTime,
+            tags: options.tags || [], // Cache tags for selective revalidation
             ...options.next,
         },
     };
@@ -67,7 +74,9 @@ export async function getProjectsServer(token, options = {}) {
         headers: {
             'Authorization': `Bearer ${token}`,
         },
-        revalidate: options.revalidate || 30, // Cache for 30 seconds
+        cache: 'force-cache', // Aggressive caching - projects list changes infrequently
+        revalidate: options.revalidate || 60, // Revalidate every 60 seconds
+        tags: ['projects', `projects-${token}`], // Tag for selective revalidation
         ...options,
     });
 }
@@ -85,7 +94,9 @@ export async function getProjectServer(projectId, token, options = {}) {
         headers: {
             'Authorization': `Bearer ${token}`,
         },
-        revalidate: options.revalidate || 10, // Cache for 10 seconds
+        cache: 'force-cache', // Cache project details aggressively
+        revalidate: options.revalidate || 30, // Revalidate every 30 seconds
+        tags: ['projects', `project-${projectId}`, `project-${projectId}-${token}`],
         ...options,
     });
 }
@@ -102,7 +113,9 @@ export async function getUserRoleServer(projectId, token) {
         headers: {
             'Authorization': `Bearer ${token}`,
         },
-        revalidate: 30,
+        cache: 'force-cache', // Cache user roles - they change infrequently
+        revalidate: 60, // Revalidate every 60 seconds
+        tags: [`project-role-${projectId}`, `project-role-${projectId}-${token}`],
     });
 }
 
@@ -119,7 +132,57 @@ export async function getCollectionServer(collectionId, token, options = {}) {
         headers: {
             'Authorization': `Bearer ${token}`,
         },
-        revalidate: options.revalidate || 5, // Cache for 5 seconds (more dynamic)
+        cache: 'force-cache', // Cache collections - reuse across tabs
+        revalidate: options.revalidate || 30, // Revalidate every 30 seconds
+        tags: ['collections', `collection-${collectionId}`, `collection-${collectionId}-${token}`],
         ...options,
+    });
+}
+
+/**
+ * Get user profile (server-side) - cached aggressively
+ */
+export async function getUserProfileServer(token) {
+    if (!token) return null;
+    
+    return serverFetch('/probackendapp/api/user/profile/', {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+        cache: 'force-cache', // User profile changes infrequently
+        revalidate: 300, // Revalidate every 5 minutes
+        tags: ['user-profile', `user-profile-${token}`],
+    });
+}
+
+/**
+ * Get recent images (server-side)
+ */
+export async function getRecentImagesServer(token, limit = 5) {
+    if (!token) return null;
+    
+    return serverFetch(`/probackendapp/api/images/recent/?limit=${limit}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+        cache: 'force-cache',
+        revalidate: 30, // Revalidate every 30 seconds
+        tags: ['recent-images', `recent-images-${token}`],
+    });
+}
+
+/**
+ * Get organization (server-side)
+ */
+export async function getOrganizationServer(organizationId, token) {
+    if (!token || !organizationId) return null;
+    
+    return serverFetch(`/probackendapp/api/organizations/${organizationId}/`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+        cache: 'force-cache',
+        revalidate: 300, // Revalidate every 5 minutes
+        tags: ['organizations', `organization-${organizationId}`, `organization-${organizationId}-${token}`],
     });
 }

@@ -9,6 +9,7 @@ class ApiService {
     }
 
     // Low-level request helper (uses fetch)
+    // OPTIMIZED: Supports Next.js fetch caching options for client-side requests
 async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
 
@@ -19,7 +20,11 @@ async request(endpoint, options = {}) {
 
     const config = {
         ...options,
-        headers
+        headers,
+        // Support Next.js fetch caching options (for client-side requests)
+        // Note: Client-side fetch caching is limited, but we can pass options through
+        ...(options.next && { next: options.next }),
+        ...(options.cache && { cache: options.cache }),
     };
 
     // Auto-add JSON content-type ONLY if the body is a plain JSON string
@@ -184,20 +189,24 @@ async request(endpoint, options = {}) {
         });
     }
 
-    // Project endpoints
-    async getProjects(token) {
+    // Project endpoints - OPTIMIZED with caching hints
+    async getProjects(token, options = {}) {
         return this.request('/probackendapp/api/projects/', {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
+            // Pass through caching options for better performance
+            ...options,
         });
     }
 
-    async getProject(projectId, token) {
+    async getProject(projectId, token, options = {}) {
         return this.request(`/probackendapp/api/projects/${projectId}/`, {
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
             },
+            // Pass through caching options
+            ...options,
         });
     }
 
@@ -240,15 +249,15 @@ async request(endpoint, options = {}) {
         });
     }
 
-    // Collection endpoints
-    async getCollection(collectionId, token) {
+    // Collection endpoints - OPTIMIZED with caching
+    async getCollection(collectionId, token, options = {}) {
         return this.request(`/probackendapp/api/collections/${collectionId}/`, {
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
             },
-        }
-
-        );
+            // Pass through caching options for reuse across tabs
+            ...options,
+        });
     }
 
     async updateCollectionDescription(projectId, description, uploadedImage, targetAudience = null, campaignSeason = null) {
@@ -708,12 +717,13 @@ async request(endpoint, options = {}) {
     }
 
     // Role and Permission endpoints
-    async getUserRole(projectId, token) {
+    async getUserRole(projectId, token, options = {}) {
         return this.request(`/probackendapp/api/projects/${projectId}/user-role/`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
             },
+            ...options,
         });
     }
     async removeModel(collectionId, type, model, token) {
@@ -728,12 +738,13 @@ async request(endpoint, options = {}) {
 
 
     // Model usage statistics
-    async getModelUsageStats(collectionId, token) {
+    async getModelUsageStats(collectionId, token, options = {}) {
         return this.request(`/probackendapp/api/collections/${collectionId}/model-usage-stats/`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
             },
+            ...options,
         });
     }
 
@@ -1021,11 +1032,12 @@ async request(endpoint, options = {}) {
         });
     }
 
-    async getCollectionHistory(collectionId, token) {
+    async getCollectionHistory(collectionId, token, options = {}) {
         return this.get(`/probackendapp/api/collections/${collectionId}/history/`, {
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
             },
+            ...options,
         });
     }
 
