@@ -383,7 +383,9 @@
     "additionalMeasurements": "Additional Measurements",
     "additionalMeasurementsPlaceholder": "E.g., Length: 5cm, Width: 3cm",
     "generatedModel": "Generated Model",
-    "imageId": "Image ID"
+    "imageId": "Image ID",
+    "uploadProductImage": "Upload product image",
+    "mayTakeFewMoments": "This may take few moments. Please wait..."
   },
   "errors": {
     "generic": "An error occurred. Please try again.",
