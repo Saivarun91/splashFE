@@ -16,11 +16,11 @@ import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
 import { canEditProject, isProjectOwner } from "@/lib/permissions"
 import { useImageGeneration } from "@/context/ImageGenerationContext"
+import { dataCache, cacheKeys } from "@/lib/data-cache"
 
 export function WorkflowTab({ project }) {
     // Ref to ProductUploadPage to access selections
     const productUploadPageRef = useRef(null)
-    console.log("roject : ", project)
     const [activeStep, setActiveStep] = useState(1)
     const [collectionData, setCollectionData] = useState(null)
     const [loading, setLoading] = useState(false)
@@ -31,12 +31,9 @@ export function WorkflowTab({ project }) {
 
     // Check if user can edit
     const canEdit = canEditProject(project, user)
-    console.log("can Edit : ", canEdit)
     const userRole = project.userRole
-    console.log("userRole : ", userRole)
     // Check if user is owner (for generate button in step 5)
     const isOwner = isProjectOwner(project, user)
-    console.log("isOwner : ", isOwner)
     // State for sequential display logic
     const [suggestionsRequested, setSuggestionsRequested] = useState(false)
 
@@ -44,6 +41,7 @@ export function WorkflowTab({ project }) {
     // Step 1 is always accessible, but not necessarily saved
     const [savedSteps, setSavedSteps] = useState(new Set())
 
+    console.log("savedSteps", savedSteps)
     // State to hold current form data from BriefAndConcept
     const [briefFormData, setBriefFormData] = useState({
         description: "",
@@ -115,7 +113,6 @@ export function WorkflowTab({ project }) {
 
                 if (description && description.trim()) {
                     setSuccessMessage('AI suggestions updated successfully!')
-                    console.log('AI suggestions generated/updated successfully:', response.collection.items?.[0])
                 } else {
                     setSuccessMessage('Project settings saved successfully!')
                 }
@@ -142,14 +139,27 @@ export function WorkflowTab({ project }) {
         }
     }
 
-    // Fetch collection data when project changes
-    console.log("suggestionsRequested", suggestionsRequested)
+    // Fetch collection data when project changes - with caching to prevent duplicate fetches
     useEffect(() => {
         const fetchCollectionData = async () => {
             if (project?.collection?.id && token) {
                 try {
                     setLoading(true)
-                    const data = await apiService.getCollection(project.collection.id, token)
+                    
+                    // Try cache first for instant display
+                    const collectionCacheKey = cacheKeys.collection(project.collection.id);
+                    const cached = dataCache.get(collectionCacheKey);
+                    if (cached) {
+                        setCollectionData(cached);
+                        setLoading(false);
+                    }
+                    
+                    // Fetch fresh data with caching
+                    const data = await dataCache.getOrFetch(
+                        collectionCacheKey,
+                        () => apiService.getCollection(project.collection.id, token),
+                        2 * 60 * 1000 // 2 minutes cache
+                    )
                     setCollectionData(data)
 
                     // Initialize saved steps based on backend data
@@ -193,6 +203,13 @@ export function WorkflowTab({ project }) {
                             (item.selected_themes && item.selected_themes.length > 0) ||
                             (item.selected_backgrounds && item.selected_backgrounds.length > 0) ||
                             (item.selected_colors && item.selected_colors.length > 0) ||
+                            (item.selected_poses && item.selected_poses.length > 0) ||
+                            (item.selected_locations && item.selected_locations.length > 0) ||
+                            (item.uploaded_theme_images && item.uploaded_theme_images.length > 0) ||
+                            (item.uploaded_background_images && item.uploaded_background_images.length > 0) ||
+                            (item.uploaded_pose_images && item.uploaded_pose_images.length > 0) ||
+                            (item.uploaded_location_images && item.uploaded_location_images.length > 0) ||
+                            (item.uploaded_color_images && item.uploaded_color_images.length > 0) ||
                             (item.global_instructions && item.global_instructions.trim())
                         )
                         if (hasSelections) {
@@ -237,6 +254,7 @@ export function WorkflowTab({ project }) {
 
         fetchCollectionData()
     }, [project?.collection?.id, token])
+    console.log("step steps : ", savedSteps)
 
     const handleStepSave = async (stepData) => {
         try {
@@ -272,8 +290,6 @@ export function WorkflowTab({ project }) {
                         )
 
                         if (response.success) {
-                            console.log('Selections saved successfully:', currentSelections)
-                            console.log('Generated prompts:', response.generated_prompts)
 
                             setSuccessMessage(response.message || 'Selections saved and prompts generated successfully!')
 
@@ -301,7 +317,6 @@ export function WorkflowTab({ project }) {
                             )
 
                             if (response.success) {
-                                console.log("✅ Model saved in WorkflowTab:", response.selected_model)
                                 // Mark step 3 as saved - this will automatically unlock step 4 via isStepUnlocked
                                 setSavedSteps(prev => new Set([...prev, 3]))
                                 const updatedData = await apiService.getCollection(collectionData.id, token)
@@ -526,6 +541,7 @@ export function WorkflowTab({ project }) {
                 savedSteps={savedSteps}
                 isStepUnlocked={isStepUnlocked}
                 isGenerating={isGenerating}
+                setSavedSteps={setSavedSteps}
             />
 
             {renderStepContent()}

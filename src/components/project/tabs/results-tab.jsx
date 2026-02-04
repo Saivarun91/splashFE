@@ -1,27 +1,21 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import Image from "next/image"
 import { Download, Image as ImageIcon, Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductImagesDisplay } from "../product-images-display"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
+import { dataCache, cacheKeys } from "@/lib/data-cache"
 
 export default function ResultsTab({ project }) {
 
     const [collectionData, setCollectionData] = useState(null)
     const [loading, setLoading] = useState(true)
-    const [stats, setStats] = useState({
-        totalImages: 0,
-        products: 0,
-        variations: 0,
-        completion: 0
-    })
-    const [modelStats, setModelStats] = useState({
-        total_models_used: 0,
-        models_breakdown: [],
-        total_generations: 0
-    })
+    // Don't initialize with 0 - use null to indicate "not loaded yet"
+    const [stats, setStats] = useState(null)
+    const [modelStats, setModelStats] = useState(null)
     const [historyData, setHistoryData] = useState(null)
     const [historyLoading, setHistoryLoading] = useState(false)
     const [isDownloading, setIsDownloading] = useState(false)
@@ -31,83 +25,181 @@ export default function ResultsTab({ project }) {
     const { token } = useAuth()
 
     const loadData = async () => {
-        if (!project?.collection?.id) return;
+        if (!project?.collection?.id || !token) return;
 
         setLoading(true);
         try {
-            const data = await apiService.getCollection(project.collection.id, token);
-            console.log("data", data);
-            setCollectionData(data);
+            // Try cache first for instant display
+            const collectionCacheKey = cacheKeys.collection(project.collection.id);
+            const modelStatsCacheKey = cacheKeys.modelStats(project.collection.id);
+            const historyCacheKey = cacheKeys.collectionHistory(project.collection.id);
+            
+            const cachedCollection = dataCache.get(collectionCacheKey);
+            const cachedModelStats = dataCache.get(modelStatsCacheKey);
+            const cachedHistory = dataCache.get(historyCacheKey);
+            
+            if (cachedCollection) {
+                setCollectionData(cachedCollection);
+                
+                // Calculate stats from cached collection
+                if (cachedCollection?.items?.[0]) {
+                    const item = cachedCollection.items[0];
+                    const products = item.product_images || [];
+                    const totalGenerated = products.reduce(
+                        (sum, p) => sum + (p.generated_images?.length || 0),
+                        0
+                    );
 
-            // Calculate stats
-            if (data?.items?.[0]) {
-                const item = data.items[0];
-                const products = item.product_images || [];
-                const totalGenerated = products.reduce(
-                    (sum, p) => sum + (p.generated_images?.length || 0),
-                    0
-                );
+                    const completionSteps = [
+                        cachedCollection.description ? 1 : 0,
+                        item.selected_model ? 1 : 0,
+                        products.length > 0 ? 1 : 0,
+                        totalGenerated > 0 ? 1 : 0
+                    ].reduce((a, b) => a + b, 0);
 
-                const completionSteps = [
-                    data.description ? 1 : 0,
-                    item.selected_model ? 1 : 0,
-                    products.length > 0 ? 1 : 0,
-                    totalGenerated > 0 ? 1 : 0
-                ].reduce((a, b) => a + b, 0);
+                    setStats({
+                        totalImages: totalGenerated,
+                        products: products.length,
+                        variations: products.length > 0 ? Math.floor(totalGenerated / products.length) : 0,
+                        completion: Math.floor((completionSteps / 4) * 100)
+                    });
+                }
+                
+                if (cachedModelStats) {
+                    setModelStats(cachedModelStats);
+                } else {
+                    // Set default model stats if not cached
+                    setModelStats({
+                        total_models_used: 0,
+                        models_breakdown: [],
+                        total_generations: 0
+                    });
+                }
+                
+                if (cachedHistory) {
+                    setHistoryData(cachedHistory);
+                }
+                
+                // Don't set loading to false here - let fresh data update it
+                // This ensures we show cached data instantly but still fetch fresh data
+            }
 
-                setStats({
-                    totalImages: totalGenerated,
-                    products: products.length,
-                    variations: products.length > 0 ? Math.floor(totalGenerated / products.length) : 0,
-                    completion: Math.floor((completionSteps / 4) * 100)
+            // Fetch all data in parallel with caching for better performance
+            const [dataResult, modelUsageResult, historyResult] = await Promise.allSettled([
+                dataCache.getOrFetch(
+                    collectionCacheKey,
+                    () => apiService.getCollection(project.collection.id, token),
+                    2 * 60 * 1000
+                ),
+                dataCache.getOrFetch(
+                    modelStatsCacheKey,
+                    () => apiService.getModelUsageStats(project.collection.id, token).then(r => r.success ? r : null),
+                    2 * 60 * 1000
+                ).catch(() => null),
+                dataCache.getOrFetch(
+                    historyCacheKey,
+                    () => apiService.getCollectionHistory(project.collection.id, token).then(r => r.success ? r : null),
+                    2 * 60 * 1000
+                ).catch(() => null)
+            ]);
+
+            // Process collection data
+            if (dataResult.status === 'fulfilled') {
+                const data = dataResult.value;
+                setCollectionData(data);
+
+                // Calculate stats
+                if (data?.items?.[0]) {
+                    const item = data.items[0];
+                    const products = item.product_images || [];
+                    const totalGenerated = products.reduce(
+                        (sum, p) => sum + (p.generated_images?.length || 0),
+                        0
+                    );
+
+                    const completionSteps = [
+                        data.description ? 1 : 0,
+                        item.selected_model ? 1 : 0,
+                        products.length > 0 ? 1 : 0,
+                        totalGenerated > 0 ? 1 : 0
+                    ].reduce((a, b) => a + b, 0);
+
+                    setStats({
+                        totalImages: totalGenerated,
+                        products: products.length,
+                        variations: products.length > 0 ? Math.floor(totalGenerated / products.length) : 0,
+                        completion: Math.floor((completionSteps / 4) * 100)
+                    });
+                } else {
+                    // No data - set to 0 explicitly (not null)
+                    setStats({
+                        totalImages: 0,
+                        products: 0,
+                        variations: 0,
+                        completion: 0
+                    });
+                }
+            }
+
+            // Process model usage statistics
+            if (modelUsageResult.status === 'fulfilled' && modelUsageResult.value?.success) {
+                setModelStats({
+                    total_models_used: modelUsageResult.value.total_models_used || 0,
+                    models_breakdown: modelUsageResult.value.models_breakdown || [],
+                    total_generations: modelUsageResult.value.total_generations || 0
+                });
+            } else {
+                // No model stats - set to 0 explicitly
+                setModelStats({
+                    total_models_used: 0,
+                    models_breakdown: [],
+                    total_generations: 0
                 });
             }
 
-            // Fetch model usage statistics
-            try {
-                const modelUsageData = await apiService.getModelUsageStats(project.collection.id, token);
-                if (modelUsageData.success) {
-                    setModelStats({
-                        total_models_used: modelUsageData.total_models_used || 0,
-                        models_breakdown: modelUsageData.models_breakdown || [],
-                        total_generations: modelUsageData.total_generations || 0
-                    });
-                }
-            } catch (err) {
-                console.error('Error fetching model statistics:', err);
-            }
+            // Process history data
+            setHistoryLoading(true);
+            if (historyResult.status === 'fulfilled' && historyResult.value?.success) {
+                const historyResponse = historyResult.value;
+                const historyProjectId = historyResponse.project_id;
+                const currentProjectId = project?.id;
 
-            // Fetch collection history (filtered by project)
-            try {
-                setHistoryLoading(true);
-                const historyResponse = await apiService.getCollectionHistory(project.collection.id, token);
-                if (historyResponse.success) {
-                    // Verify that the history belongs to the current project
-                    const historyProjectId = historyResponse.project_id;
-                    const currentProjectId = project?.id;
-
-                    if (historyProjectId && currentProjectId && historyProjectId === currentProjectId) {
-                        // History matches the current project
-                        setHistoryData(historyResponse);
-                    } else if (!historyProjectId && historyResponse.collection_id === project.collection.id) {
-                        // If no project_id in response but collection matches, still show it
-                        setHistoryData(historyResponse);
-                    } else {
-                        // Project mismatch - don't show history
-                        console.warn('History project ID mismatch. Expected:', currentProjectId, 'Got:', historyProjectId);
-                        setHistoryData(null);
-                    }
+                if (historyProjectId && currentProjectId && historyProjectId === currentProjectId) {
+                    setHistoryData(historyResponse);
+                } else if (!historyProjectId && historyResponse.collection_id === project.collection.id) {
+                    setHistoryData(historyResponse);
                 } else {
                     setHistoryData(null);
                 }
-            } catch (err) {
-                console.error('Error fetching collection history:', err);
+            } else {
                 setHistoryData(null);
-            } finally {
-                setHistoryLoading(false);
+            }
+            setHistoryLoading(false);
+            
+            // Cache successful results
+            if (dataResult.status === 'fulfilled') {
+                dataCache.set(collectionCacheKey, dataResult.value, 2 * 60 * 1000);
+            }
+            if (modelUsageResult.status === 'fulfilled' && modelUsageResult.value?.success) {
+                dataCache.set(modelStatsCacheKey, modelUsageResult.value, 2 * 60 * 1000);
+            }
+            if (historyResult.status === 'fulfilled' && historyResult.value?.success) {
+                dataCache.set(historyCacheKey, historyResult.value, 2 * 60 * 1000);
             }
         } catch (err) {
             console.error("Error loading results:", err);
+            // Set defaults on error
+            setStats({
+                totalImages: 0,
+                products: 0,
+                variations: 0,
+                completion: 0
+            });
+            setModelStats({
+                total_models_used: 0,
+                models_breakdown: [],
+                total_generations: 0
+            });
         } finally {
             setLoading(false);
         }
@@ -116,7 +208,7 @@ export default function ResultsTab({ project }) {
 
     useEffect(() => {
         loadData()
-    }, [project])
+    }, [project?.collection?.id, project?.id, token])
 
     // Reset to page 1 when filter changes
     useEffect(() => {
@@ -261,7 +353,6 @@ export default function ResultsTab({ project }) {
 
     const handleDownloadAll = () => {
         if (isDownloading) {
-            console.log('Download already in progress...');
             return;
         }
 
@@ -372,7 +463,6 @@ export default function ResultsTab({ project }) {
     const handleDownloadAllHistory = () => {
         if (!historyData?.history_by_product) return;
         if (isDownloading) {
-            console.log('Download already in progress...');
             return;
         }
 
@@ -421,18 +511,12 @@ export default function ResultsTab({ project }) {
         });
     }
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center py-12">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#884cff] mx-auto mb-4"></div>
-                    <p className="text-[#708090]">Loading results...</p>
-                </div>
-            </div>
-        )
-    }
-
-    const hasResults = stats.totalImages > 0
+    // Show skeleton only if no cached data - never block with spinner
+    // Don't show 0 values - show skeletons until data is loaded
+    const isLoading = loading && !collectionData && !stats && !modelStats;
+    
+    // Only show stats if data is loaded (not null)
+    const hasResults = stats?.totalImages > 0 || false
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -471,47 +555,65 @@ export default function ResultsTab({ project }) {
 
     return (
         <div>
-            {/* Stats Cards - Matching Overview Tab */}
+            {/* Stats Cards - Show skeletons until data loads (never show 0 values) */}
             <div className="grid grid-cols-4 gap-6 mb-8">
-                <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                            <ImageIcon className="w-5 h-5 text-[#884cff]" />
+                {isLoading ? (
+                    // Show skeleton loaders instead of 0 values
+                    <>
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6 animate-pulse">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                </div>
+                                <div className="h-8 bg-gray-200 rounded w-16"></div>
+                            </div>
+                        ))}
+                    </>
+                ) : (
+                    // Show actual stats only when data is loaded
+                    <>
+                        <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
+                                    <ImageIcon className="w-5 h-5 text-[#884cff]" />
+                                </div>
+                                <p className="text-sm text-[#708090]">Total Images</p>
+                            </div>
+                            <p className="text-3xl font-bold text-[#884cff]">{modelStats?.total_generations ?? 0}</p>
                         </div>
-                        <p className="text-sm text-[#708090]">Total Images</p>
-                    </div>
-                    <p className="text-3xl font-bold text-[#884cff]">{modelStats.total_generations}</p>
-                </div>
 
-                <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                            <span className="text-xl">📦</span>
+                        <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
+                                    <span className="text-xl">📦</span>
+                                </div>
+                                <p className="text-sm text-[#708090]">Products</p>
+                            </div>
+                            <p className="text-3xl font-bold text-[#884cff]">{stats?.products ?? 0}</p>
                         </div>
-                        <p className="text-sm text-[#708090]">Products</p>
-                    </div>
-                    <p className="text-3xl font-bold text-[#884cff]">{stats.products}</p>
-                </div>
 
-                <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                            <span className="text-xl">👤</span>
+                        <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
+                                    <span className="text-xl">👤</span>
+                                </div>
+                                <p className="text-sm text-[#708090]">Total Models Used</p>
+                            </div>
+                            <p className="text-3xl font-bold text-[#884cff]">{modelStats?.total_models_used ?? 0}</p>
                         </div>
-                        <p className="text-sm text-[#708090]">Total Models Used</p>
-                    </div>
-                    <p className="text-3xl font-bold text-[#884cff]">{modelStats.total_models_used}</p>
-                </div>
 
-                <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                            <span className="text-xl">✓</span>
+                        <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
+                                    <span className="text-xl">✓</span>
+                                </div>
+                                <p className="text-sm text-[#708090]">Completion</p>
+                            </div>
+                            <p className="text-3xl font-bold text-[#884cff]">{stats?.completion ?? 0}%</p>
                         </div>
-                        <p className="text-sm text-[#708090]">Completion</p>
-                    </div>
-                    <p className="text-3xl font-bold text-[#884cff]">{stats.completion}%</p>
-                </div>
+                    </>
+                )}
             </div>
 
 
@@ -540,7 +642,42 @@ export default function ResultsTab({ project }) {
 
 
             {/* Product Images Display */}
-            {hasResults ? (
+            {loading && !collectionData ? (
+                // Show skeleton loaders while images are loading
+                <div className="mb-12 space-y-8">
+                    {/* Header Skeleton */}
+                    <div className="flex items-center justify-between mb-8 animate-pulse">
+                        <div className="space-y-2">
+                            <div className="h-7 bg-gray-200 rounded w-64"></div>
+                            <div className="h-4 bg-gray-200 rounded w-80"></div>
+                        </div>
+                        <div className="h-10 w-32 bg-gray-200 rounded-full"></div>
+                    </div>
+                    
+                    {/* Product Sections Skeleton - Matching ProductImagesDisplay structure */}
+                    {Array.from({ length: 2 }).map((_, productIdx) => (
+                        <div key={productIdx} className="bg-white border-2 border-[#e6e6e6] rounded-xl p-6 space-y-4 animate-pulse">
+                            {/* Product Header Skeleton */}
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-5 bg-gray-200 rounded w-48"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                                </div>
+                            </div>
+                            
+                            {/* Images Grid Skeleton - Matching ProductImagesDisplay grid layout */}
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                {Array.from({ length: 5 }).map((_, imgIdx) => (
+                                    <div key={imgIdx} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                                        <div className="w-full h-full bg-gray-200"></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : hasResults ? (
                 <ProductImagesDisplay
                     collectionData={collectionData}
                     showRegenerate={true}
@@ -657,17 +794,17 @@ export default function ResultsTab({ project }) {
                                 <div className="grid grid-cols-4 gap-4 mb-6">
                                     {paginatedImages.map((image, index) => (
                                         <div key={image.id || index} className="group relative aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm hover:shadow-md transition-all">
-                                            <img
+                                            <Image
                                                 src={image.image_url}
                                                 alt="Generated"
-                                                className="w-full h-full object-cover cursor-pointer"
+                                                fill
+                                                className="object-cover cursor-pointer"
                                                 onClick={() => window.open(image.image_url, "_blank")}
-                                                onError={(e) => {
-                                                    e.target.src = '/placeholder-image.png';
-                                                }}
+                                                sizes="(max-width: 768px) 50vw, 25vw"
+                                                unoptimized={image.image_url?.includes('cloudinary') || image.image_url?.includes('imagekit')}
                                             />
                                             {/* Hover Overlay */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
+                                            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
                                                 {/* Top Badge */}
                                                 <div className="flex justify-between items-start">
                                                     <div className="bg-black/70 text-white text-xs px-2 py-1 rounded-full">
@@ -764,10 +901,11 @@ export default function ResultsTab({ project }) {
             )}
 
             {historyLoading && (
-                <div className="mt-12 flex items-center justify-center py-8">
-                    <div className="text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#884cff] mx-auto mb-2"></div>
-                        <p className="text-sm text-[#708090]">Loading history...</p>
+                <div className="mt-12">
+                    <div className="grid grid-cols-4 gap-4 animate-pulse">
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                            <div key={i} className="aspect-square bg-gray-100 rounded-xl"></div>
+                        ))}
                     </div>
                 </div>
             )}

@@ -1,12 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense, lazy } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { WorkflowTab } from "@/components/project/tabs/workflow-tab"
-import OverviewTab from "@/components/project/tabs/overview-tab"
-import ResultsTab from "@/components/project/tabs/results-tab"
-import CollaboratorsTab from "@/components/project/tabs/collaborators-tab"
 import { useImageGeneration } from "@/context/ImageGenerationContext"
+
+// Lazy load heavy tabs for code splitting
+const OverviewTab = lazy(() => import("@/components/project/tabs/overview-tab").then(mod => ({ default: mod.default })))
+const ResultsTab = lazy(() => import("@/components/project/tabs/results-tab").then(mod => ({ default: mod.default })))
+const CollaboratorsTab = lazy(() => import("@/components/project/tabs/collaborators-tab").then(mod => ({ default: mod.default })))
+
+// Loading skeleton component
+function TabSkeleton() {
+    return (
+        <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#884cff] mx-auto mb-4"></div>
+                <p className="text-[#708090]">Loading...</p>
+            </div>
+        </div>
+    )
+}
 
 export function WorkflowContent({ project }) {
     const [activeTab, setActiveTab] = useState("workflow")
@@ -53,15 +67,21 @@ export function WorkflowContent({ project }) {
                 </TabsContent>
 
                 <TabsContent value="overview" className="p-6 m-0">
-                    <OverviewTab project={project} />
+                    <Suspense fallback={<TabSkeleton />}>
+                        <OverviewTab project={project} />
+                    </Suspense>
                 </TabsContent>
 
                 <TabsContent value="results" className="p-6 m-0">
-                    <ResultsTab project={project} />
+                    <Suspense fallback={<TabSkeleton />}>
+                        <ResultsTab project={project} />
+                    </Suspense>
                 </TabsContent>
 
                 <TabsContent value="collaborators" className="m-0">
-                    <CollaboratorsTab projectId={project.id} projectData={project} />
+                    <Suspense fallback={<TabSkeleton />}>
+                        <CollaboratorsTab projectId={project.id} projectData={project} />
+                    </Suspense>
                 </TabsContent>
             </Tabs>
         </div>

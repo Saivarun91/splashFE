@@ -15,46 +15,78 @@ import {
     MoreVertical,
     BarChart3
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { apiService } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import toast from "react-hot-toast";
+import { dataCache, cacheKeys } from "@/lib/data-cache";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ProjectCardSkeleton } from "@/components/project/ProjectCardSkeleton"
 
 export default function Dashboard() {
     const { token } = useAuth();
     const { t } = useLanguage();
+    const router = useRouter();
     const [searchQuery, setSearchQuery] = useState("");
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState("All");
-    console.log("projects", projects)
+
     useEffect(() => {
         const fetchProjects = async () => {
+            if (!token) return;
+            
             try {
                 setLoading(true);
-                const response = await apiService.getProjects(token);
-                const projectsData = response.projects || [];
+                
+                // Use getOrFetch for automatic cache-first strategy + request deduplication
+                const cacheKey = cacheKeys.projectsList();
+                const projectsData = await dataCache.getOrFetch(
+                    cacheKey,
+                    async () => {
+                        const response = await apiService.getProjects(token);
+                        return response.projects || [];
+                    },
+                    2 * 60 * 1000 // 2 minutes cache
+                );
+                
                 setProjects(projectsData);
+                setLoading(false);
+
+                // Prefetch project detail pages for instant navigation - batch prefetch
+                // Prefetch top 5 projects immediately, rest in background
+                const projectsToPrefetch = projectsData.slice(0, 5);
+                projectsToPrefetch.forEach(project => {
+                    const projectPath = `/dashboard/projects/${project.slug || project.id}`;
+                    router.prefetch(projectPath);
+                });
+                
+                // Prefetch remaining projects in background (non-blocking)
+                setTimeout(() => {
+                    projectsData.slice(5, 10).forEach(project => {
+                        const projectPath = `/dashboard/projects/${project.slug || project.id}`;
+                        router.prefetch(projectPath);
+                    });
+                }, 100);
             } catch (err) {
                 console.error("Error fetching projects:", err);
                 setError(err.message);
-            } finally {
                 setLoading(false);
             }
         };
 
-        if (token) fetchProjects();
-    }, [token]);
+        fetchProjects();
+    }, [token, router]);
 
-    const handleDeleteProject = async (projectId) => {
+    const handleDeleteProject = useCallback(async (projectId) => {
         if (!confirm(t("dashboard.deleteConfirm"))) return;
         try {
             await apiService.deleteProject(projectId, token);
@@ -63,10 +95,10 @@ export default function Dashboard() {
             console.error("Error deleting project:", err);
             toast.error(t("dashboard.deleteFailed"));
         }
-    };
+    }, [token, t]);
 
-    // Format time ago
-    const getTimeAgo = (dateString) => {
+    // Format time ago - memoized
+    const getTimeAgo = useCallback((dateString) => {
         if (!dateString) return t("dashboard.unknown");
         const date = new Date(dateString);
         const now = new Date();
@@ -82,33 +114,26 @@ export default function Dashboard() {
         } else {
             return `${diffInDays} ${t("dashboard.days")} ${t("dashboard.ago")}`;
         }
-    };
+    }, [t]);
 
-    // --- Filter logic for Tabs + Search ---
-    const filteredProjects = projects.filter((project) => {
-        const matchesSearch = project.name
-            ?.toLowerCase()
-            .includes(searchQuery.toLowerCase());
+    // --- Filter logic for Tabs + Search --- Memoized for performance
+    const filteredProjects = useMemo(() => {
+        const searchLower = searchQuery.toLowerCase();
+        return projects.filter((project) => {
+            const matchesSearch = project.name?.toLowerCase().includes(searchLower);
 
-        const matchesTab =
-            activeTab === t("dashboard.all") ||
-            (activeTab === t("dashboard.inProgressTab") && project.status === "progress") ||
-            (activeTab === t("dashboard.completed") && project.status === "completed") ||
-            (activeTab === t("dashboard.draft") && project.status === "draft");
+            const matchesTab =
+                activeTab === t("dashboard.all") ||
+                (activeTab === t("dashboard.inProgressTab") && project.status === "progress") ||
+                (activeTab === t("dashboard.completed") && project.status === "completed") ||
+                (activeTab === t("dashboard.draft") && project.status === "draft");
 
-        return matchesSearch && matchesTab;
-    });
+            return matchesSearch && matchesTab;
+        });
+    }, [projects, searchQuery, activeTab, t]);
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading projects...</p>
-                </div>
-            </div>
-        );
-    }
+    // Show skeleton immediately - never block the page
+    const showSkeletons = loading && projects.length === 0;
 
     if (error) {
         return (
@@ -130,13 +155,13 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 text-gray-900">
+        <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 text-gray-900">
             <div className="max-w-7xl mx-auto p-6 space-y-8 animate-fade-in">
 
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">{t("dashboard.projects")}</h1>
+                        <h1 className="text-4xl font-bold bg-linear-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">{t("dashboard.projects")}</h1>
                         <p className="text-gray-600">{t("dashboard.organizeCampaigns")}</p>
                     </div>
                     <Link href="/dashboard/projects/create">
@@ -177,6 +202,16 @@ export default function Dashboard() {
 
                 {/* Projects Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                    {/* Show skeletons while loading - zero blocking */}
+                    {showSkeletons && (
+                        <>
+                            {[1, 2, 3, 4, 5, 6].map((i) => (
+                                <ProjectCardSkeleton key={`skeleton-${i}`} />
+                            ))}
+                        </>
+                    )}
+                    
+                    {/* Render projects as they load - progressive enhancement */}
                     {filteredProjects.map((project) => {
                         const statusText = project.status === "progress"
                             ? t("dashboard.inProgressTab")
@@ -198,6 +233,7 @@ export default function Dashboard() {
                             <Link
                                 key={project.id}
                                 href={`/dashboard/projects/${project.slug ? project.slug : project.id}`}
+                                prefetch={true}
                                 className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 relative block cursor-pointer"
                             >
                                 {/* Top Right Menu */}
@@ -208,6 +244,7 @@ export default function Dashboard() {
                                         handleDeleteProject(project.id);
                                     }}
                                     className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition z-10"
+                                    aria-label="Delete project"
                                 >
                                     <MoreVertical className="w-5 h-5" />
                                 </button>

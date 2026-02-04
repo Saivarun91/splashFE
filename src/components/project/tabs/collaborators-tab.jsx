@@ -50,7 +50,7 @@ export default function CollaborationPage({ projectId, projectData }) {
     const fetchProjectData = async () => {
         try {
             setLoading(true)
-            const data = await apiService.getProject(projectId)
+            const data = await apiService.getProject(projectId,token)
             // team_members now has: user_id, user_email, user_name, role
             setTeamMembers(data.team_members || [])
         } catch (err) {
