@@ -244,23 +244,9 @@ export default function SignupForm() {
                                 onClick={() => handleViewContent('terms')}
                                 className="text-[#5533ff] hover:underline font-semibold"
                             >
-                                {t("signup.termsAndConditions")}
+                                {t("signup.termsAndConditions")} {" "}
                             </button>
-                        </label>
-                    </div>
-
-                    <div className="flex items-start gap-2">
-                        <input
-                            type="checkbox"
-                            id="acceptPrivacy"
-                            name="acceptPrivacy"
-                            checked={formData.acceptPrivacy}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 h-4 w-4 text-[#5533ff] border-gray-300 rounded focus:ring-[#5533ff]"
-                        />
-                        <label htmlFor="acceptPrivacy" className="text-sm text-[#313957]">
-                            {t("signup.agreeTo")}{" "}
+                            {" AND "}
                             <button
                                 type="button"
                                 onClick={() => handleViewContent('privacy')}
@@ -271,7 +257,9 @@ export default function SignupForm() {
                         </label>
                     </div>
 
-                    <div className="flex items-start gap-2">
+            
+
+                    {/* <div className="flex items-start gap-2">
                         <input
                             type="checkbox"
                             id="acceptGDPR"
@@ -291,7 +279,7 @@ export default function SignupForm() {
                                 {t("signup.gdprCompliance")}
                             </button>
                         </label>
-                    </div>
+                    </div> */}
                 </div>
 
                 <Button
