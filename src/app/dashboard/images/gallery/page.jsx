@@ -88,6 +88,38 @@ export default function GalleryPage() {
 
     const filteredImages = images
 
+    const handleDelete = async (imageId) => {
+        if (!confirm(t("images.confirmDelete") || "Are you sure you want to delete this image?")) {
+            return
+        }
+
+        try {
+            const response = await apiService.deleteUserImage(imageId, token)
+            if (response && response.success) {
+                // Remove the image from the current list immediately for better UX
+                setImages(prevImages => prevImages.filter(img => img.id !== imageId))
+                
+                // Move back a page if last image was deleted
+                if (images.length === 1 && page > 1) {
+                    setPage(prev => prev - 1)
+                } else {
+                    // Reload images to refresh the list
+                    await loadImages()
+                }
+    
+                toast.success(t("images.imageDeletedSuccess") || "Image deleted successfully")
+            } else {
+                throw new Error(response?.error || "Failed to delete image")
+            }
+        } catch (error) {
+            console.error("Error deleting image:", error)
+            toast.error(error.message || t("images.failedToDeleteImage") || "Failed to delete image")
+        }
+    }
+    
+
+
+
     // Download image function using blob approach
     const downloadImage = async (url, filename = "image.png") => {
         try {
@@ -316,56 +348,78 @@ export default function GalleryPage() {
                                 >
                                     {/* Image */}
                                     <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden mb-2">
-                                        <Image
-                                            src={image.generated_image_url}
-                                            alt={image.prompt || "Generated image"}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
+    <Image
+        src={image.generated_image_url}
+        alt={image.prompt || "Generated image"}
+        fill
+        className="object-cover"
+    />
 
-                                        {/* Hover Actions */}
-                                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 bg-black/40">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    handleView(image)
-                                                }}
-                                                className="p-2.5 bg-white rounded-full hover:bg-gray-100 transition-all shadow-lg"
-                                                title="View in new tab"
-                                            >
-                                                <Eye size={16} className="text-gray-700" />
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    handleDownload(image)
-                                                }}
-                                                className="p-2.5 bg-white rounded-full hover:bg-gray-100 transition-all shadow-lg"
-                                                title="Download"
-                                            >
-                                                <Download size={16} className="text-gray-700" />
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    handleRegenerate(image)
-                                                }}
-                                                className="p-2.5 bg-white rounded-full hover:bg-gray-100 transition-all shadow-lg"
-                                                title="Regenerate"
-                                            >
-                                                <RefreshCw size={16} className="text-gray-700" />
-                                            </button>
-                                        </div>
+    {/* Dark hover overlay */}
+    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
 
-                                        {/* Parent indicator */}
-                                        {image.parent_image_id && (
-                                            <div className="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                                                <RefreshCw size={10} />
-                                                {t("images.regenerated")}
-                                            </div>
-                                        )}
-                                    </div>
+    {/* ✅ DELETE BUTTON (TOP RIGHT) */}
+    <button
+        onClick={(e) => {
+            e.stopPropagation()
+            handleDelete(image.id)
+        }}
+        className="
+            absolute top-2 right-2 z-10
+            opacity-0 group-hover:opacity-100
+            p-2 rounded-full
+            bg-white/90 hover:bg-red-50
+            text-red-600 hover:text-red-700
+            shadow-md transition-all
+        "
+        title={t("images.delete") || "Delete"}
+    >
+        <Trash2 size={16} />
+    </button>
+
+    {/* Hover Actions (center buttons) */}
+    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 bg-black/40">
+        <button
+            onClick={(e) => {
+                e.stopPropagation()
+                handleView(image)
+            }}
+            className="p-2 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-[#884cff] shadow-md transition-all"
+            title={t("images.view") || "View"}
+        >
+            <Eye size={18} />
+        </button>
+        <button
+            onClick={(e) => {
+                e.stopPropagation()
+                handleDownload(image)
+            }}
+            className="p-2 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-[#884cff] shadow-md transition-all"
+            title={t("images.download") || "Download"}
+        >
+            <Download size={18} />
+        </button>
+        <button
+            onClick={(e) => {
+                e.stopPropagation()
+                handleRegenerate(image)
+            }}
+            className="p-2 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-[#884cff] shadow-md transition-all"
+            title={t("images.regenerate") || "Regenerate"}
+        >
+            <RefreshCw size={18} />
+        </button>
+    </div>
+
+    {/* Parent indicator */}
+    {image.parent_image_id && (
+        <div className="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+            <RefreshCw size={10} />
+            {t("images.regenerated")}
+        </div>
+    )}
+</div>
+
 
                                     {/* Details */}
                                     <div className="bg-white rounded-lg p-2">

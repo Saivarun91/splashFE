@@ -34,10 +34,10 @@ export default function LoginForm() {
         }
     };
 
-    const handleGoogleSignIn = () => {
-        // Handle Google sign in logic
-        console.log("Sign in with Google");
-    };
+    // const handleGoogleSignIn = () => {
+    //     // Handle Google sign in logic
+    //     console.log("Sign in with Google");
+    // };
 
     return (
         <div className="w-full max-w-md">
@@ -115,14 +115,14 @@ export default function LoginForm() {
             </form>
 
             {/* Divider */}
-            <div className="flex items-center gap-4 my-8">
+            {/* <div className="flex items-center gap-4 my-8">
                 <div className="flex-1 h-px bg-[#e6e6e6]"></div>
                 <span className="text-sm text-[#737373]">{t("auth.or")}</span>
                 <div className="flex-1 h-px bg-[#e6e6e6]"></div>
-            </div>
+            </div> */}
 
             {/* Google Sign In */}
-            <button
+            {/* <button
                 onClick={handleGoogleSignIn}
                 className="w-full py-3 px-4 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg flex items-center justify-center gap-3 hover:bg-[#f7fbff] transition-colors"
             >
@@ -134,7 +134,7 @@ export default function LoginForm() {
                 <span className="text-sm font-medium text-[#0c1421]">
                     {t("auth.signInWithGoogle")}
                 </span>
-            </button>
+            </button> */}
 
             {/* Sign Up Link */}
             <div className="mt-8 text-center">

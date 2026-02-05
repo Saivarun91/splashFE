@@ -189,6 +189,20 @@ async request(endpoint, options = {}) {
         });
     }
 
+    async verifyEmailOtp(email, otp) {
+        return this.request('/api/verify-email-otp/', {
+            method: 'POST',
+            body: JSON.stringify({ email, otp }),
+        });
+    }
+
+    async resendEmailOtp(email) {
+        return this.request('/api/resend-email-otp/', {
+            method: 'POST',
+            body: JSON.stringify({ email }),
+        });
+    }
+
     // Project endpoints - OPTIMIZED with caching hints
     async getProjects(token, options = {}) {
         return this.request('/probackendapp/api/projects/', {
@@ -993,6 +1007,14 @@ async request(endpoint, options = {}) {
             }
         );
         return response.data;
+    }
+    async deleteUserImage(imageId, token) {
+        const response = await this.delete(`/image/delete-image/${imageId}/`, {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            }
+        });
+        return response;
     }
 
     // Recent History endpoints

@@ -41,7 +41,9 @@ export default function SignupForm() {
     const [selectedContent, setSelectedContent] = useState(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const router = useRouter();
-
+    const [step, setStep] = useState("signup");
+    const [otp, setOtp] = useState("");
+    const [otpLoading, setOtpLoading] = useState(false);
     useEffect(() => {
         // Fetch legal content on component mount
         const fetchLegalContent = async () => {
@@ -56,6 +58,7 @@ export default function SignupForm() {
         };
         fetchLegalContent();
     }, []);
+
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -114,28 +117,105 @@ export default function SignupForm() {
         e.preventDefault();
         setLoading(true);
         setMessage("");
-
+    
         if (formData.password !== formData.confirm_password) {
             setMessage(t("auth.passwordsNotMatch"));
             setLoading(false);
             return;
         }
-
-        if (!formData.acceptTerms || !formData.acceptPrivacy || !formData.acceptGDPR) {
-            setMessage(t("auth.acceptAllTerms"));
+    
+        if (!formData.acceptTerms) {
+            setMessage(t("auth.acceptAllTerms") || "Please accept all terms and conditions to continue");
             setLoading(false);
             return;
         }
-
+    
         try {
-            const response = await apiService.register(formData.full_name, formData.username, formData.email, formData.password);
-            router.push("/login");
+            await apiService.register(
+                formData.full_name,
+                formData.username,
+                formData.email,
+                formData.password
+            );
+    
+            // ✅ Move to OTP step
+            setStep("otp");
+            setMessage(t("auth.otpSent"));
+    
         } catch (err) {
             setMessage(err.message);
         } finally {
             setLoading(false);
         }
     };
+    const handleVerifyOtp = async (e) => {
+        e.preventDefault();
+        
+        if (!otp || otp.length !== 6) {
+            setMessage(t("auth.pleaseEnterValidOtp") || "Please enter a valid 6-digit OTP");
+            return;
+        }
+
+        setOtpLoading(true);
+        setMessage("");
+    
+        try {
+            const response = await apiService.verifyEmailOtp(
+                formData.email,
+                otp
+            );
+    
+            // Check if verification was successful
+            if (response && (response.token || response.message)) {
+                // ✅ Save token if returned
+                if (response.token) {
+                    localStorage.setItem("token", response.token);
+                }
+                
+                // Show success message
+                setMessage(response.message || t("auth.emailVerified") || "Email verified successfully!");
+                
+                // Redirect to dashboard after a short delay
+                setTimeout(() => {
+                    router.push("/login");
+                }, 1000);
+            } else {
+                throw new Error(response?.error || t("auth.invalidOtp") || "Invalid OTP");
+            }
+    
+        } catch (err) {
+            console.error("OTP verification error:", err);
+            const errorMessage = err.message || err.response?.data?.error || t("auth.invalidOtp") || "Failed to verify OTP. Please try again.";
+            setMessage(errorMessage);
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
+    const handleResendOtp = async () => {
+        setOtpLoading(true);
+        setMessage("");
+
+        try {
+            const response = await apiService.resendEmailOtp(formData.email);
+            
+            if (response && (response.success || response.message)) {
+                setMessage(response.message || t("auth.otpResent") || "OTP has been resent to your email");
+                // Clear the OTP input
+                setOtp("");
+            } else {
+                throw new Error(response?.error || t("auth.failedToResendOtp") || "Failed to resend OTP");
+            }
+        } catch (err) {
+            console.error("Resend OTP error:", err);
+            const errorMessage = err.message || err.response?.data?.error || t("auth.failedToResendOtp") || "Failed to resend OTP. Please try again.";
+            setMessage(errorMessage);
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
+
 
     return (
         <div className="w-full max-w-md">
@@ -145,7 +225,7 @@ export default function SignupForm() {
             </div>
 
             {/* Language Selector */}
-            <div className="mb-6">
+            {/* <div className="mb-6">
                 <Label className="block text-sm font-semibold text-[#0c1421] mb-2">
                     {t("signup.selectLanguage")}
                 </Label>
@@ -158,8 +238,8 @@ export default function SignupForm() {
                         <SelectItem value="es">{t("common.spanish")}</SelectItem>
                     </SelectContent>
                 </Select>
-            </div>
-
+            </div> */}
+            {step === "signup" ? (
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                     <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.fullName")}</label>
@@ -259,27 +339,7 @@ export default function SignupForm() {
 
             
 
-                    {/* <div className="flex items-start gap-2">
-                        <input
-                            type="checkbox"
-                            id="acceptGDPR"
-                            name="acceptGDPR"
-                            checked={formData.acceptGDPR}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 h-4 w-4 text-[#5533ff] border-gray-300 rounded focus:ring-[#5533ff]"
-                        />
-                        <label htmlFor="acceptGDPR" className="text-sm text-[#313957]">
-                            {t("signup.agreeTo")}{" "}
-                            <button
-                                type="button"
-                                onClick={() => handleViewContent('gdpr')}
-                                className="text-[#5533ff] hover:underline font-semibold"
-                            >
-                                {t("signup.gdprCompliance")}
-                            </button>
-                        </label>
-                    </div> */}
+                    
                 </div>
 
                 <Button
@@ -290,9 +350,53 @@ export default function SignupForm() {
                     {loading ? t("auth.signingUp") : t("auth.signup")}
                 </Button>
             </form>
-
+            ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-5">
+        <h2 className="text-3xl font-bold text-[#0c1421]">
+            {t("auth.verifyEmail")}
+        </h2>
+    
+        <p className="text-sm text-[#313957]">
+            {t("auth.otpSentTo")} <strong>{formData.email}</strong>
+        </p>
+    
+        <Input
+            type="text"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+            maxLength={6}
+            placeholder={t("auth.enterOtp")}
+            className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg text-center tracking-widest text-lg"
+            required
+        />
+    
+        <Button
+            type="submit"
+            disabled={otpLoading || otp.length !== 6}
+            className="w-full py-3 bg-[#5533ff] hover:bg-[#4422dd] text-white font-semibold rounded-full"
+        >
+            {otpLoading ? t("auth.verifying") : t("auth.verifyOtp")}
+        </Button>
+    
+        <button
+            type="button"
+            onClick={handleResendOtp}
+            disabled={otpLoading}
+            className="text-sm text-[#5533ff] hover:underline block mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+            {otpLoading ? t("auth.sending") || "Sending..." : t("auth.resendOtp") || "Resend OTP"}
+        </button>
+    </form>
+            )}
+    
             {message && (
-                <p className="mt-4 text-center text-sm text-red-600">{message}</p>
+                <p className={`mt-4 text-center text-sm ${
+                    message.includes("successfully") || message.includes("sent") || message.includes("verified")
+                        ? "text-green-600" 
+                        : "text-red-600"
+                }`}>
+                    {message}
+                </p>
             )}
 
             <div className="mt-8 text-center">

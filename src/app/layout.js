@@ -17,7 +17,7 @@ export const metadata = {
   title: "Splash AI Studio - Transform Your Creative Vision",
   description: "AI-powered creative studio for stunning visuals and project management",
   icons: {
-    icon: "/images/logo-splash.png",
+    icon: "/images/favicon.png",
   },
 };
 
