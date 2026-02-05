@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Check, Crown, Building2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Check, Crown, Building2,Gem } from "lucide-react";
 import { apiService } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 const DEFAULT_CREDIT_OPTIONS = [
   { amount: 50, credits: 50 },
@@ -10,12 +12,25 @@ const DEFAULT_CREDIT_OPTIONS = [
   { amount: 300, credits: 300 },
 ];
 
+const BILLING_PAGE = "/dashboard/my-account/billing";
+
 const PricingSection = () => {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const [proPlan, setProPlan] = useState(null);
   const [enterprisePlan, setEnterprisePlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCreditOption, setSelectedCreditOption] = useState(0);
+
+  const handleProPayClick = () => {
+    if (isAuthenticated) {
+      router.push(BILLING_PAGE);
+    } else {
+      const loginUrl = `/signup?redirect=${encodeURIComponent(BILLING_PAGE)}`;
+      router.push(loginUrl);
+    }
+  };
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -85,13 +100,67 @@ const PricingSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        {proPlan && (
+            <div className="relative p-6 rounded-2xl border-2 border-gray-200 bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-gray-600 to-gray-800">
+                  <Crown className="text-white" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-semibold text-gray-900">Free Plan</h3>
+                  <p className="text-sm text-gray-500 mt-0.5">For a limited time, you can get 5 credits for free.</p>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <span className="text-4xl font-bold text-gray-900">Free</span>
+                <span className="text-gray-500 ml-2">for 5 credits</span>
+              </div>
+
+              <button
+                className="w-full py-3 rounded-lg font-semibold bg-primary text-white hover:bg-white hover:text-primary  border-2 border-primary transition-colors mb-4"
+                onClick={() => (window.location.href = "/signup")}
+              >
+                Get Started
+              </button>
+
+              {proPlan.features && proPlan.features.length > 0 && (
+                <ul className="space-y-3 border-t border-gray-200 pt-4">
+                    <li className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-gray-900 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">Explore the platform for free</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-gray-900 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700"> Get 5 credits for free</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-gray-900 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">Get free image generation credits</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-gray-900 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">No credit card required</span>
+                    </li>
+                    {/* <li className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700"></span>
+                    </li> */}
+                  
+                </ul>
+              )}
+              
+            </div>
+          )}
+
+
           {/* Pro Plan Card */}
           {proPlan && (
             <div className="relative p-6 rounded-2xl border-2 border-purple-200 bg-gradient-to-b from-purple-50 to-white shadow-lg hover:shadow-xl transition-shadow">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600">
-                  <Crown className="text-white" size={24} />
+                <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-500">
+                  <Gem className="text-white" size={24} />
                 </div>
                 <div>
                   <h3 className="text-2xl font-semibold text-gray-900">{proPlan.name}</h3>
@@ -103,22 +172,23 @@ const PricingSection = () => {
 
               <div className="mb-4">
                 <span className="text-4xl font-bold text-gray-900">${proAmount}</span>
-                <span className="text-gray-500 ml-2">one-time</span>
+                <span className="text-gray-500 ml-2">Fixed</span>
               </div>
 
               <button
-                className="w-full py-3 rounded-lg font-semibold bg-purple-600 text-white hover:bg-purple-700 transition-colors mb-4"
-                onClick={() => (window.location.href = "/dashboard/my-account/billing")}
+                className="w-full py-3 rounded-lg font-semibold bg-gradient-to-br from-indigo-600 to-purple-500 text-white hover:bg-indigo-700 transition-colors mb-4"
+                onClick={handleProPayClick}
               >
                 {proCta}
               </button>
+            
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Choose credits</label>
                 <select
                   value={selectedCreditOption}
                   onChange={(e) => setSelectedCreditOption(Number(e.target.value))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-primary rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
                   {proCreditOptions.map((opt, index) => (
                     <option key={index} value={index}>
@@ -162,7 +232,7 @@ const PricingSection = () => {
 
               <a
                 href="mailto:sales@example.com"
-                className="w-full inline-block text-center py-3 rounded-lg font-semibold border-2 border-gray-300 text-gray-900 hover:bg-gray-50 transition-colors mb-4"
+                className="w-full inline-block text-center py-3 rounded-lg font-semibold bg-primary text-white hover:bg-white hover:text-primary  border-2 border-primary transition-colors mb-4"
               >
                 {enterpriseCta}
               </a>
