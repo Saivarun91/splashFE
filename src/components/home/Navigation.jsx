@@ -317,7 +317,7 @@ const Navigation = () => {
           <div className="hidden md:block">
             <Link
               href={isAuthPage ? "/" : "/login"}
-              className="inline-block px-4 py-2 text-sm lg:text-base font-medium text-white bg-[#A64DFF] rounded hover:bg-purple-600 transition-colors"
+              className="inline-block px-4 py-2 text-sm lg:text-base font-medium text-white bg-gradient-to-br from-indigo-600 to-purple-500 rounded hover:bg-indigo-700 transition-colors"
             >
               {isAuthPage ? "Back to Home" : "Get Started"}
             </Link>
@@ -350,7 +350,7 @@ const Navigation = () => {
             ))}
             <Link
               href={isAuthPage ? "/" : "/login"}
-              className="block w-full px-4 py-2 text-base font-medium text-white bg-[#A64DFF] rounded hover:bg-purple-600 transition-colors"
+              className="block w-full px-4 py-2 text-base font-medium text-white bg-gradient-to-br from-indigo-600 to-purple-500 rounded hover:bg-indigo-700 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               {isAuthPage ? "Back to Home" : "Get Started"}

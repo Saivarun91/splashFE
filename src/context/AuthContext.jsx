@@ -104,10 +104,17 @@ export function AuthProvider({ children }) {
                 }
 
                 toast.success("Login successful");
+
+                // Check for redirect param (e.g. from pricing Pay button: /login?redirect=/dashboard/my-account/billing)
+                const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+                const redirectTo = urlParams?.get("redirect");
+                const isValidRedirect = redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//");
                 
                 // Check if profile is completed
                 if (!data.user.profile_completed) {
                     router.push("/complete-profile");
+                } else if (isValidRedirect) {
+                    router.push(redirectTo);
                 } else {
                     router.push("/dashboard");
                 }

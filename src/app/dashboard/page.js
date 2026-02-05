@@ -2,15 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { Sparkles, Image as ImageIcon, FolderKanban, Zap, TrendingUp, Mail } from "lucide-react";
+import { Sparkles, Image, FolderKanban, Zap, TrendingUp, Mail } from "lucide-react";
 import { FaCoins } from "react-icons/fa";
 import { RiAiGenerate2 } from "react-icons/ri";
 import PendingInvitations from "@/components/PendingInvitations";
 import { useAuth } from "@/context/AuthContext";
 import { apiService } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
-import { dataCache, cacheKeys } from "@/lib/data-cache";
 
 export default function Dashboard() {
     const { user, token } = useAuth();
@@ -108,7 +106,7 @@ export default function Dashboard() {
         fetchCredits();
       }, [token]);
       
-    // Fetch dashboard data - OPTIMIZED with parallel fetching and caching
+    // Fetch projects data
     useEffect(() => {
         const fetchDashboardData = async () => {
             if (!token) {
@@ -117,76 +115,32 @@ export default function Dashboard() {
             }
 
             try {
-                setLoading(true);
-                
-                // Try cache first for instant display
-                const projectsCacheKey = cacheKeys.projectsList();
-                const imagesCacheKey = `recent-images-${token}`;
-                
-                const cachedProjects = dataCache.get(projectsCacheKey);
-                const cachedImages = dataCache.get(imagesCacheKey);
-                
-                if (cachedProjects) {
-                    // Calculate stats from cached data
-                    const activeProjects = cachedProjects.length;
-                    const inProgress = cachedProjects.filter(p => p.status === 'in_progress' || p.status === 'active').length;
-                    const completed = cachedProjects.filter(p => p.status === 'completed').length;
-                    const totalImages = cachedProjects.reduce((sum, p) => sum + (p.total_images || 0), 0);
-                    
-                    setStats({
-                        activeProjects,
-                        inProgressProjects: inProgress,
-                        completedProjects: completed,
-                        totalImages,
-                        imagesGenerated: totalImages
-                    });
-                    setLoading(false);
-                }
-                
-                if (cachedImages) {
-                    setRecentImages(cachedImages);
-                }
+                // Fetch projects
+                const projectsResponse = await apiService.getProjects(token);
+                if (projectsResponse?.projects) {
+                    const projectsData = projectsResponse.projects;
 
-                // Fetch all data in parallel - 50-60% faster than sequential
-                const [projectsResult, imagesResult] = await Promise.allSettled([
-                    dataCache.getOrFetch(
-                        projectsCacheKey,
-                        async () => {
-                            const response = await apiService.getProjects(token);
-                            return response?.projects || [];
-                        },
-                        2 * 60 * 1000 // 2 minutes cache
-                    ),
-                    dataCache.getOrFetch(
-                        imagesCacheKey,
-                        async () => {
-                            const response = await apiService.getRecentImages(token, 5);
-                            return response?.success && response?.images ? response.images : [];
-                        },
-                        30 * 1000 // 30 seconds cache
-                    ).catch(() => [])
-                ]);
-
-                // Process projects data
-                if (projectsResult.status === 'fulfilled') {
-                    const projectsData = projectsResult.value;
+                    // Calculate stats
                     const activeProjects = projectsData.length;
                     const inProgress = projectsData.filter(p => p.status === 'in_progress' || p.status === 'active').length;
                     const completed = projectsData.filter(p => p.status === 'completed').length;
                     const totalImages = projectsData.reduce((sum, p) => sum + (p.total_images || 0), 0);
+                    const imagesGenerated = projectsData.reduce((sum, p) => sum + (p.images_generated || 0), 0);
 
                     setStats({
-                        activeProjects,
+                        activeProjects: activeProjects,
                         inProgressProjects: inProgress,
                         completedProjects: completed,
-                        totalImages,
-                        imagesGenerated: totalImages
+                        totalImages: totalImages,
+                        imagesGenerated: imagesGenerated
                     });
+                
                 }
 
-                // Process images data
-                if (imagesResult.status === 'fulfilled') {
-                    setRecentImages(imagesResult.value);
+                // Fetch recent images from ImageGenerationHistory
+                const imagesResponse = await apiService.getRecentImages(token, 5);
+                if (imagesResponse?.success && imagesResponse?.images) {
+                    setRecentImages(imagesResponse.images);
                 }
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
@@ -202,7 +156,7 @@ export default function Dashboard() {
         <div className="space-y-6 animate-fadeIn p-6 bg-gray-50 text-gray-900">
             {/* Welcome Section */}
             <div className="relative p-4 rounded-xl bg-white shadow-md border border-gray-200 overflow-hidden">
-                <div className="absolute top-0 right-0 w-40 h-40 bg-linear-to-tr from-indigo-500 to-purple-500 opacity-10 rounded-full blur-3xl" />
+                <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-tr from-indigo-500 to-purple-500 opacity-10 rounded-full blur-3xl" />
                 <div className="relative z-10">
                     <h1 className="text-2xl font-bold">{greeting}, {getUserDisplayName()}</h1>
                 </div>
@@ -280,22 +234,13 @@ export default function Dashboard() {
                         <RiAiGenerate2  className="w-6 h-6 text-indigo-500" />
                     </div>
                     <div>
-                        {loading && !stats.imagesGenerated ? (
-                            <div className="animate-pulse">
-                                <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
-                                <div className="h-4 bg-gray-200 rounded w-32"></div>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="text-2xl font-bold text-gray-900">
-                                    {stats.imagesGenerated}
-                                </div>
-                                <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                    <TrendingUp className="w-3 h-3 text-green-500" />
-                                    {t("dashboard.totalImagesGenerated")}
-                                </p>
-                            </>
-                        )}
+                        <div className="text-2xl font-bold text-gray-900">
+                            {loading ? "..." : stats.imagesGenerated}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3 text-green-500" />
+                            {loading ? t("common.loading") : t("dashboard.totalImagesGenerated")}
+                        </p>
                     </div>
                 </div>
 
@@ -306,21 +251,12 @@ export default function Dashboard() {
                         <FolderKanban className="w-6 h-6 text-indigo-500" />
                     </div>
                     <div>
-                        {loading && !stats.activeProjects ? (
-                            <div className="animate-pulse">
-                                <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
-                                <div className="h-4 bg-gray-200 rounded w-40"></div>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="text-2xl font-bold text-gray-900">
-                                    {stats.activeProjects}
-                                </div>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    {`${stats.inProgressProjects} ${t("dashboard.inProgress")} • ${stats.completedProjects} ${t("dashboard.completed")}`}
-                                </p>
-                            </>
-                        )}
+                        <div className="text-2xl font-bold text-gray-900">
+                            {loading ? "..." : stats.activeProjects}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                            {loading ? t("common.loading") : `${stats.inProgressProjects} ${t("dashboard.inProgress")} • ${stats.completedProjects} ${t("dashboard.completed")}`}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -345,10 +281,10 @@ export default function Dashboard() {
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">{t("dashboard.quickActions")}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Plain Image */}
-                    <Link href="/dashboard/images/white-bg" prefetch={true}>
+                    <Link href="/dashboard/images/white-bg">
                         <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group text-center">
                             <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-indigo-50 group-hover:bg-indigo-100 transition">
-                                <ImageIcon className="w-5 h-5 text-indigo-500" />
+                                <Image className="w-5 h-5 text-indigo-500" />
                             </div>
                             <h3 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.plainImage")}</h3>
                             <p className="text-xs text-gray-500">{t("dashboard.cleanProductShots")}</p>
@@ -356,7 +292,7 @@ export default function Dashboard() {
                     </Link>
 
                     {/* Themed Image */}
-                    <Link href="/dashboard/images/replace-bg" prefetch={true}>
+                    <Link href="/dashboard/images/replace-bg">
                         <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group text-center">
                             <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-yellow-50 group-hover:bg-yellow-100 transition">
                                 <Sparkles className="w-5 h-5 text-yellow-400" />
@@ -367,10 +303,10 @@ export default function Dashboard() {
                     </Link>
 
                     {/* Model Images */}
-                    <Link href="/dashboard/images/model-generation" prefetch={true}>
+                    <Link href="/dashboard/images/model-generation">
                         <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group text-center">
                             <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-indigo-50 group-hover:bg-indigo-100 transition">
-                                <ImageIcon className="w-5 h-5 text-indigo-500" />
+                                <Image className="w-5 h-5 text-indigo-500" />
                             </div>
                             <h3 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.modelImages")}</h3>
                             <p className="text-xs text-gray-500">{t("dashboard.aiOrHumanModels")}</p>
@@ -378,7 +314,7 @@ export default function Dashboard() {
                     </Link>
 
                     {/* New Project */}
-                    <Link href="/dashboard/projects/create" prefetch={true}>
+                    <Link href="/dashboard/projects/create">
                         <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group text-center">
                             <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-yellow-50 group-hover:bg-yellow-100 transition">
                                 <FolderKanban className="w-5 h-5 text-yellow-400" />
@@ -412,18 +348,15 @@ export default function Dashboard() {
                                 {recentImages.map((image) => {
                                     const imageSrc = image.image_url || "/placeholder.svg";
                                     return (
-                                    <div
-                                        key={image.id}
-                                        className="relative aspect-square overflow-hidden rounded-xl bg-gray-100 border border-gray-200 hover:shadow-md transition-all cursor-pointer"
-                                    >
-                                            {/* Use Next.js Image for optimization */}
-                                            <Image
+                                        <div
+                                            key={image.id}
+                                            className="aspect-square overflow-hidden rounded-xl bg-gray-100 border border-gray-200 hover:shadow-md transition-all cursor-pointer"
+                                        >
+                                            <img
                                                 src={imageSrc}
                                                 alt={image.prompt || "Generated content"}
-                                                fill
-                                                className="object-cover"
-                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                                                unoptimized={imageSrc?.includes('cloudinary') || imageSrc?.includes('imagekit')}
+                                                loading="lazy"
+                                                className="w-full h-full object-cover"
                                                 onError={(e) => {
                                                     e.target.src = "/placeholder.svg";
                                                 }}
@@ -436,7 +369,7 @@ export default function Dashboard() {
                     }
                     return (
                         <div className="text-center py-8 text-gray-500">
-                            <ImageIcon className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                            <Image className="w-12 h-12 mx-auto mb-2 text-gray-400" />
                             <p>{t("dashboard.noRecentImages")}</p>
                         </div>
                     );

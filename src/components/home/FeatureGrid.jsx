@@ -40,14 +40,15 @@
 
 // export default FeatureGrid;
 import React from "react";
+import { Gem, Star, User, Palette, Repeat, Box } from "lucide-react";
 
 const features = [
-  { title: "Photoreal Metals & Gems", description: "True-to-life sheen and sparkle.", icon: "💎" },
-  { title: "Skin-Tone Fidelity", description: "Editorial lighting and natural texture.", icon: "✨" },
-  { title: "Pose Library", description: "From subtle tilts to bold looks.", icon: "🎭" },
-  { title: "Style Presets", description: "Studio clean, editorial luxe, outdoor daylight.", icon: "🎨" },
-  { title: "Variant Consistency", description: "One look, many SKUs.", icon: "🔄" },
-  { title: "Marketplace-Ready", description: "Compliant crops, backgrounds, and sizes.", icon: "📦" },
+  { title: "Photoreal Metals & Gems", description: "True-to-life sheen and sparkle.", icon: <Gem /> },
+  { title: "Skin-Tone Fidelity", description: "Editorial lighting and natural texture.", icon: <Star /> },
+  { title: "Pose Library", description: "From subtle tilts to bold looks.", icon: <User /> },
+  { title: "Style Presets", description: "Studio clean, editorial luxe, outdoor daylight.", icon: <Palette /> },
+  { title: "Variant Consistency", description: "One look, many SKUs.", icon: <Repeat /> },
+  { title: "Marketplace-Ready", description: "Compliant crops, backgrounds, and sizes.", icon: <Box /> },
 ];
 
 const FeatureGrid = () => {
@@ -55,7 +56,7 @@ const FeatureGrid = () => {
     <section className="py-12 lg:py-16 bg-gray-50">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-8 lg:mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold mb-4 text-gray-900">
             Everything you need
           </h2>
@@ -69,9 +70,10 @@ const FeatureGrid = () => {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="p-8 rounded-2xl shadow-lg border border-gray-200 bg-white hover:bg-gray-50 hover:shadow-2xl transition-all"
+              className="p-8 rounded-2xl shadow-lg border border-gray-500 bg-white hover:bg-gray-50 hover:shadow-2xl transition-all"
             >
-              <div className="text-4xl mb-4">{feature.icon}</div>
+              <div className="text-primary size-10 p-2 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600">{feature.icon}</div>
+              <br />
               <h3 className="text-xl font-semibold mb-2 text-gray-900">{feature.title}</h3>
               <p className="text-gray-700">{feature.description}</p>
             </div>

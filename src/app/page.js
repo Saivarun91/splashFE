@@ -68,7 +68,7 @@ const Home = () => {
         <ProductChapter
           title="Cast the perfect face."
           description="Choose AI models or upload approved talent—control poses, angles, and expressions. Diverse representation with beauty-grade lighting that makes your jewelry shine."
-          imageSrc="/images/chapter-model.jpg"
+          imageSrc="/images/chapter-model.jpeg"
           imageAlt="Professional model portrait for jewelry campaigns"
           imagePosition="left"
         />
@@ -84,7 +84,7 @@ const Home = () => {
         <ProductChapter
           title="Set the scene."
           description="Pick locations, backdrops, and palettes. Go from studio-clean to editorial drama. Marble slabs, silk backdrops, daylight streaming—complete creative control."
-          imageSrc="/images/chapter-scene.jpg"
+          imageSrc="/images/chapter-scene.png"
           imageAlt="Editorial jewelry photography setup with marble and silk"
           imagePosition="left"
         />

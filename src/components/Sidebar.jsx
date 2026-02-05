@@ -629,34 +629,28 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
         >
             {/* Header */}
             <div className="flex items-center h-16 px-3 border-b border-gray-800">
-                {isGenerating ? (
-                    <div className="flex items-center gap-2 flex-1 group cursor-not-allowed opacity-50">
-                        <div className="w-10 h-10 rounded-xl bg-linear-to-r from-indigo-500 to-purple-500 flex items-center justify-center transition-transform duration-200">
-                            <Sparkles className="w-5 h-5 text-white" />
+                
+                
+                    <>
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+                            <img src="/images/favicon.png" alt="Splash AI Studio" className="w-full h-full object-contain"  />
                         </div>
                         {isExpanded && (
-                            <span className="text-lg font-semibold tracking-tight ml-2">
-                                Splash AI Studio
-                            </span>
+                            <div className="flex items-center justify-center gap-2 group" >
+                            <Link href="/" className="flex items-center justify-center gap-2 group" >
+                                <img
+                                    src="/images/logo-splash.png"
+                                    alt="Splash AI Studio"
+                                    className="h-32 lg:h-40 w-auto object-contain hover:scale-105 transition-transform duration-300 translate-y-2 mb-px"
+                                />
+                            </Link>
+                            </div>
+                            
                         )}
-                    </div>
-                ) : (
-                    <Link href="/dashboard" className="flex items-center gap-2 flex-1 group">
-                        <div className="w-10 h-10 rounded-xl bg-linear-to-r from-indigo-500 to-purple-500 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-                            <Sparkles className="w-5 h-5 text-white" />
-                        </div>
-                        {isExpanded && (
-                            <span className="text-lg font-semibold tracking-tight ml-2">
-                                Splash AI Studio
-                            </span>
-                        )}
-                    </Link>
-                )}
-
-                <button
-                    onClick={() => !isGenerating && setCollapsed(!collapsed)}
-                    disabled={isGenerating}
-                    className={`ml-2 flex items-center justify-center w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 transition ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    </>
+                    <button
+                    onClick={() => setCollapsed && setCollapsed(!collapsed)}
+                    className="ml-2 flex items-center justify-center w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 transition"
                 >
                     {collapsed ? (
                         <ChevronRight className="w-6 h-6 text-white" />
