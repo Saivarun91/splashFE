@@ -209,7 +209,7 @@ const HowItWorks = () => {
           <button
             className={`py-2 font-medium transition-colors ${
               activeTab === "images"
-                ? "border-b-2 border-purple-600 text-purple-600"
+                ? "border-b-2 border-gradient-to-r from-purple-600 to-indigo-600 text-purple-600"
                 : "text-gray-600 hover:text-gray-800"
             }`}
             onClick={() => setActiveTab("images")}
