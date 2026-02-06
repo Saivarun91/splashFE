@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { MoveRight, CheckCircle2, Zap, Users, Globe2, Layers } from "lucide-react";
+import { MoveRight, MoveLeft, CheckCircle2, Zap, Users, Globe2, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -208,6 +208,19 @@ export default function AboutPage() {
           </Link>
         </div>
       </section>
+
+      <button
+        onClick={() => {
+          const footer = document.getElementById("site-footer");
+          footer?.scrollIntoView({ behavior: "smooth" });
+        }}
+        className="fixed top-24 left-6 z-50
+                   bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700
+                   hover:bg-gray-100 hover:text-black
+                   px-4 py-2 rounded-full shadow-sm transition-all flex items-center gap-2"
+      >
+        <MoveLeft size={16} /> Back
+      </button>
     </div>
   );
 }

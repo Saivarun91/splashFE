@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Instagram, Twitter, Linkedin } from "lucide-react";
+import { useState } from "react";
+import { FooterContactModal } from "./FooterContactModal";
 
 /**
  * Quick links: hrefs point to home anchors or app routes.
@@ -34,9 +36,13 @@ const footerLinks = {
   ],
 };
 
+
 const Footer = () => {
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
   return (
-    <footer className="border-t border-gray-300 bg-white">
+    <footer id="site-footer" className="border-t border-gray-300 bg-white">
+      <FooterContactModal open={isContactModalOpen} onOpenChange={setIsContactModalOpen} />
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12 md:py-16 lg:py-20">
         {/* Mobile: Stacked, Tablet+: Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 sm:gap-8 lg:gap-12 mb-8 sm:mb-12">
@@ -86,12 +92,27 @@ const Footer = () => {
               <ul className="space-y-2 sm:space-y-3">
                 {links.map((link) => (
                   <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-xs sm:text-sm text-black hover:text-gray-700 transition-colors"
-                    >
-                      {link.label}
-                    </Link>
+                    {link.label === "Contact" ? (
+                      // <button
+                        
+                      //   className="text-xs sm:text-sm text-black hover:text-gray-700 transition-colors text-left"
+                      // >
+                      //   {link.label}
+                      // </button>
+                      <Link
+                        href={link.href}
+                        className="text-xs sm:text-sm text-black hover:text-gray-700 transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-xs sm:text-sm text-black hover:text-gray-700 transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

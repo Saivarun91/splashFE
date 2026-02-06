@@ -10,78 +10,78 @@ class ApiService {
 
     // Low-level request helper (uses fetch)
     // OPTIMIZED: Supports Next.js fetch caching options for client-side requests
-async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
+    async request(endpoint, options = {}) {
+        const url = `${this.baseURL}${endpoint}`;
 
-    // Prepare headers object but DO NOT auto-set Content-Type yet
-    const headers = {
-        ...(options.headers || {})
-    };
+        // Prepare headers object but DO NOT auto-set Content-Type yet
+        const headers = {
+            ...(options.headers || {})
+        };
 
-    const config = {
-        ...options,
-        headers,
-        // Support Next.js fetch caching options (for client-side requests)
-        // Note: Client-side fetch caching is limited, but we can pass options through
-        ...(options.next && { next: options.next }),
-        ...(options.cache && { cache: options.cache }),
-    };
+        const config = {
+            ...options,
+            headers,
+            // Support Next.js fetch caching options (for client-side requests)
+            // Note: Client-side fetch caching is limited, but we can pass options through
+            ...(options.next && { next: options.next }),
+            ...(options.cache && { cache: options.cache }),
+        };
 
-    // Auto-add JSON content-type ONLY if the body is a plain JSON string
-    const isJSONBody =
-        config.body &&
-        typeof config.body === "string" &&
-        !headers["Content-Type"] &&
-        !config.body instanceof FormData;
+        // Auto-add JSON content-type ONLY if the body is a plain JSON string
+        const isJSONBody =
+            config.body &&
+            typeof config.body === "string" &&
+            !headers["Content-Type"] &&
+            !config.body instanceof FormData;
 
-    if (isJSONBody) {
-        headers["Content-Type"] = "application/json";
-    }
+        if (isJSONBody) {
+            headers["Content-Type"] = "application/json";
+        }
 
-    try {
-        const response = await fetch(url, config);
+        try {
+            const response = await fetch(url, config);
 
-        if (!response.ok) {
-            if (response.status === 401) {
-                if (typeof window !== "undefined" && !localStorage.getItem("token")) {
-                    return null;
+            if (!response.ok) {
+                if (response.status === 401) {
+                    if (typeof window !== "undefined" && !localStorage.getItem("token")) {
+                        return null;
+                    }
                 }
+
+                // Extract backend error message
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    if (errorData?.error) errorMessage = errorData.error;
+                    else if (errorData?.message) errorMessage = errorData.message;
+                } catch { }
+
+                const error = new Error(errorMessage);
+                error.status = response.status;
+                throw error;
             }
 
-            // Extract backend error message
-            let errorMessage = `HTTP error! status: ${response.status}`;
+            // Some endpoints return empty body
+            const text = await response.text();
             try {
-                const errorData = await response.json();
-                if (errorData?.error) errorMessage = errorData.error;
-                else if (errorData?.message) errorMessage = errorData.message;
-            } catch { }
+                return text ? JSON.parse(text) : {};
+            } catch {
+                return text;
+            }
+        } catch (error) {
+            if (
+                error.message &&
+                error.message.includes("401") &&
+                typeof window !== "undefined" &&
+                !localStorage.getItem("token")
+            ) {
+                return null;
+            }
 
-            const error = new Error(errorMessage);
-            error.status = response.status;
+            console.error("API request failed:", error);
             throw error;
         }
-
-        // Some endpoints return empty body
-        const text = await response.text();
-        try {
-            return text ? JSON.parse(text) : {};
-        } catch {
-            return text;
-        }
-    } catch (error) {
-        if (
-            error.message &&
-            error.message.includes("401") &&
-            typeof window !== "undefined" &&
-            !localStorage.getItem("token")
-        ) {
-            return null;
-        }
-
-        console.error("API request failed:", error);
-        throw error;
     }
-}
 
 
     // HTTP method shortcuts
@@ -595,7 +595,7 @@ async request(endpoint, options = {}) {
             body: JSON.stringify({
                 // product_image_url: productImageUrl,
                 // product_image_path: productImagePath
-                product_url: productImageUrl 
+                product_url: productImageUrl
             }),
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
@@ -940,7 +940,7 @@ async request(endpoint, options = {}) {
 
         // Update the prompt in formData
         formData.set('prompt', enhancedPrompt);
-        
+
         const response = await axios.post(`${this.baseURL}/image/generate-campaign-shot/`, formData, {
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
@@ -1245,7 +1245,7 @@ async request(endpoint, options = {}) {
 
     // Get payment history for current user (works for both org and individual users)
     async getPaymentHistory(token, organizationId = null) {
-        const url = organizationId 
+        const url = organizationId
             ? `/api/payments/history/?organization_id=${organizationId}`
             : '/api/payments/history/';
         return this.get(url, {
@@ -1262,7 +1262,7 @@ async request(endpoint, options = {}) {
 
     // Plans endpoints
     async getPlans(activeOnly = true) {
-        const endpoint = activeOnly 
+        const endpoint = activeOnly
             ? '/api/plans/?active_only=true'
             : '/api/plans/';
         return this.request(endpoint);
@@ -1278,6 +1278,19 @@ async request(endpoint, options = {}) {
             method: 'POST',
             body: JSON.stringify(data),
         });
+    }
+
+    // Submit Contact Form (Footer) - no auth required
+    async submitContact(data) {
+        return this.request('/api/homepage/contact/', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    // Legal endpoints
+    async getLegalContent(type) {
+        return this.get(`/api/legal/${type}/`);
     }
 
     // Invoice endpoints

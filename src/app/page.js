@@ -109,6 +109,7 @@ const Home = () => {
       <FeatureGrid />
       <BeforeAfter />
       <ShowcaseSection />
+      
 
       <div id="how-it-works">
         <HowItWorks />
@@ -117,7 +118,7 @@ const Home = () => {
       <div id="pricing">
         <PricingSection />
       </div>
-
+      
       <Footer />
     </div>
   );

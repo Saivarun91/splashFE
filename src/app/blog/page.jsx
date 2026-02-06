@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, Calendar, User, Clock } from "lucide-react";
+import { ArrowRight, ArrowLeft, Calendar, User, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -34,6 +34,18 @@ export default function BlogIndexPage() {
           </p>
         </div>
       </section>
+      <button
+        onClick={() => {
+          const footer = document.getElementById("site-footer");
+          footer?.scrollIntoView({ behavior: "smooth" });
+        }}
+        className="fixed top-24 left-6 z-50
+             bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700
+             hover:bg-gray-100 hover:text-black
+             px-4 py-2 rounded-full shadow-sm transition-all flex items-center gap-2"
+      >
+        <ArrowLeft size={16} /> Back
+      </button>
 
       {/* Blog Grid */}
       <section className="py-16">
