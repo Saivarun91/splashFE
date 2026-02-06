@@ -51,12 +51,12 @@ const Home = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <Navigation />
       <HeroSection />
 
       {/* Product Story Chapters */}
-      <div id="product">
+      <div id="product" className="pt-0 sm:pt-0">
         <ProductChapter
           title="Start with a spark."
           description="Upload moodboards, pick styles, and define your brand feel. Our AI understands luxury aesthetics and translates your vision into precise creative direction."

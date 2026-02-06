@@ -395,7 +395,10 @@
     "imageFilteredSuccess": "Image filtered successfully!",
     "imageSortedSuccess": "Image sorted successfully!",
     "confirmDelete": "Are you sure you want to delete this image?",
-    "failedToDeleteImage": "Failed to delete image"
+    "failedToDeleteImage": "Failed to delete image",
+    "generatingYourImage": "Generating your image...",
+    "newImages": "New Images",
+    "clickRegenerateToModify": "click regenerate to modify this image with new instructions!"
   },
   "errors": {
     "generic": "An error occurred. Please try again.",

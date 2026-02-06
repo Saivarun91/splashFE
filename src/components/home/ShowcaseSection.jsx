@@ -111,31 +111,31 @@ const showcaseImages = [
 
 const ShowcaseSection = () => {
   return (
-    <section id="showcase" className="py-12 lg:py-16 bg-white">
-      <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
+    <section id="showcase" className="py-8 sm:py-10 md:py-12 lg:py-16 bg-white">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-12">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-8 sm:mb-12 md:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
             See it in action
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-2">
             Campaign-ready visuals created entirely with Splash AI Studio.
           </p>
         </div>
 
-        {/* Image Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
+        {/* Image Grid - Mobile: 2 columns, Tablet+: 3 columns */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
           {showcaseImages.map((image, index) => (
             <div
               key={index}
-              className={`relative overflow-hidden rounded-xl shadow-lg hover:scale-105 transition-transform duration-300 ${
-                image.tall ? "md:row-span-2" : ""
+              className={`relative overflow-hidden rounded-lg sm:rounded-xl shadow-md sm:shadow-lg hover:scale-105 transition-transform duration-300 ${
+                image.tall ? "sm:row-span-2" : ""
               }`}
             >
               <img
                 src={image.src}
                 alt={image.alt}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover min-h-[150px] sm:min-h-[200px] md:min-h-[250px]"
                 loading="lazy"
               />
             </div>

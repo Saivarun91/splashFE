@@ -91,57 +91,58 @@ const PricingSection = () => {
   return (
     <section id="pricing" className="py-12 lg:py-16 bg-white">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-4">
+        <div className="text-center mb-8 sm:mb-12 md:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-3 sm:mb-4">
             Simple, transparent pricing
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-2">
             Choose the plan that fits your needs.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        {/* Mobile: 1 column, Tablet: 2 columns, Desktop: 3 columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-4xl mx-auto">
         {proPlan && (
-            <div className="relative p-6 rounded-2xl border-2 border-gray-200 bg-white shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-gray-600 to-gray-800">
-                  <Crown className="text-white" size={24} />
+            <div className="relative p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border-2 border-gray-200 bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-gray-600 to-gray-800 flex-shrink-0">
+                  <Crown className="text-white" size={20} className="sm:w-6 sm:h-6" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-semibold text-gray-900">Free Plan</h3>
-                  <p className="text-sm text-gray-500 mt-0.5">For a limited time, you can get 5 credits for free.</p>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">Free Plan</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">For a limited time, you can get 5 credits for free.</p>
                 </div>
               </div>
 
-              <div className="mb-4">
-                <span className="text-4xl font-bold text-gray-900">Free</span>
-                <span className="text-gray-500 ml-2">for 5 credits</span>
+              <div className="mb-3 sm:mb-4">
+                <span className="text-3xl sm:text-4xl font-bold text-gray-900">Free</span>
+                <span className="text-sm sm:text-base text-gray-500 ml-2">for 5 credits</span>
               </div>
 
               <button
-                className="w-full py-3 rounded-lg font-semibold bg-primary text-white hover:bg-white hover:text-primary  border-2 border-primary transition-colors mb-4"
+                className="w-full py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base bg-primary text-white hover:bg-white hover:text-primary border-2 border-primary transition-colors mb-3 sm:mb-4"
                 onClick={() => (window.location.href = "/signup")}
               >
                 Get Started
               </button>
 
               {proPlan.features && proPlan.features.length > 0 && (
-                <ul className="space-y-3 border-t border-gray-200 pt-4">
-                    <li className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-gray-900 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">Explore the platform for free</span>
+                <ul className="space-y-2 sm:space-y-3 border-t border-gray-200 pt-3 sm:pt-4">
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm sm:text-base text-gray-700">Explore the platform for free</span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-gray-900 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700"> Get 5 credits for free</span>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm sm:text-base text-gray-700"> Get 5 credits for free</span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-gray-900 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">Get free image generation credits</span>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm sm:text-base text-gray-700">Get free image generation credits</span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-gray-900 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">No credit card required</span>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm sm:text-base text-gray-700">No credit card required</span>
                     </li>
                     {/* <li className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
@@ -157,38 +158,38 @@ const PricingSection = () => {
 
           {/* Pro Plan Card */}
           {proPlan && (
-            <div className="relative p-6 rounded-2xl border-2 border-purple-200 bg-gradient-to-b from-purple-50 to-white shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-500">
-                  <Gem className="text-white" size={24} />
+            <div className="relative p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border-2 border-purple-200 bg-gradient-to-b from-purple-50 to-white shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-600 to-purple-500 flex-shrink-0">
+                  <Gem className="text-white" size={20} className="sm:w-6 sm:h-6" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-semibold text-gray-900">{proPlan.name}</h3>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">{proPlan.name}</h3>
                   {proPlan.description && (
-                    <p className="text-sm text-gray-500 mt-0.5">{proPlan.description}</p>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{proPlan.description}</p>
                   )}
                 </div>
               </div>
 
-              <div className="mb-4">
-                <span className="text-4xl font-bold text-gray-900">${proAmount}</span>
-                <span className="text-gray-500 ml-2">Fixed</span>
+              <div className="mb-3 sm:mb-4">
+                <span className="text-3xl sm:text-4xl font-bold text-gray-900">${proAmount}</span>
+                <span className="text-sm sm:text-base text-gray-500 ml-2">Fixed</span>
               </div>
 
               <button
-                className="w-full py-3 rounded-lg font-semibold bg-gradient-to-br from-indigo-600 to-purple-500 text-white hover:bg-indigo-700 transition-colors mb-4"
+                className="w-full py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base bg-gradient-to-br from-indigo-600 to-purple-500 text-white hover:bg-indigo-700 transition-colors mb-3 sm:mb-4"
                 onClick={handleProPayClick}
               >
                 {proCta}
               </button>
             
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Choose credits</label>
+              <div className="mb-3 sm:mb-4">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Choose credits</label>
                 <select
                   value={selectedCreditOption}
                   onChange={(e) => setSelectedCreditOption(Number(e.target.value))}
-                  className="w-full px-4 py-2 border border-primary rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-primary rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
                   {proCreditOptions.map((opt, index) => (
                     <option key={index} value={index}>
@@ -199,11 +200,11 @@ const PricingSection = () => {
               </div>
 
               {proPlan.features && proPlan.features.length > 0 && (
-                <ul className="space-y-3 border-t border-gray-200 pt-4">
+                <ul className="space-y-2 sm:space-y-3 border-t border-gray-200 pt-3 sm:pt-4">
                   {proPlan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
+                    <li key={i} className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm sm:text-base text-gray-700">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -213,36 +214,36 @@ const PricingSection = () => {
 
           {/* Enterprise Plan Card */}
           {enterprisePlan && (
-            <div className="relative p-6 rounded-2xl border-2 border-gray-200 bg-white shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-gray-600 to-gray-800">
-                  <Building2 className="text-white" size={24} />
+            <div className="relative p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border-2 border-gray-200 bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-gray-600 to-gray-800 flex-shrink-0">
+                  <Building2 className="text-white" size={20} className="sm:w-6 sm:h-6" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-semibold text-gray-900">{enterprisePlan.name}</h3>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">{enterprisePlan.name}</h3>
                   {enterprisePlan.description && (
-                    <p className="text-sm text-gray-500 mt-0.5">{enterprisePlan.description}</p>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{enterprisePlan.description}</p>
                   )}
                 </div>
               </div>
 
-              <div className="mb-4">
-                <span className="text-3xl font-bold text-gray-900">{enterpriseAmountDisplay}</span>
+              <div className="mb-3 sm:mb-4">
+                <span className="text-2xl sm:text-3xl font-bold text-gray-900">{enterpriseAmountDisplay}</span>
               </div>
 
               <a
                 href="mailto:sales@example.com"
-                className="w-full inline-block text-center py-3 rounded-lg font-semibold bg-primary text-white hover:bg-white hover:text-primary  border-2 border-primary transition-colors mb-4"
+                className="w-full inline-block text-center py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base bg-primary text-white hover:bg-white hover:text-primary border-2 border-primary transition-colors mb-3 sm:mb-4"
               >
                 {enterpriseCta}
               </a>
 
               {enterprisePlan.features && enterprisePlan.features.length > 0 && (
-                <ul className="space-y-3 border-t border-gray-200 pt-4">
+                <ul className="space-y-2 sm:space-y-3 border-t border-gray-200 pt-3 sm:pt-4">
                   {enterprisePlan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-gray-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
+                    <li key={i} className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm sm:text-base text-gray-700">{feature}</span>
                     </li>
                   ))}
                 </ul>

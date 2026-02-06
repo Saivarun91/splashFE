@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Menu } from "lucide-react";
 
 const heroImages = [
   "/images/hero-campaign-01.jpg",
@@ -51,7 +51,7 @@ const HeroSection = () => {
             href="/login"
             className="inline-flex items-center justify-center bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] text-white font-medium rounded-xl hover:bg-purple-600 transition-colors sm:flex-1 sm:max-w-[180px] animate-slideFadeIn delay-100"
           >
-            Try Splash AI
+            Try Free Splash AI
             <ChevronRight className="ml-2" size={20} />
           </Link>
           <a
@@ -107,28 +107,32 @@ const HeroSection = () => {
 
       {/* Fixed Bottom Glassy Bar */}
       <div
-        className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-20 transition-all duration-500 ease-in-out ${scrolledPastHero ? "opacity-100 translate-y-0 animate-slideUpIn" : "opacity-0 -translate-y-6 pointer-events-none"
+        className={`fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 transition-all duration-500 ease-in-out w-[95%] sm:w-auto max-w-[95vw] ${scrolledPastHero ? "opacity-100 translate-y-0 animate-slideUpIn" : "opacity-0 -translate-y-6 pointer-events-none"
           }`}
       >
-        <div className="flex items-center gap-3 bg-white/60 backdrop-blur-md px-5 py-3 rounded-xl shadow-lg whitespace-nowrap border border-white/20">
-          <span className="text-[0.95rem] font-bold text-transparent bg-clip-text bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] animate-slideFadeIn">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 bg-white/60 backdrop-blur-md px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-lg border border-white/20">
+          <span className="text-[0.75rem] sm:text-[0.95rem] font-bold text-transparent bg-clip-text bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] animate-slideFadeIn text-center sm:text-left whitespace-normal sm:whitespace-nowrap">
             CAMPAIGN READY VISUALS, WITHOUT THE SHOOT
           </span>
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] text-white font-medium rounded-xl px-3 py-2 hover:bg-purple-600 transition-colors animate-slideFadeIn delay-100"
-          >
-            Try Splash AI
-            <ChevronRight className="ml-1" size={16} />
-          </Link>
-          <a
-            href="#showcase"
-            className="inline-flex items-center justify-center px-3 py-2 border-2 border-gray-300 rounded text-gray-800 hover:bg-gray-100 transition-colors animate-slideFadeIn delay-200"
-          >
-            See Showcase
-          </a>
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] text-white text-xs sm:text-sm font-medium rounded-xl px-3 sm:px-3 py-1.5 sm:py-2 hover:bg-purple-600 transition-colors animate-slideFadeIn delay-100 flex-1 sm:flex-initial"
+            >
+              Try Free Splash AI
+              <ChevronRight className="ml-1" size={14} />
+            </Link>
+            <a
+              href="#showcase"
+              className="inline-flex items-center justify-center px-3 py-1.5 sm:py-2 border-2 border-gray-300 rounded text-gray-800 text-xs sm:text-sm hover:bg-gray-100 transition-colors animate-slideFadeIn delay-200 flex-1 sm:flex-initial"
+            >
+              See Showcase
+            </a>
+          </div>
         </div>
       </div>
+      
+        
 
       {/* Animations */}
       <style jsx>{`
@@ -148,6 +152,8 @@ const HeroSection = () => {
           animation: slideUpIn 0.6s ease-out forwards;
         }
       `}</style>
+
+      
     </section>
   );
 };

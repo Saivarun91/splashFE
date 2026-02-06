@@ -287,20 +287,20 @@ const Navigation = () => {
         : "bg-white/70 backdrop-blur-xl shadow-sm border-b border-gray-200"
         }`}
     >
-      <div className="max-w-screen-2xl mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between h-14 lg:h-18">
-          {/* Logo */}
-          <Link href="/" className="flex items-center justify-center gap-2 group">
+      <div className="max-w-screen-2xl mx-auto px-3 sm:px-4 lg:px-8">
+        <div className="flex items-center justify-between h-12 sm:h-14 lg:h-18">
+          {/* Logo - Mobile */}
+          <Link href="/" className="flex items-center justify-center gap-1 sm:gap-2 group">
             <img
               src="/images/logo-splash.png"
               alt="Splash AI Studio"
-              className="h-32 lg:h-40 w-auto object-contain hover:scale-105 transition-transform duration-300 translate-y-2 mb-px"
+              className="h-20 sm:h-28 md:h-32 lg:h-40 w-auto object-contain hover:scale-105 transition-transform duration-300 translate-y-1 sm:translate-y-2 mb-px"
             />
           </Link>
 
           {/* Desktop Navigation */}
           {!isAuthPage && (
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-6 lg:gap-8">
               {navLinks.map((link) => (
                 <a
                   key={link.name}
@@ -313,23 +313,23 @@ const Navigation = () => {
             </div>
           )}
 
-          {/* CTA Button */}
+          {/* CTA Button - Desktop */}
           <div className="hidden md:block">
             <Link
               href={isAuthPage ? "/" : "/login"}
-              className="inline-block px-4 py-2 text-sm lg:text-base font-medium text-white bg-gradient-to-br from-indigo-600 to-purple-500 rounded hover:bg-indigo-700 transition-colors"
+              className="inline-block px-4 py-2 text-sm lg:text-base font-medium text-white bg-gradient-to-br from-indigo-600 to-purple-500 rounded-lg hover:bg-indigo-700 transition-colors"
             >
-              {isAuthPage ? "Back to Home" : "Get Started"}
+              {isAuthPage ? "Back to Home" : "Get Started for free"}
             </Link>
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2"
+            className="md:hidden p-2 -mr-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={20} className="sm:w-6 sm:h-6" /> : <Menu size={20} className="sm:w-6 sm:h-6" />}
           </button>
         </div>
       </div>
@@ -337,12 +337,12 @@ const Navigation = () => {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200">
-          <div className="px-6 py-4 space-y-4">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
             {!isAuthPage && navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
-                className="block text-base text-gray-800 hover:text-[#A64DFF] transition-colors font-medium"
+                className="block text-sm sm:text-base text-gray-800 hover:text-[#A64DFF] transition-colors font-medium py-1"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.name}
@@ -350,10 +350,10 @@ const Navigation = () => {
             ))}
             <Link
               href={isAuthPage ? "/" : "/login"}
-              className="block w-full px-4 py-2 text-base font-medium text-white bg-gradient-to-br from-indigo-600 to-purple-500 rounded hover:bg-indigo-700 transition-colors"
+              className="block w-full px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white bg-gradient-to-br from-indigo-600 to-purple-500 rounded-lg hover:bg-indigo-700 transition-colors text-center"
               onClick={() => setMobileMenuOpen(false)}
             >
-              {isAuthPage ? "Back to Home" : "Get Started"}
+              {isAuthPage ? "Back to Home" : "Get Started for free"}
             </Link>
           </div>
         </div>

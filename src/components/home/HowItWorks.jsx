@@ -186,18 +186,18 @@ const HowItWorks = () => {
   const [activeTab, setActiveTab] = useState("projects");
 
   return (
-    <section id="how-it-works" className="py-12 lg:py-16 bg-white">
-      <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-4">
+    <section id="how-it-works" className="py-8 sm:py-10 md:py-12 lg:py-16 bg-white">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-12">
+        <div className="text-center mb-8 sm:mb-12 md:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-3 sm:mb-4">
             How it works
           </h2>
         </div>
 
-        {/* Tabs Buttons */}
-        <div className="grid w-full max-w-md mx-auto grid-cols-2 mb-12 border-b border-gray-300">
+        {/* Tabs Buttons - Mobile Responsive */}
+        <div className="grid w-full max-w-md mx-auto grid-cols-2 mb-6 sm:mb-8 md:mb-12 border-b border-gray-300">
           <button
-            className={`py-2 font-medium transition-colors ${
+            className={`py-2 sm:py-3 text-sm sm:text-base font-medium transition-colors ${
               activeTab === "projects"
                 ? "border-b-2 border-purple-600 text-purple-600"
                 : "text-gray-600 hover:text-gray-800"
@@ -207,9 +207,9 @@ const HowItWorks = () => {
             Projects
           </button>
           <button
-            className={`py-2 font-medium transition-colors ${
+            className={`py-2 sm:py-3 text-sm sm:text-base font-medium transition-colors ${
               activeTab === "images"
-                ? "border-b-2 border-gradient-to-r from-purple-600 to-indigo-600 text-purple-600"
+                ? "border-b-2 border-purple-600 text-purple-600"
                 : "text-gray-600 hover:text-gray-800"
             }`}
             onClick={() => setActiveTab("images")}
@@ -221,18 +221,19 @@ const HowItWorks = () => {
         {/* Tab Content */}
         {activeTab === "projects" && (
           <div>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto text-center mb-12">
+            <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto text-center mb-6 sm:mb-8 md:mb-12 px-2">
               Four simple steps from concept to campaign with team collaboration.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+            {/* Mobile: 1 column, Tablet: 2 columns, Desktop: 4 columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
               {steps.map((step, index) => (
-                <div key={index} className="text-center space-y-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-purple-100 text-purple-600 mb-2">
-                    <step.icon size={32} strokeWidth={1.5} />
+                <div key={index} className="text-center space-y-3 sm:space-y-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl bg-purple-100 text-purple-600 mb-2">
+                    <step.icon size={24} className="sm:w-7 sm:h-7 md:w-8 md:h-8" strokeWidth={1.5} />
                   </div>
-                  <div className="text-sm font-medium text-gray-500">Step {index + 1}</div>
-                  <h3 className="text-2xl font-semibold text-gray-900">{step.title}</h3>
-                  <p className="text-gray-600">{step.description}</p>
+                  <div className="text-xs sm:text-sm font-medium text-gray-500">Step {index + 1}</div>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">{step.title}</h3>
+                  <p className="text-sm sm:text-base text-gray-600 px-2">{step.description}</p>
                 </div>
               ))}
             </div>
@@ -241,18 +242,19 @@ const HowItWorks = () => {
 
         {activeTab === "images" && (
           <div>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto text-center mb-12">
+            <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto text-center mb-6 sm:mb-8 md:mb-12 px-2">
               Quick and powerful AI image generation for individual creators.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+            {/* Mobile: 1 column, Tablet: 2 columns, Desktop: 4 columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
               {imageOptions.map((option, index) => (
-                <div key={index} className="text-center space-y-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-purple-100 text-purple-600 mb-2">
-                    <option.icon size={32} strokeWidth={1.5} />
+                <div key={index} className="text-center space-y-3 sm:space-y-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl bg-purple-100 text-purple-600 mb-2">
+                    <option.icon size={24} className="sm:w-7 sm:h-7 md:w-8 md:h-8" strokeWidth={1.5} />
                   </div>
-                  <div className="text-sm font-medium text-gray-500">Option {index + 1}</div>
-                  <h3 className="text-2xl font-semibold text-gray-900">{option.title}</h3>
-                  <p className="text-gray-600">{option.description}</p>
+                  <div className="text-xs sm:text-sm font-medium text-gray-500">Option {index + 1}</div>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">{option.title}</h3>
+                  <p className="text-sm sm:text-base text-gray-600 px-2">{option.description}</p>
                 </div>
               ))}
             </div>

@@ -72,7 +72,7 @@ const FeatureGrid = () => {
               key={index}
               className="p-8 rounded-2xl shadow-lg border border-gray-500 bg-white hover:bg-gray-50 hover:shadow-2xl transition-all"
             >
-              <div className="text-primary size-10 p-2 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600">{feature.icon}</div>
+              <div className="text-white size-10 p-2 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600">{feature.icon}</div>
               <br />
               <h3 className="text-xl font-semibold mb-2 text-gray-900">{feature.title}</h3>
               <p className="text-gray-700">{feature.description}</p>
