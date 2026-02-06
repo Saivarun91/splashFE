@@ -75,7 +75,7 @@ function ProductChapter({ title, description, imageSrc, imageAlt, imagePosition 
         >
           {/* Text Content */}
           <div className={`space-y-6 ${imagePosition === "left" ? "lg:order-2" : ""}`}>
-            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">{title}</h2>
+            <h2 className="text-2xl lg:text-3xl font-bold bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF]  text-transparent bg-clip-text">{title}</h2>
             <p className="text-lg text-gray-900 lg:text-xl leading-relaxed">
               {description}
             </p>

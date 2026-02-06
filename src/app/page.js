@@ -23,12 +23,12 @@ const Home = () => {
       if (savedUser) {
         const userData = JSON.parse(savedUser);
         if (!userData.profile_completed) {
-          router.push("/complete-profile");
+          router.push("/login");
         } else {
           router.push("/dashboard");
         }
       } else {
-        router.push("/dashboard");
+        router.push("/login");
       }
     }
   }, [isAuthenticated, isLoading, router]);

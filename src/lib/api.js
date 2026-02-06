@@ -1288,6 +1288,15 @@ async request(endpoint, options = {}) {
             },
         });
     }
+
+    // Legal Compliance endpoints
+    async getLegalContent(contentType) {
+        if (contentType) {
+            return this.request(`/api/legal/${contentType}/`);
+        } else {
+            return this.request('/api/legal/');
+        }
+    }
 }
 
 // Configure axios to add token to all requests

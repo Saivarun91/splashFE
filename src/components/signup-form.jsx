@@ -44,36 +44,23 @@ export default function SignupForm() {
     const [step, setStep] = useState("signup");
     const [otp, setOtp] = useState("");
     const [otpLoading, setOtpLoading] = useState(false);
-    useEffect(() => {
-        // Fetch legal content on component mount
-        const fetchLegalContent = async () => {
-            try {
-                const response = await apiService.getLegalContent();
-                if (response.success && response.content) {
-                    setLegalContent(response.content);
-                }
-            } catch (err) {
-                console.error("Failed to fetch legal content:", err);
-            }
-        };
-        fetchLegalContent();
-    }, []);
+
 
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData({ 
-            ...formData, 
-            [name]: type === 'checkbox' ? checked : value 
+        setFormData({
+            ...formData,
+            [name]: type === 'checkbox' ? checked : value
         });
     };
 
     const formatContent = (content) => {
         if (!content) return '';
-        
+
         // Check if content is already HTML (contains HTML tags)
         const isHTML = /<[a-z][\s\S]*>/i.test(content);
-        
+
         if (isHTML) {
             // Content is already HTML, return as-is
             return content;
@@ -86,12 +73,12 @@ export default function SignupForm() {
                 .filter(paragraph => paragraph.length > 0)
                 .map(paragraph => `<p>${paragraph.replace(/\n/g, '<br/>')}</p>`)
                 .join('');
-            
+
             // If no paragraphs were created, treat single line breaks as <br>
             if (!formatted) {
                 formatted = content.replace(/\n/g, '<br/>');
             }
-            
+
             return formatted;
         }
     };
@@ -99,11 +86,11 @@ export default function SignupForm() {
     const handleViewContent = async (contentType) => {
         try {
             const response = await apiService.getLegalContent(contentType);
-            if (response.success) {
+            if (response && response.success && response.content) {
                 setSelectedContent({
                     type: contentType,
-                    title: response.title,
-                    content: response.content
+                    title: response.content.title,
+                    content: response.content.content
                 });
                 setIsDialogOpen(true);
             }
@@ -117,19 +104,19 @@ export default function SignupForm() {
         e.preventDefault();
         setLoading(true);
         setMessage("");
-    
+
         if (formData.password !== formData.confirm_password) {
             setMessage(t("auth.passwordsNotMatch"));
             setLoading(false);
             return;
         }
-    
+
         if (!formData.acceptTerms) {
             setMessage(t("auth.acceptAllTerms") || "Please accept all terms and conditions to continue");
             setLoading(false);
             return;
         }
-    
+
         try {
             await apiService.register(
                 formData.full_name,
@@ -137,11 +124,11 @@ export default function SignupForm() {
                 formData.email,
                 formData.password
             );
-    
+
             // ✅ Move to OTP step
             setStep("otp");
             setMessage(t("auth.otpSent"));
-    
+
         } catch (err) {
             setMessage(err.message);
         } finally {
@@ -150,7 +137,7 @@ export default function SignupForm() {
     };
     const handleVerifyOtp = async (e) => {
         e.preventDefault();
-        
+
         if (!otp || otp.length !== 6) {
             setMessage(t("auth.pleaseEnterValidOtp") || "Please enter a valid 6-digit OTP");
             return;
@@ -158,23 +145,23 @@ export default function SignupForm() {
 
         setOtpLoading(true);
         setMessage("");
-    
+
         try {
             const response = await apiService.verifyEmailOtp(
                 formData.email,
                 otp
             );
-    
+
             // Check if verification was successful
             if (response && (response.token || response.message)) {
                 // ✅ Save token if returned
                 if (response.token) {
                     localStorage.setItem("token", response.token);
                 }
-                
+
                 // Show success message
                 setMessage(response.message || t("auth.emailVerified") || "Email verified successfully!");
-                
+
                 // Redirect to dashboard after a short delay
                 setTimeout(() => {
                     router.push("/login");
@@ -182,7 +169,7 @@ export default function SignupForm() {
             } else {
                 throw new Error(response?.error || t("auth.invalidOtp") || "Invalid OTP");
             }
-    
+
         } catch (err) {
             console.error("OTP verification error:", err);
             const errorMessage = err.message || err.response?.data?.error || t("auth.invalidOtp") || "Failed to verify OTP. Please try again.";
@@ -198,7 +185,7 @@ export default function SignupForm() {
 
         try {
             const response = await apiService.resendEmailOtp(formData.email);
-            
+
             if (response && (response.success || response.message)) {
                 setMessage(response.message || t("auth.otpResent") || "OTP has been resent to your email");
                 // Clear the OTP input
@@ -240,161 +227,160 @@ export default function SignupForm() {
                 </Select>
             </div> */}
             {step === "signup" ? (
-            <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                    <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.fullName")}</label>
-                    <Input
-                        type="text"
-                        name="full_name"
-                        value={formData.full_name}
-                        onChange={handleChange}
-                        placeholder={t("auth.johnDoe")}
-                        required
-                        className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.username")}</label>
-                    <Input
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        placeholder={t("auth.johndoe123")}
-                        required
-                        className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.email")}</label>
-                    <Input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder={t("auth.exampleEmail")}
-                        required
-                        className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.password")}</label>
-                    <Input
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder={t("auth.atLeast8Chars")}
-                        required
-                        className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.confirmPassword")}</label>
-                    <Input
-                        type="password"
-                        name="confirm_password"
-                        value={formData.confirm_password}
-                        onChange={handleChange}
-                        placeholder={t("auth.confirmYourPassword")}
-                        required
-                        className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
-                    />
-                </div>
-
-                {/* Legal Compliance Checkboxes */}
-                <div className="space-y-3 pt-2">
-                    <div className="flex items-start gap-2">
-                        <input
-                            type="checkbox"
-                            id="acceptTerms"
-                            name="acceptTerms"
-                            checked={formData.acceptTerms}
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div>
+                        <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.fullName")}</label>
+                        <Input
+                            type="text"
+                            name="full_name"
+                            value={formData.full_name}
                             onChange={handleChange}
+                            placeholder={t("auth.johnDoe")}
                             required
-                            className="mt-1 h-4 w-4 text-[#5533ff] border-gray-300 rounded focus:ring-[#5533ff]"
+                            className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
                         />
-                        <label htmlFor="acceptTerms" className="text-sm text-[#313957]">
-                            {t("signup.agreeTo")}{" "}
-                            <button
-                                type="button"
-                                onClick={() => handleViewContent('terms')}
-                                className="text-[#5533ff] hover:underline font-semibold"
-                            >
-                                {t("signup.termsAndConditions")} {" "}
-                            </button>
-                            {" AND "}
-                            <button
-                                type="button"
-                                onClick={() => handleViewContent('privacy')}
-                                className="text-[#5533ff] hover:underline font-semibold"
-                            >
-                                {t("signup.privacyPolicy")}
-                            </button>
-                        </label>
                     </div>
 
-            
+                    <div>
+                        <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.username")}</label>
+                        <Input
+                            type="text"
+                            name="username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            placeholder={t("auth.johndoe123")}
+                            required
+                            className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
+                        />
+                    </div>
 
-                    
-                </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.email")}</label>
+                        <Input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            placeholder={t("auth.exampleEmail")}
+                            required
+                            className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
+                        />
+                    </div>
 
-                <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3 bg-[#5533ff] hover:bg-[#4422dd] text-white font-semibold rounded-full"
-                >
-                    {loading ? t("auth.signingUp") : t("auth.signup")}
-                </Button>
-            </form>
+                    <div>
+                        <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.password")}</label>
+                        <Input
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder={t("auth.atLeast8Chars")}
+                            required
+                            className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.confirmPassword")}</label>
+                        <Input
+                            type="password"
+                            name="confirm_password"
+                            value={formData.confirm_password}
+                            onChange={handleChange}
+                            placeholder={t("auth.confirmYourPassword")}
+                            required
+                            className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
+                        />
+                    </div>
+
+                    {/* Legal Compliance Checkboxes */}
+                    <div className="space-y-3 pt-2">
+                        <div className="flex items-start gap-2">
+                            <input
+                                type="checkbox"
+                                id="acceptTerms"
+                                name="acceptTerms"
+                                checked={formData.acceptTerms}
+                                onChange={handleChange}
+                                required
+                                className="mt-1 h-4 w-4 text-[#5533ff] border-gray-300 rounded focus:ring-[#5533ff]"
+                            />
+                            <label htmlFor="acceptTerms" className="text-sm text-[#313957]">
+                                {t("signup.agreeTo")}{" "}
+                                <button
+                                    type="button"
+                                    onClick={() => handleViewContent('terms')}
+                                    className="text-[#5533ff] hover:underline font-semibold"
+                                >
+                                    {t("signup.termsAndConditions")} {" "}
+                                </button>
+                                {" AND "}
+                                <button
+                                    type="button"
+                                    onClick={() => handleViewContent('privacy')}
+                                    className="text-[#5533ff] hover:underline font-semibold"
+                                >
+                                    {t("signup.privacyPolicy")}
+                                </button>
+                            </label>
+                        </div>
+
+
+
+
+                    </div>
+
+                    <Button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-3 bg-[#5533ff] hover:bg-[#4422dd] text-white font-semibold rounded-full"
+                    >
+                        {loading ? t("auth.signingUp") : t("auth.signup")}
+                    </Button>
+                </form>
             ) : (
-            <form onSubmit={handleVerifyOtp} className="space-y-5">
-        <h2 className="text-3xl font-bold text-[#0c1421]">
-            {t("auth.verifyEmail")}
-        </h2>
-    
-        <p className="text-sm text-[#313957]">
-            {t("auth.otpSentTo")} <strong>{formData.email}</strong>
-        </p>
-    
-        <Input
-            type="text"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-            maxLength={6}
-            placeholder={t("auth.enterOtp")}
-            className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg text-center tracking-widest text-lg"
-            required
-        />
-    
-        <Button
-            type="submit"
-            disabled={otpLoading || otp.length !== 6}
-            className="w-full py-3 bg-[#5533ff] hover:bg-[#4422dd] text-white font-semibold rounded-full"
-        >
-            {otpLoading ? t("auth.verifying") : t("auth.verifyOtp")}
-        </Button>
-    
-        <button
-            type="button"
-            onClick={handleResendOtp}
-            disabled={otpLoading}
-            className="text-sm text-[#5533ff] hover:underline block mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-            {otpLoading ? t("auth.sending") || "Sending..." : t("auth.resendOtp") || "Resend OTP"}
-        </button>
-    </form>
+                <form onSubmit={handleVerifyOtp} className="space-y-5">
+                    <h2 className="text-3xl font-bold text-[#0c1421]">
+                        {t("auth.verifyEmail")}
+                    </h2>
+
+                    <p className="text-sm text-[#313957]">
+                        {t("auth.otpSentTo")} <strong>{formData.email}</strong>
+                    </p>
+
+                    <Input
+                        type="text"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                        maxLength={6}
+                        placeholder={t("auth.enterOtp")}
+                        className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg text-center tracking-widest text-lg"
+                        required
+                    />
+
+                    <Button
+                        type="submit"
+                        disabled={otpLoading || otp.length !== 6}
+                        className="w-full py-3 bg-[#5533ff] hover:bg-[#4422dd] text-white font-semibold rounded-full"
+                    >
+                        {otpLoading ? t("auth.verifying") : t("auth.verifyOtp")}
+                    </Button>
+
+                    <button
+                        type="button"
+                        onClick={handleResendOtp}
+                        disabled={otpLoading}
+                        className="text-sm text-[#5533ff] hover:underline block mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {otpLoading ? t("auth.sending") || "Sending..." : t("auth.resendOtp") || "Resend OTP"}
+                    </button>
+                </form>
             )}
-    
+
             {message && (
-                <p className={`mt-4 text-center text-sm ${
-                    message.includes("successfully") || message.includes("sent") || message.includes("verified")
-                        ? "text-green-600" 
+                <p className={`mt-4 text-center text-sm ${message.includes("successfully") || message.includes("sent") || message.includes("verified")
+                        ? "text-green-600"
                         : "text-red-600"
-                }`}>
+                    }`}>
                     {message}
                 </p>
             )}
@@ -421,9 +407,9 @@ export default function SignupForm() {
                     </DialogHeader>
                     <div className="mt-4">
                         {selectedContent?.content ? (
-                            <div 
+                            <div
                                 className="prose prose-sm max-w-none text-[#313957]"
-                                dangerouslySetInnerHTML={{ 
+                                dangerouslySetInnerHTML={{
                                     __html: formatContent(selectedContent.content)
                                 }}
                             />
