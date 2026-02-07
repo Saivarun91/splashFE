@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { apiService } from "@/lib/api";
 import { Loader2, Mail, Phone, MapPin, CheckCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -10,7 +10,12 @@ import { Label } from "@/components/ui/label";
 import { MoveLeft } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+
 export default function ContactPage() {
+  const generateCaptcha = () => {
+    return Math.random().toString(36).substring(2, 6) + Math.random().toString(36).substring(2, 6);
+  };
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -23,6 +28,10 @@ export default function ContactPage() {
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
+  const [captcha, setCaptcha] = useState("");
+  const [captchaInput, setCaptchaInput] = useState("");
+  const [captchaValid, setCaptchaValid] = useState(false);
+
   const validate = () => {
     if (!form.name.trim()) return "Name is required.";
     if (!form.mobile.trim()) return "Mobile number is required.";
@@ -32,6 +41,13 @@ export default function ContactPage() {
     if (!form.reason.trim()) return "Reason for contact is required.";
     return null;
   };
+  useEffect(() => {
+    setCaptcha(generateCaptcha());
+  }, []);
+  
+  useEffect(() => {
+    setCaptchaValid(captchaInput === captcha);
+  }, [captchaInput, captcha]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -85,9 +101,15 @@ export default function ContactPage() {
                 <div>
                   <h3 className="text-lg font-semibold">Office Address</h3>
                   <p className="text-[#313957] mt-1 leading-relaxed">
-                    202, Serinity Diamond, ,
-                    <br />
-                    Serilingampally, Hyderabad, India – 500046
+                    <a
+                      href="https://maps.app.goo.gl/3tMuX7F4xemYYrxH6"
+                      className="hover:text-[#5533ff]"
+                      target="_blank"
+                    >
+                      501, Manjeera Majestic Commercial Complex,
+                      <br />
+                      JNTU Road,KPHB, Hyderabad , Telangana, India 500085
+                    </a>
                   </p>
                 </div>
               </div>
@@ -113,10 +135,10 @@ export default function ContactPage() {
                   <h3 className="text-lg font-semibold">Email Address</h3>
                   <p className="text-[#313957] mt-1">
                     <a
-                      href="mailto:support@findmyguru.com"
+                      href="mailto:support@gosplash.ai"
                       className="hover:text-[#5533ff]"
                     >
-                      support@findmyguru.com
+                      support@gosplash.ai
                     </a>
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
@@ -191,21 +213,53 @@ export default function ContactPage() {
                     placeholder="How can we help you?"
                   />
                 </div>
+                <div className="space-y-2">
+  <Label>Captcha</Label>
 
-                <Button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full bg-[#5533ff] hover:bg-[#4322e8] text-white font-bold"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    "Send Message"
-                  )}
-                </Button>
+  <div className="flex items-center gap-4">
+    <div className="px-4 py-2 bg-gray-100 border rounded font-mono text-lg tracking-widest">
+      {captcha}
+    </div>
+
+    <Button
+      type="button"
+      variant="outline"
+      onClick={() => {
+        setCaptcha(generateCaptcha());
+        setCaptchaInput("");
+      }}
+    >
+      Refresh
+    </Button>
+  </div>
+
+  <Input
+    value={captchaInput}
+    onChange={(e) => setCaptchaInput(e.target.value.toUpperCase())}
+    placeholder="Enter captcha"
+  />
+
+  {!captchaValid && captchaInput && (
+    <p className="text-sm text-red-500">Captcha does not match</p>
+  )}
+</div>
+
+
+<Button
+  type="submit"
+  disabled={submitting || !captchaValid}
+  className="w-full bg-[#5533ff] hover:bg-[#4322e8] text-white font-bold disabled:opacity-50"
+>
+  {submitting ? (
+    <>
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      Sending...
+    </>
+  ) : (
+    "Send Message"
+  )}
+</Button>
+
               </form>
             )}
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { MoveRight, MoveLeft, CheckCircle2, Zap, Users, Globe2, Layers } from "lucide-react";
+import { MoveRight, MoveLeft, CheckCircle2, Zap, Users, Globe2, Layers, LayoutDashboardIcon, DollarSignIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -48,10 +48,18 @@ export default function AboutPage() {
           <div className="bg-[#f8f9fc] rounded-2xl p-8 md:p-12 border border-[#e6e6e6]">
             {/* Placeholder for an abstract illustration or pattern */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="h-40 bg-white rounded-lg shadow-sm w-full animate-pulse"></div>
-              <div className="h-40 bg-white rounded-lg shadow-sm w-full animate-pulse delay-75"></div>
-              <div className="h-40 bg-white rounded-lg shadow-sm w-full animate-pulse delay-150"></div>
-              <div className="h-40 bg-white rounded-lg shadow-sm w-full animate-pulse delay-300"></div>
+              <div className="h-40 bg-white rounded-lg shadow-sm w-full">
+                <img src="/images/about1.jpg" alt="About 1" />
+              </div>
+              <div className="h-40 bg-white rounded-lg shadow-sm w-full">
+                <img src="/images/about2.jpg" alt="About 2" />
+              </div>
+              <div className="h-40 bg-white rounded-lg shadow-sm w-full">
+                <img src="/images/about3.jpg" alt="About 3" />
+              </div>
+              <div className="h-40 bg-white rounded-lg shadow-sm w-full">
+                <img src="/images/logo-Splash.png" alt="About 4" />
+              </div>
             </div>
           </div>
         </div>
@@ -105,38 +113,38 @@ export default function AboutPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <div className="p-8 bg-white border border-[#e6e6e6] rounded-xl hover:shadow-lg transition-shadow">
-              <Layers className="w-10 h-10 text-[#5533ff] mb-4" />
+            <div className="p-6 bg-white border border-[#e6e6e6] rounded-xl hover:shadow-lg transition-shadow">
+              < div className="w-10 h-10 bg-[#f0f2f5] rounded-lg flex items-center justify-center mb-4 text-[#5533ff] font-bold"><Layers /></div>
               <h3 className="text-xl font-bold mb-3">Product Visuals</h3>
               <p className="text-[#313957]">Tools to generate individual product visuals and campaign imagery with high fidelity.</p>
             </div>
             {/* Feature 2 */}
-            <div className="p-8 bg-white border border-[#e6e6e6] rounded-xl hover:shadow-lg transition-shadow">
-              <div className="w-10 h-10 bg-[#f0f2f5] rounded-lg flex items-center justify-center mb-4 text-[#5533ff] font-bold">D</div>
+            <div className="p-6 bg-white border border-[#e6e6e6] rounded-xl hover:shadow-lg transition-shadow">
+              <div className="w-10 h-10 bg-[#f0f2f5] rounded-lg flex items-center justify-center mb-4 text-[#5533ff] font-bold"><LayoutDashboardIcon /></div>
               <h3 className="text-xl font-bold mb-3">Centralized Dashboard</h3>
               <p className="text-[#313957]">A centralized dashboard to manage, organize, and retrieve all your AI-generated images.</p>
             </div>
             {/* Feature 3 */}
-            <div className="p-8 bg-white border border-[#e6e6e6] rounded-xl hover:shadow-lg transition-shadow">
-              <div className="w-10 h-10 bg-[#f0f2f5] rounded-lg flex items-center justify-center mb-4 text-[#5533ff] font-bold">C</div>
+            <div className="p-6 bg-white border border-[#e6e6e6] rounded-xl hover:shadow-lg transition-shadow">
+              <div className="w-10 h-10 bg-[#f0f2f5] rounded-lg flex items-center justify-center mb-4 text-[#5533ff] font-bold"><LayoutDashboardIcon /></div>
               <h3 className="text-xl font-bold mb-3">Campaign Creation</h3>
               <p className="text-[#313957]">Support for project-based campaign creation to keep your seasonal assets organized.</p>
             </div>
             {/* Feature 4 */}
-            <div className="p-8 bg-white border border-[#e6e6e6] rounded-xl hover:shadow-lg transition-shadow">
-              <Users className="w-10 h-10 text-[#5533ff] mb-4" />
+            <div className="p-6 bg-white border border-[#e6e6e6] rounded-xl hover:shadow-lg transition-shadow">
+              <div className="w-10 h-10 bg-[#f0f2f5] rounded-lg flex items-center justify-center mb-4 text-[#5533ff] font-bold"><Users /></div>
               <h3 className="text-xl font-bold mb-3">Collaboration</h3>
               <p className="text-[#313957]">Built-in collaboration capabilities for growing teams and agencies.</p>
             </div>
             {/* Feature 5 */}
-            <div className="p-8 bg-white border border-[#e6e6e6] rounded-xl hover:shadow-lg transition-shadow">
-              <div className="w-10 h-10 bg-[#f0f2f5] rounded-lg flex items-center justify-center mb-4 text-[#5533ff] font-bold">$</div>
+            <div className="p-6 bg-white border border-[#e6e6e6] rounded-xl hover:shadow-lg transition-shadow">
+              <div className="w-10 h-10 bg-[#f0f2f5] rounded-lg flex items-center justify-center mb-4 text-[#5533ff] font-bold"><DollarSignIcon /></div>
               <h3 className="text-xl font-bold mb-3">Flexible Plans</h3>
               <p className="text-[#313957]">Flexible subscription and credit-based usage plans tailored to your needs.</p>
             </div>
             {/* Feature 6 */}
-            <div className="p-8 bg-white border border-[#e6e6e6] rounded-xl hover:shadow-lg transition-shadow">
-              <CheckCircle2 className="w-10 h-10 text-[#5533ff] mb-4" />
+            <div className="p-6 bg-white border border-[#e6e6e6] rounded-xl hover:shadow-lg transition-shadow">
+              <div className="w-10 h-10 bg-[#f0f2f5] rounded-lg flex items-center justify-center mb-4 text-[#5533ff] font-bold"><CheckCircle2 /></div>
               <h3 className="text-xl font-bold mb-3">Intuitive Design</h3>
               <p className="text-[#313957]">The platform is designed to be intuitive and usable by non-technical users.</p>
             </div>
