@@ -4,15 +4,17 @@ import React from "react";
 import { MoveRight, MoveLeft, CheckCircle2, Zap, Users, Globe2, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function AboutPage() {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-white text-[#0c1421]">
       {/* 1. Page Header */}
       <section className="relative py-20 md:py-32 overflow-hidden bg-[#f8f9fc]">
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
         <div className="max-w-screen-xl mx-auto px-6 text-center">
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-[#0c1421] to-[#5533ff]">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-br from-indigo-600 to-purple-500">
             About Splash AI Studio
           </h1>
           <p className="text-lg md:text-xl text-[#313957] max-w-2xl mx-auto leading-relaxed">
@@ -196,13 +198,13 @@ export default function AboutPage() {
       </section>
 
       {/* 8. Closing Statement */}
-      <section className="py-20 bg-[#5533ff] text-white text-center">
+      <section className="py-20 bg-gradient-to-br from-indigo-600 to-purple-500 text-white text-center">
         <div className="max-w-screen-lg mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold mb-8 leading-tight">
             Splash AI Studio represents a modern approach to fashion photography — combining speed, scalability, and creative flexibility through artificial intelligence.
           </h2>
           <Link href="/signup">
-            <Button size="lg" className="bg-white text-[#5533ff] hover:bg-gray-100 font-bold px-8 py-6 text-lg rounded-full">
+            <Button size="lg" className="bg-white text-[#5533ff] hover:bg-gray-100 font-bold px-8 py-6 text-lg rounded-full border border-black">
               Get Started
             </Button>
           </Link>
@@ -211,11 +213,10 @@ export default function AboutPage() {
 
       <button
         onClick={() => {
-          const footer = document.getElementById("site-footer");
-          footer?.scrollIntoView({ behavior: "smooth" });
+          router.push("/");
         }}
-        className="fixed top-24 left-6 z-50
-                   bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700
+        className="fixed top-10 left-6 z-50
+                   bg-white/80 backdrop-blur-sm border border-gray-200 text-
                    hover:bg-gray-100 hover:text-black
                    px-4 py-2 rounded-full shadow-sm transition-all flex items-center gap-2"
       >

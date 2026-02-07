@@ -106,7 +106,7 @@ const PricingSection = () => {
             <div className="relative p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border-2 border-gray-200 bg-white shadow-lg hover:shadow-xl transition-shadow">
               <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                 <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-gray-600 to-gray-800 flex-shrink-0">
-                  <Crown className="text-white" size={20} className="sm:w-6 sm:h-6" />
+                  <Crown className="text-white" size={20} />
                 </div>
                 <div>
                   <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">Free Plan</h3>
@@ -161,7 +161,7 @@ const PricingSection = () => {
             <div className="relative p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border-2 border-purple-200 bg-gradient-to-b from-purple-50 to-white shadow-lg hover:shadow-xl transition-shadow">
               <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                 <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-600 to-purple-500 flex-shrink-0">
-                  <Gem className="text-white" size={20} className="sm:w-6 sm:h-6" />
+                  <Gem className="text-white" size={20} />
                 </div>
                 <div>
                   <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">{proPlan.name}</h3>
@@ -217,7 +217,7 @@ const PricingSection = () => {
             <div className="relative p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border-2 border-gray-200 bg-white shadow-lg hover:shadow-xl transition-shadow">
               <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                 <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-gray-600 to-gray-800 flex-shrink-0">
-                  <Building2 className="text-white" size={20} className="sm:w-6 sm:h-6" />
+                  <Building2 className="text-white" size={20} />
                 </div>
                 <div>
                   <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">{enterprisePlan.name}</h3>

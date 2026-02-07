@@ -14,25 +14,14 @@ const footerLinks = {
   Product: [
     { label: "Features", href: "/#product" },
     { label: "Pricing", href: "/#pricing" },
-    { label: "Case Studies", href: "/#showcase" },
-    { label: "Roadmap", href: "/roadmap" },
+    { label: "Showcase", href: "/#showcase" },
+    { label: "About Us", href: "/about" },
   ],
   Company: [
-    { label: "About", href: "/about" },
     { label: "Blog", href: "/blog" },
-    { label: "Careers", href: "/careers" },
-    { label: "Contact", href: "/contact" },
-  ],
-  Resources: [
-    { label: "Documentation", href: "/documentation" },
-    { label: "Help Center", href: "/help" },
-    { label: "API Reference", href: "/api-reference" },
-    { label: "Community", href: "/community" },
-  ],
-  Legal: [
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "Terms of Service", href: "/terms" },
-    { label: "Cookie Policy", href: "/cookies" },
+    { label: "Contact Us", href: "/contact" },
+    {label: "Privacy Policy", href: "/privacy" },
+    {label: "Terms of Service", href: "/terms" },
   ],
 };
 
@@ -88,8 +77,8 @@ const Footer = () => {
           {/* Link Columns */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h3 className="font-semibold mb-3 sm:mb-4 text-xs sm:text-sm text-black">{category}</h3>
-              <ul className="space-y-2 sm:space-y-3">
+              <h3 className="font-semibold mb-3 sm:mb-4 text-xs sm:text-base text-black">{category}</h3>
+              <ul className="space-y-2 sm:space-y-3 ">
                 {links.map((link) => (
                   <li key={link.label}>
                     {link.label === "Contact" ? (
@@ -101,14 +90,20 @@ const Footer = () => {
                       // </button>
                       <Link
                         href={link.href}
-                        className="text-xs sm:text-sm text-black hover:text-gray-700 transition-colors"
+                        className="text-xs sm:text-base text-black hover:text-gray-700 transition-colors text-right"
                       >
                         {link.label}
                       </Link>
                     ) : (
+                      // <Link
+                      //   href={link.href}
+                      //   className="text-xs sm:text-sm text-black hover:text-gray-700 transition-colors text-right"
+                      // >
+                      //   {link.label}
+                      // </Link>
                       <Link
                         href={link.href}
-                        className="text-xs sm:text-sm text-black hover:text-gray-700 transition-colors"
+                        className="text-xs sm:text-base text-black hover:text-gray-700 transition-colors text-right"
                       >
                         {link.label}
                       </Link>

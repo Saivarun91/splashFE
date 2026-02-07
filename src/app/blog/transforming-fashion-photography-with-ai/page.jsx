@@ -5,16 +5,28 @@ import Link from "next/link";
 import { ArrowLeft, Calendar, User, Share2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useRouter } from "next/navigation";
 
 export default function BlogPostPage() {
+    const router = useRouter();
     return (
         <div className="min-h-screen bg-white text-[#0c1421]">
             {/* Header / Hero */}
             <section className="bg-[#f8f9fc] border-b border-[#e6e6e6] py-12 md:py-20">
-                <div className="max-w-3xl mx-auto px-6">
-                    <Link href="/blog" className="inline-flex items-center text-sm font-semibold text-[#5533ff] hover:underline mb-8">
-                        <ArrowLeft size={16} className="mr-1" /> Back to Blog
-                    </Link>
+                <div className="max-w-screen-xl mx-auto px-6">
+                    {/* <div className="flex items-center justify-between mb-8">
+                <button
+                onClick={() => {
+                    router.push("/blog");
+                }}
+                className="inline-flex items-center text-sm font-semibold text-[#5533ff] hover:underline mb-8 hover:cursor-pointer
+                   bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700
+                   hover:bg-gray-100 hover:text-black
+                   px-4 py-2 rounded-full shadow-sm transition-all flex items-center gap-2"
+            >
+                <ArrowLeft size={16} /> Back
+            </button>
+                    </div> */}
                     <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6 leading-tight">
                         Splash AI Studio: Transforming Fashion Photography with AI
                     </h1>
@@ -36,7 +48,7 @@ export default function BlogPostPage() {
             </section>
 
             {/* Article Content */}
-            <article className="max-w-3xl mx-auto px-6 py-12 md:py-16">
+            <article className="max-w-screen-xl mx-auto px-6 py-12 md:py-16">
                 <div className="prose prose-lg prose-slate max-w-none">
                     <p className="lead text-xl text-[#313957] mb-8">
                         The fashion and apparel industry thrives on visuals. From product listings and social media campaigns to seasonal launches and digital ads, high-quality imagery plays a critical role in brand success. However, traditional photoshoots are expensive, time-consuming, and difficult to scale.
@@ -241,10 +253,9 @@ export default function BlogPostPage() {
 
             <button
                 onClick={() => {
-                    const footer = document.getElementById("site-footer");
-                    footer?.scrollIntoView({ behavior: "smooth" });
+                    router.push("/blog");
                 }}
-                className="fixed top-24 left-6 z-50
+                className="fixed top-10 left-6 z-50
                    bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700
                    hover:bg-gray-100 hover:text-black
                    px-4 py-2 rounded-full shadow-sm transition-all flex items-center gap-2"
