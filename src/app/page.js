@@ -97,13 +97,13 @@ const Home = () => {
           imagePosition="right"
         />
 
-        <ProductChapter
+        {/* <ProductChapter
           title="Ready for every channel."
           description="One-click exports for PDP, marketplace, and social. Commenting and approvals built-in. Compliant crops, backgrounds, and sizes for every platform."
           imageSrc="/images/chapter-publish.jpg"
           imageAlt="E-commerce mockups showing jewelry product pages"
           imagePosition="left"
-        />
+        /> */}
       </div>
 
       <FeatureGrid />
