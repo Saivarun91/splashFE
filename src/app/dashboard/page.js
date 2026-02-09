@@ -7,6 +7,7 @@ import { FaCoins } from "react-icons/fa";
 import { RiAiGenerate2 } from "react-icons/ri";
 import PendingInvitations from "@/components/PendingInvitations";
 import { useAuth } from "@/context/AuthContext";
+import { useCredits } from "@/context/CreditsContext";
 import { apiService } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -15,9 +16,7 @@ export default function Dashboard() {
     const { t } = useLanguage();
     const [recentImages, setRecentImages] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [organizationCredits, setOrganizationCredits] = useState(null);
-    const [userCredits, setUserCredits] = useState(null);
-    const [creditsLoading, setCreditsLoading] = useState(true);
+    const { organizationCredits, userCredits, creditsLoading } = useCredits();
     const [stats, setStats] = useState({
         activeProjects: 0,
         inProgressProjects: 0,
@@ -50,62 +49,6 @@ export default function Dashboard() {
         return t("dashboard.user");
     };
 
-    // Fetch organization credits
-    useEffect(() => {
-        const fetchCredits = async () => {
-          if (!token) {
-            setCreditsLoading(false);
-            return;
-          }
-      
-          try {
-            // Always get fresh user profile
-            const userProfile = await apiService.getUserProfile(token);
-            console.log("userProfile", userProfile);
-            if (userProfile?.success && userProfile?.user) {
-              const currentUser = userProfile.user;
-      
-              let organizationId = null;
-      
-              if (currentUser.organization) {
-                if (typeof currentUser.organization === "object" && currentUser.organization.id) {
-                  organizationId = currentUser.organization.id;
-                } else {
-                  organizationId = String(currentUser.organization);
-                }
-              }
-      
-              // ✅ CASE 1: Organization user
-              if (organizationId) {
-                const orgData = await apiService.getOrganization(organizationId, token);
-      
-                setOrganizationCredits({
-                  balance: orgData.credit_balance || 0,
-                  organizationName: orgData.name || "Organization"
-                });
-      
-                setUserCredits(null);
-              } 
-              // ✅ CASE 2: Individual user
-              else {
-                setUserCredits({
-                  balance: currentUser.credit_balance || 0
-                });
-                console.log("userCredits", currentUser.credit_balance);
-      
-                setOrganizationCredits(null);
-              }
-            }
-          } catch (error) {
-            console.error("Error fetching credits:", error);
-          } finally {
-            setCreditsLoading(false);
-          }
-        };
-      
-        fetchCredits();
-      }, [token]);
-      
     // Fetch projects data
     useEffect(() => {
         const fetchDashboardData = async () => {

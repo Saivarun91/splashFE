@@ -42,20 +42,22 @@
 import React from "react";
 import { Gem, Star, User, Palette, Repeat, Box } from "lucide-react";
 
-const features = [
-  { title: "Photoreal Metals & Gems", description: "True-to-life sheen and sparkle.", icon: <Gem /> },
-  { title: "Skin-Tone Fidelity", description: "Editorial lighting and natural texture.", icon: <Star /> },
-  { title: "Pose Library", description: "From subtle tilts to bold looks.", icon: <User /> },
-  { title: "Style Presets", description: "Studio clean, editorial luxe, outdoor daylight.", icon: <Palette /> },
-  { title: "Variant Consistency", description: "One look, many SKUs.", icon: <Repeat /> },
-  { title: "Marketplace-Ready", description: "Compliant crops, backgrounds, and sizes.", icon: <Box /> },
+const iconMap = { Gem, Star, User, Palette, Repeat, Box };
+
+const defaultFeatures = [
+  { title: "Photoreal Metals & Gems", description: "True-to-life sheen and sparkle.", icon: "Gem" },
+  { title: "Skin-Tone Fidelity", description: "Editorial lighting and natural texture.", icon: "Star" },
+  { title: "Pose Library", description: "From subtle tilts to bold looks.", icon: "User" },
+  { title: "Style Presets", description: "Studio clean, editorial luxe, outdoor daylight.", icon: "Palette" },
+  { title: "Variant Consistency", description: "One look, many SKUs.", icon: "Repeat" },
+  { title: "Marketplace-Ready", description: "Compliant crops, backgrounds, and sizes.", icon: "Box" },
 ];
 
-const FeatureGrid = () => {
+const FeatureGrid = ({ features: propFeatures }) => {
+  const features = propFeatures?.length ? propFeatures : defaultFeatures;
   return (
     <section className="py-12 lg:py-16 bg-gray-50">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-        {/* Section Header */}
         <div className="text-center mb-8 lg:mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold mb-4 text-gray-900">
             Everything you need
@@ -64,20 +66,23 @@ const FeatureGrid = () => {
             Professional-grade tools for creating luxury jewelry imagery.
           </p>
         </div>
-
-        {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="p-8 rounded-2xl shadow-lg border border-gray-500 bg-white hover:bg-gray-50 hover:shadow-2xl transition-all"
-            >
-              <div className="text-white size-10 p-2 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600">{feature.icon}</div>
-              <br />
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">{feature.title}</h3>
-              <p className="text-gray-700">{feature.description}</p>
-            </div>
-          ))}
+          {features.map((feature, index) => {
+            const IconComponent = iconMap[feature.icon] || Gem;
+            return (
+              <div
+                key={index}
+                className="p-8 rounded-2xl shadow-lg border border-gray-500 bg-white hover:bg-gray-50 hover:shadow-2xl transition-all"
+              >
+                <div className="text-white size-10 p-2 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600">
+                  <IconComponent />
+                </div>
+                <br />
+                <h3 className="text-xl font-semibold mb-2 text-gray-900">{feature.title}</h3>
+                <p className="text-gray-700">{feature.description}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

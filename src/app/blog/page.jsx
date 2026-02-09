@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { MoveRight, MoveLeft, Calendar, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,11 +8,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Navigation from "@/components/home/Navigation";
+import { apiService } from "@/lib/api";
 
 export default function BlogIndexPage() {
   const router = useRouter();
+  const [posts, setPosts] = useState([]);
 
-  const posts = [
+  useEffect(() => {
+    apiService.getBlogPosts().then(setPosts).catch(() => setPosts([]));
+  }, []);
+
+  const defaultPosts = [
     {
       slug: "transforming-fashion-photography-with-ai",
       title: "Splash AI Studio: Transforming Fashion Photography with AI",
@@ -21,10 +27,11 @@ export default function BlogIndexPage() {
       date: "October 16, 2025",
       author: "Splash Team",
       category: "Innovation",
-      readTime: "5 min read",
+      read_time: "5 min read",
       image: "/images/blog/ai-fashion-visual.png",
     },
   ];
+  const list = posts.length ? posts : defaultPosts;
 
   return (
     <>
@@ -65,7 +72,7 @@ export default function BlogIndexPage() {
       <section className="py-16 md:py-24">
         <div className="max-w-screen-xl mx-auto px-6">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {posts.map((post) => (
+            {list.map((post) => (
               <Link
                 href={`/blog/${post.slug}`}
                 key={post.slug}
@@ -81,7 +88,7 @@ export default function BlogIndexPage() {
                     </div>
 
                     <img
-                      src={post.image}
+                      src={post.image || post.image_url || ""}
                       alt={post.title}
                       className="absolute inset-0 w-full h-full object-cover opacity-0
                         group-hover:opacity-100 transition-opacity duration-300"
@@ -99,7 +106,7 @@ export default function BlogIndexPage() {
                       </span>
                       <span>•</span>
                       <span className="flex items-center gap-1">
-                        <Clock size={14} /> {post.readTime}
+                        <Clock size={14} /> {post.read_time || post.readTime || "5 min read"}
                       </span>
                     </div>
 

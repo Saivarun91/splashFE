@@ -1288,6 +1288,22 @@ class ApiService {
         });
     }
 
+    // Page content (CMS): home, about, vision_mission, tutorials, security
+    async getPageContent(slug) {
+        const res = await this.get(`/api/homepage/content/${slug}/`);
+        return res?.content ?? {};
+    }
+
+    // Blog (public)
+    async getBlogPosts() {
+        const res = await this.get('/api/homepage/blog/');
+        return res?.posts ?? [];
+    }
+    async getBlogPost(slug) {
+        const res = await this.get(`/api/homepage/blog/${slug}/`);
+        return res?.post ?? null;
+    }
+
     // Legal endpoints
     async getLegalContent(type) {
         return this.get(`/api/legal/${type}/`);

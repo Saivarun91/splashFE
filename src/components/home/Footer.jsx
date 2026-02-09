@@ -3,7 +3,7 @@ import { Instagram, Twitter, Linkedin } from "lucide-react";
 import { useState } from "react";
 import { FooterContactModal } from "./FooterContactModal";
 
-const footerLinks = {
+const defaultFooterLinks = {
   Platform: [
     { label: "Features", href: "/#product" },
     { label: "Pricing", href: "/#pricing" },
@@ -26,8 +26,12 @@ const footerLinks = {
   ],
 };
 
-const Footer = () => {
+const Footer = ({ footer: footerContent }) => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const footerLinks = footerContent?.links && Object.keys(footerContent.links).length ? footerContent.links : defaultFooterLinks;
+  const logoUrl = footerContent?.logo_url ?? "/images/logo-splash.png";
+  const tagline = footerContent?.tagline ?? "Campaign-ready visuals powered by AI.";
+  const copyrightText = footerContent?.copyright ?? "© 2026 Splash AI Studio. All rights reserved.";
 
   return (
     <footer id="site-footer" className="border-t border-gray-300 bg-white">
@@ -37,21 +41,18 @@ const Footer = () => {
       />
 
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-14 lg:py-20">
-        {/* 6 columns desktop, stacked on mobile */}
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 lg:gap-12 mb-10">
-          
-          {/* Brand */}
           <div className="col-span-2">
             <Link href="/" className="block mb-4">
               <img
-                src="/images/logo-splash.png"
+                src={logoUrl}
                 alt="Splash AI Studio"
                 className="h-32 md:h-40 w-auto object-contain hover:scale-105 transition-transform duration-300"
               />
             </Link>
 
             <p className="text-sm text-black max-w-xs mb-6">
-              Campaign-ready visuals powered by AI.
+              {tagline}
             </p>
 
             {/* Social Icons */}
@@ -92,10 +93,9 @@ const Footer = () => {
           ))}
         </div>
 
-        {/* Bottom Bar */}
         <div className="border-t border-gray-300 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-black text-center sm:text-left">
-            © 2026 Splash AI Studio. All rights reserved.
+            {copyrightText}
           </p>
         </div>
       </div>

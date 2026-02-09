@@ -5,16 +5,24 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ChevronRight, Menu } from "lucide-react";
 
-const heroImages = [
+const defaultHeroImages = [
   "/images/hero-campaign-01.jpg",
   "/images/hero-campaign-02.jpg",
   "/images/hero-campaign-03.jpg",
 ];
 
-const HeroSection = () => {
+const HeroSection = ({ hero: heroContent }) => {
   const [currentImage, setCurrentImage] = useState(0);
   const [scrolledPastHero, setScrolledPastHero] = useState(false);
   const heroRef = useRef(null);
+
+  const heroImages = heroContent?.images?.length ? heroContent.images : defaultHeroImages;
+  const title = heroContent?.title ?? "CAMPAIGN READY VISUALS, WITHOUT THE SHOOT";
+  const ctaPrimaryText = heroContent?.cta_primary_text ?? "Try Free Splash AI";
+  const ctaPrimaryHref = heroContent?.cta_primary_href ?? "/login";
+  const ctaSecondaryText = heroContent?.cta_secondary_text ?? "See Showcase";
+  const ctaSecondaryHref = heroContent?.cta_secondary_href ?? "#showcase";
+  const bottomText = heroContent?.bottom_text ?? "Moodboard to model shots to perfect retouches— Splash AI Studio turns your concepts into stunning, shoppable imagery.";
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -43,22 +51,22 @@ const HeroSection = () => {
       {/* Top Content */}
       <div className="max-w-screen-xl mx-auto px-6 lg:px-12 py-2 lg:py-3 text-center relative z-10">
         <h1 className="text-[1.3rem] lg:text-[1.6rem] font-bold my-4 text-transparent bg-clip-text bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] animate-slideFadeIn">
-          CAMPAIGN READY VISUALS, WITHOUT THE SHOOT
+          {title}
         </h1>
 
         <div className="flex flex-col sm:flex-row gap-2 justify-center mb-0">
           <Link
-            href="/login"
+            href={ctaPrimaryHref}
             className="inline-flex items-center justify-center bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] text-white font-medium rounded-xl hover:bg-purple-600 transition-colors sm:flex-1 sm:max-w-[180px] animate-slideFadeIn delay-100"
           >
-            Try Free Splash AI
+            {ctaPrimaryText}
             <ChevronRight className="ml-2" size={20} />
           </Link>
           <a
-            href="#showcase"
+            href={ctaSecondaryHref}
             className="inline-flex items-center justify-center px-4 py-2 border-2 border-gray-300 rounded text-gray-800 hover:bg-gray-100 transition-colors sm:flex-1 sm:max-w-[180px] animate-slideFadeIn delay-200"
           >
-            See Showcase
+            {ctaSecondaryText}
           </a>
         </div>
       </div>
@@ -97,11 +105,7 @@ const HeroSection = () => {
       {/* Bottom Text (smaller size) */}
       <div className="max-w-screen-xl mx-auto px-6 lg:px-12 py-3 text-center relative z-10">
         <p className="text-[0.95rem] lg:text-[1.1rem] max-w-2xl mx-auto text-black animate-slideFadeIn">
-          Moodboard to model shots to perfect retouches—{" "}
-          <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-br from-[#6344ff] to-[#a34bff]">
-            Splash AI Studio
-          </span>{" "}
-          turns your concepts into stunning, shoppable imagery.
+          {bottomText}
         </p>
       </div>
 
@@ -112,21 +116,21 @@ const HeroSection = () => {
       >
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 bg-white/60 backdrop-blur-md px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-lg border border-white/20">
           <span className="text-[0.75rem] sm:text-[0.95rem] font-bold text-transparent bg-clip-text bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] animate-slideFadeIn text-center sm:text-left whitespace-normal sm:whitespace-nowrap">
-            CAMPAIGN READY VISUALS, WITHOUT THE SHOOT
+            {title}
           </span>
           <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
             <Link
-              href="/login"
+              href={ctaPrimaryHref}
               className="inline-flex items-center justify-center bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] text-white text-xs sm:text-sm font-medium rounded-xl px-3 sm:px-3 py-1.5 sm:py-2 hover:bg-purple-600 transition-colors animate-slideFadeIn delay-100 flex-1 sm:flex-initial"
             >
-              Try Free Splash AI
+              {ctaPrimaryText}
               <ChevronRight className="ml-1" size={14} />
             </Link>
             <a
-              href="#showcase"
+              href={ctaSecondaryHref}
               className="inline-flex items-center justify-center px-3 py-1.5 sm:py-2 border-2 border-gray-300 rounded text-gray-800 text-xs sm:text-sm hover:bg-gray-100 transition-colors animate-slideFadeIn delay-200 flex-1 sm:flex-initial"
             >
-              See Showcase
+              {ctaSecondaryText}
             </a>
           </div>
         </div>
