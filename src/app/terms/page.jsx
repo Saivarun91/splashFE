@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { apiService } from "@/lib/api";
 import { Loader2, MoveLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-
+import Navigation from "@/components/home/Navigation";
 export default function TermsPage() {
   const router = useRouter();
   const [content, setContent] = useState(null);
@@ -47,6 +47,8 @@ export default function TermsPage() {
   }
 
   return (
+    <>
+    <Navigation />
     <div className="min-h-screen bg-white text-[#0c1421]">
       {/* Page Header */}
       <section className="relative py-20 md:py-32 overflow-hidden bg-[#f8f9fc]">
@@ -87,7 +89,7 @@ export default function TermsPage() {
       </section>
 
       {/* Back Button */}
-      <button
+      {/* <button
         onClick={() => router.push("/")}
         className="fixed top-10 left-6 z-50
                    bg-white/80 backdrop-blur-sm border border-gray-200
@@ -96,7 +98,8 @@ export default function TermsPage() {
                    flex items-center gap-2"
       >
         <MoveLeft size={16} /> Back
-      </button>
+      </button> */}
     </div>
+    </>
   );
 }

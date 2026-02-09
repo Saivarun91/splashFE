@@ -5,10 +5,13 @@ import { MoveRight, MoveLeft, CheckCircle2, Zap, Users, Globe2, Layers, LayoutDa
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Navigation from "@/components/home/Navigation";
 
 export default function AboutPage() {
   const router = useRouter();
   return (
+    <>
+    <Navigation />
     <div className="min-h-screen bg-white text-[#0c1421]">
       {/* 1. Page Header */}
       <section className="relative py-20 md:py-32 overflow-hidden bg-[#f8f9fc]">
@@ -219,7 +222,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <button
+      {/* <button
         onClick={() => {
           router.push("/");
         }}
@@ -229,7 +232,9 @@ export default function AboutPage() {
                    px-4 py-2 rounded-full shadow-sm transition-all flex items-center gap-2"
       >
         <MoveLeft size={16} /> Back
-      </button>
+      </button> */}
     </div>
+    </>
+    
   );
 }

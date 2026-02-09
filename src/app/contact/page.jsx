@@ -11,10 +11,11 @@ import { MoveLeft } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Navigation from "@/components/home/Navigation";
 
 export default function ContactPage() {
   const generateCaptcha = () => {
-    return Math.random().toString(36).substring(2, 6) + Math.random().toString(36).substring(2, 6);
+    return Math.random().toString(36).substring(2, 6).toLocaleLowerCase() + Math.random().toString(36).substring(2, 6).toLocaleLowerCase();
   };
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -74,6 +75,8 @@ export default function ContactPage() {
   };
 
   return (
+    <>
+    <Navigation />
     <div className="min-h-screen bg-white text-[#0c1421]">
       {/* Header */}
       <section className="relative py-20 md:py-32 bg-[#f8f9fc] text-center">
@@ -149,7 +152,7 @@ export default function ContactPage() {
             </div>
 {/* Google Map Embed */} 
 <div className="mt-10 h-64 w-full bg-gray-100 rounded-lg overflow-hidden border border-gray-200"> 
-  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.457891392658!2d78.3361113148769!3d17.43779778804825!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb939105555555%3A0x1234567890abcdef!2sSerenity%20Diamond!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin" width="100%" height="100%" style={{ border: 0 }} allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Office Location" >
+<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3805.323180100733!2d78.39097917516732!3d17.492079483413075!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb910057424ed5%3A0x199dce60198e6b9b!2sTechsprout%20AI%20Labs%20Pvt.%20Ltd.!5e0!3m2!1sen!2sin!4v1770624140087!5m2!1sen!2sin" width="100%" height="100%" style={{ border: 0 }} allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Office Location" >
   </iframe> 
   </div> 
   </div>
@@ -235,12 +238,12 @@ export default function ContactPage() {
 
   <Input
     value={captchaInput}
-    onChange={(e) => setCaptchaInput(e.target.value.toUpperCase())}
+    onChange={(e) => setCaptchaInput(e.target.value.toLowerCase())}
     placeholder="Enter captcha"
   />
 
   {!captchaValid && captchaInput && (
-    <p className="text-sm text-red-500">Captcha does not match</p>
+    <p className="text-sm text-red-500" style={{ fontSize: '12px' }}>Captcha does not match</p>
   )}
 </div>
 
@@ -266,7 +269,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <button
+      {/* <button
         onClick={() => {
           router.push("/");
         }}
@@ -276,7 +279,8 @@ export default function ContactPage() {
                    px-4 py-2 rounded-full shadow-sm transition-all flex items-center gap-2"
       >
         <MoveLeft size={16} /> Back
-      </button>
+      </button> */}
     </div>
+    </>
   );
 }

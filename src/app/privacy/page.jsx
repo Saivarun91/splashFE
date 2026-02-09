@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { apiService } from "@/lib/api";
 import { Loader2, MoveLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-
+import Navigation from "@/components/home/Navigation";
 export default function PrivacyPage() {
   const router = useRouter();
   const [content, setContent] = useState(null);
@@ -32,9 +32,12 @@ export default function PrivacyPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#5533ff]" />
-      </div>
+      <>
+      <Navigation />
+        <div className="flex justify-center items-center min-h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-[#5533ff]" />
+        </div>
+      </>
     );
   }
 
@@ -47,6 +50,8 @@ export default function PrivacyPage() {
   }
 
   return (
+    <>
+    <Navigation />
     <div className="min-h-screen bg-white text-[#0c1421]">
       {/* Page Header */}
       <section className="relative py-20 md:py-32 overflow-hidden bg-[#f8f9fc]">
@@ -87,7 +92,7 @@ export default function PrivacyPage() {
       </section>
 
       {/* Back Button */}
-      <button
+      {/* <button
         onClick={() => router.push("/")}
         className="fixed top-10 left-6 z-50
                    bg-white/80 backdrop-blur-sm border border-gray-200
@@ -96,7 +101,9 @@ export default function PrivacyPage() {
                    flex items-center gap-2"
       >
         <MoveLeft size={16} /> Back
-      </button>
+      </button> */}
     </div>
+    </>
+    
   );
 }

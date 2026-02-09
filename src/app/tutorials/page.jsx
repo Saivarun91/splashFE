@@ -3,6 +3,7 @@
 
 import { MoveLeft, PlayCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Navigation from "@/components/home/Navigation";
 
 const tutorials = [
   {
@@ -35,6 +36,8 @@ export default function TutorialsPage() {
   const router = useRouter();
 
   return (
+    <>
+    <Navigation />
     <div className="min-h-screen bg-white text-[#0c1421]">
 
       {/* 1. Hero Section (Same style as About & FAQ) */}
@@ -105,7 +108,7 @@ export default function TutorialsPage() {
       </section>
 
       {/* Back Button (Same Pattern Everywhere) */}
-      <button
+      {/* <button
         onClick={() => router.push("/")}
         className="fixed top-10 left-6 z-50
                    bg-white/80 backdrop-blur-sm border border-gray-200
@@ -113,7 +116,8 @@ export default function TutorialsPage() {
                    px-4 py-2 rounded-full shadow-sm transition-all flex items-center gap-2"
       >
         <MoveLeft size={16} /> Back
-      </button>
+      </button> */}
     </div>
+    </>
   );
 }

@@ -2,11 +2,13 @@
 
 import { MoveLeft, ShieldCheck, Lock, Database, UserCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
-
+import Navigation from "@/components/home/Navigation";
 export default function SecurityPage() {
   const router = useRouter();
 
   return (
+    <>
+    <Navigation />
     <div className="min-h-screen bg-white text-[#0c1421]">
 
       {/* 1. Hero Section */}
@@ -114,7 +116,7 @@ export default function SecurityPage() {
         </div>
       </section>
 
-      {/* Back Button */}
+      {/* Back Button
       <button
         onClick={() => router.push("/")}
         className="fixed top-10 left-6 z-50
@@ -123,7 +125,8 @@ export default function SecurityPage() {
                    px-4 py-2 rounded-full shadow-sm transition-all flex items-center gap-2"
       >
         <MoveLeft size={16} /> Back
-      </button>
+      </button> */}
     </div>
+    </>
   );
 }

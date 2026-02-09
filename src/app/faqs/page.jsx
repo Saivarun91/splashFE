@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, HelpCircle, MoveLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Navigation from "@/components/home/Navigation";
 
 const faqs = [
   {
@@ -32,6 +33,8 @@ export default function FAQsPage() {
   const router = useRouter();
 
   return (
+    <>
+    <Navigation />
     <div className="min-h-screen bg-white text-[#0c1421]">
       
       {/* 1. Page Header (Same as About) */}
@@ -110,7 +113,7 @@ export default function FAQsPage() {
       </section>
 
       {/* Back Button (Same Pattern as About) */}
-      <button
+      {/* <button
         onClick={() => router.push("/")}
         className="fixed top-10 left-6 z-50
                    bg-white/80 backdrop-blur-sm border border-gray-200
@@ -118,7 +121,8 @@ export default function FAQsPage() {
                    px-4 py-2 rounded-full shadow-sm transition-all flex items-center gap-2"
       >
         <MoveLeft size={16} /> Back
-      </button>
+      </button> */}
     </div>
+    </>
   );
 }

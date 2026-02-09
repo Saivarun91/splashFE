@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import Navigation from "@/components/home/Navigation";
 
 export default function BlogIndexPage() {
   const router = useRouter();
@@ -26,6 +27,8 @@ export default function BlogIndexPage() {
   ];
 
   return (
+    <>
+    <Navigation />
     <div className="min-h-screen bg-white text-[#0c1421]">
       {/* 1. Page Header */}
       <section className="relative py-20 md:py-32 overflow-hidden bg-[#f8f9fc]">
@@ -47,7 +50,7 @@ export default function BlogIndexPage() {
       </section>
 
       {/* Back Button */}
-      <button
+      {/* <button
         onClick={() => router.push("/")}
         className="fixed top-10 left-6 z-50
           bg-white/80 backdrop-blur-sm border border-gray-200
@@ -56,7 +59,7 @@ export default function BlogIndexPage() {
           flex items-center gap-2"
       >
         <MoveLeft size={16} /> Back
-      </button>
+      </button> */}
 
       {/* Blog Grid */}
       <section className="py-16 md:py-24">
@@ -129,5 +132,6 @@ export default function BlogIndexPage() {
         </div>
       </section>
     </div>
+    </>
   );
 }

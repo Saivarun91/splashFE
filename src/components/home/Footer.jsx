@@ -17,7 +17,7 @@ const footerLinks = {
   Company: [
     { label: "About Us", href: "/about" },
     { label: "Contact Us", href: "/contact" },
-    { label: "Careers", href: "/careers" },
+    { label: "Vision & Mission", href: "/vision-mision" },
   ],
   Legal: [
     { label: "Privacy Policy", href: "/privacy" },

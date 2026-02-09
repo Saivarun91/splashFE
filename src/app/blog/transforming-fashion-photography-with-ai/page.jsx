@@ -6,25 +6,28 @@ import { ArrowLeft, Calendar, User, Share2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
+import Navigation from "@/components/home/Navigation";
 
 export default function BlogPostPage() {
     const router = useRouter();
     return (
+        <>
+        <Navigation />
         <div className="min-h-screen bg-white text-[#0c1421]">
             {/* Header / Hero */}
-            <section className="bg-[#f8f9fc] border-b border-[#e6e6e6] py-12 md:py-20">
+            <section className="bg-[#f8f9fc] border-b border-[#e6e6e6] py-12 md:py-30">
                 <div className="max-w-screen-xl mx-auto px-6">
-                    {/* <div className="flex items-center justify-between mb-8">
+                    {/* <div className="flex items-start justify-start mb-4">
                 <button
                 onClick={() => {
-                    router.push("/blog");
+                    router.push("/");
                 }}
                 className="inline-flex items-center text-sm font-semibold text-[#5533ff] hover:underline mb-8 hover:cursor-pointer
                    bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700
                    hover:bg-gray-100 hover:text-black
-                   px-4 py-2 rounded-full shadow-sm transition-all flex items-center gap-2"
+                   px-2 py-1 rounded-full shadow-sm transition-all flex items-center gap-2"
             >
-                <ArrowLeft size={16} /> Back
+                <ArrowLeft size={16} /> back
             </button>
                     </div> */}
                     <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6 leading-tight">
@@ -255,7 +258,7 @@ export default function BlogPostPage() {
                 onClick={() => {
                     router.push("/blog");
                 }}
-                className="fixed top-10 left-6 z-50
+                className="fixed top-[100px] left-6 z-50
                    bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700
                    hover:bg-gray-100 hover:text-black
                    px-4 py-2 rounded-full shadow-sm transition-all flex items-center gap-2"
@@ -263,5 +266,6 @@ export default function BlogPostPage() {
                 <ArrowLeft size={16} /> Back
             </button>
         </div >
+        </>
     );
 }
