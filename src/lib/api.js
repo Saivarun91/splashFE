@@ -3,6 +3,40 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 import axios from 'axios';
 import { generateEnhancedPrompt, generateEnhancedCampaignPrompt } from './ornamentRules';
 
+const SPLASH_LOGIN_PATH = '/login';
+
+/**
+ * On any token/authentication error: clear auth state and redirect to login.
+ */
+function handleTokenError() {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = SPLASH_LOGIN_PATH;
+}
+
+function isTokenRelatedError(error) {
+    if (!error?.message) return false;
+    const msg = String(error.message).toLowerCase();
+    return (
+        msg.includes('token') ||
+        msg.includes('401') ||
+        msg.includes('unauthorized') ||
+        msg.includes('authentication') ||
+        msg.includes('expired') ||
+        msg.includes('invalid credentials')
+    );
+}
+
+/** Ensure 401 responses trigger logout and redirect; returns response otherwise. */
+function checkResponseAuth(response) {
+    if (response.status === 401) {
+        handleTokenError();
+        throw new Error('Authentication failed. Please login again.');
+    }
+    return response;
+}
+
 class ApiService {
     constructor() {
         this.baseURL = API_BASE_URL;
@@ -42,10 +76,10 @@ class ApiService {
             const response = await fetch(url, config);
 
             if (!response.ok) {
+                // Token/authentication error: logout and redirect to login
                 if (response.status === 401) {
-                    if (typeof window !== "undefined" && !localStorage.getItem("token")) {
-                        return null;
-                    }
+                    handleTokenError();
+                    throw new Error('Authentication failed. Please login again.');
                 }
 
                 // Extract backend error message
@@ -58,6 +92,9 @@ class ApiService {
 
                 const error = new Error(errorMessage);
                 error.status = response.status;
+                if (isTokenRelatedError(error)) {
+                    handleTokenError();
+                }
                 throw error;
             }
 
@@ -69,15 +106,9 @@ class ApiService {
                 return text;
             }
         } catch (error) {
-            if (
-                error.message &&
-                error.message.includes("401") &&
-                typeof window !== "undefined" &&
-                !localStorage.getItem("token")
-            ) {
-                return null;
+            if (isTokenRelatedError(error)) {
+                handleTokenError();
             }
-
             console.error("API request failed:", error);
             throw error;
         }
@@ -290,7 +321,10 @@ class ApiService {
             return fetch(`${this.baseURL}/probackendapp/api/projects/${projectId}/setup/description/`, {
                 method: 'POST',
                 body: formData,
-            }).then(response => response.json());
+            }).then(response => {
+                checkResponseAuth(response);
+                return response.json();
+            });
         }
 
         // Otherwise, use JSON
@@ -344,6 +378,7 @@ class ApiService {
                 'Authorization': `Bearer ${token || ''}`,
             },
         }).then(response => {
+            checkResponseAuth(response);
             console.log('Upload response status:', response.status);
             if (!response.ok) {
                 return response.text().then(text => {
@@ -373,7 +408,10 @@ class ApiService {
             return fetch(`${this.baseURL}/probackendapp/api/projects/${projectId}/collections/${collectionId}/select/`, {
                 method: 'POST',
                 body: formData,
-            }).then(response => response.json());
+            }).then(response => {
+                checkResponseAuth(response);
+                return response.json();
+            });
         }
 
         // Otherwise, use JSON
@@ -483,7 +521,10 @@ class ApiService {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
-        }).then(response => response.json());
+        }).then(response => {
+            checkResponseAuth(response);
+            return response.json();
+        });
     }
 
     async deleteProductImage(collectionId, productImageUrl, productImagePath, token) {
@@ -632,7 +673,10 @@ class ApiService {
                 'Authorization': `Bearer ${token || ''}`,
             },
             body: formData,
-        }).then(response => response.json());
+        }).then(response => {
+            checkResponseAuth(response);
+            return response.json();
+        });
     }
 
     async getAllModels(collectionId, token) {
@@ -1338,6 +1382,19 @@ axios.interceptors.request.use(
         return config;
     },
     (error) => {
+        return Promise.reject(error);
+    }
+);
+
+// On 401 or token errors from axios, logout and redirect to login
+axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const status = error?.response?.status;
+        const message = error?.response?.data?.error || error?.response?.data?.message || error?.message || '';
+        if (status === 401 || isTokenRelatedError({ message })) {
+            handleTokenError();
+        }
         return Promise.reject(error);
     }
 );
