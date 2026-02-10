@@ -10,6 +10,12 @@ import { useLanguage } from "@/context/LanguageContext"
 import { OrnamentSelection } from "@/components/images/OrnamentSelection"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 import toast from "react-hot-toast"
+
+const MAX_IMAGE_MB = 10;
+const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
+
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 export default function RealModelForm() {
     const router = useRouter()
     const { t } = useLanguage()
@@ -70,22 +76,37 @@ export default function RealModelForm() {
         }
     };
       
-    const handleFileChange = (type, file) => {
-        if (file) {
-            setFormData((prev) => ({ ...prev, [type]: file }))
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                if (type === 'modelImage') {
-                    setModelPreview(reader.result)
-                } else if (type === 'ornamentImage') {
-                    setOrnamentPreview(reader.result)
-                } else {
-                    setPosePreview(reader.result)
-                }
-            }
-            reader.readAsDataURL(file)
+    const handleFileChange = (type, file, inputEl) => {
+        if (!file) return;
+      
+        // ✅ Size validation (10 MB)
+        if (file.size > MAX_IMAGE_BYTES) {
+          toast.error("Image is too large. Please upload a smaller image (max 10MB).");
+          inputEl.value = ""; // 🔥 CRITICAL: reset input
+          return;
         }
-    }
+      
+        // ✅ Optional: type validation
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+          toast.error("Only JPG, PNG, and WEBP images are allowed.");
+          inputEl.value = "";
+          return;
+        }
+      
+        setFormData((prev) => ({ ...prev, [type]: file }));
+      
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (type === "modelImage") setModelPreview(reader.result);
+          else if (type === "ornamentImage") setOrnamentPreview(reader.result);
+          else if (type === "poseImage") setPosePreview(reader.result);
+        };
+      
+        reader.readAsDataURL(file);
+      };
+      
+      
+      
 
     const handleRegenerate = () => {
         setRegenerateModal({
@@ -237,12 +258,15 @@ export default function RealModelForm() {
                                     onClick={() => document.getElementById("model-input").click()}
                                 >
                                     <input
-                                        type="file"
-                                        id="model-input"
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={(e) => handleFileChange('modelImage', e.target.files[0])}
-                                    />
+  type="file"
+  id="model-input"
+  className="hidden"
+  accept="image/*"
+  onChange={(e) =>
+    handleFileChange("modelImage", e.target.files[0], e.target)
+  }
+/>
+
                                     {modelPreview ? (
                                         <div className="relative w-full h-40">
                                             <Image src={modelPreview} alt="Model Preview" fill className="object-contain rounded-lg" />
@@ -267,12 +291,15 @@ export default function RealModelForm() {
                                     onClick={() => document.getElementById("ornament-input").click()}
                                 >
                                     <input
-                                        type="file"
-                                        id="ornament-input"
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={(e) => handleFileChange('ornamentImage', e.target.files[0])}
-                                    />
+  type="file"
+  id="ornament-input"
+  className="hidden"
+  accept="image/*"
+  onChange={(e) =>
+    handleFileChange("ornamentImage", e.target.files[0], e.target)
+  }
+/>
+
                                     {ornamentPreview ? (
                                         <div className="relative w-full h-40">
                                             <Image src={ornamentPreview} alt="Ornament Preview" fill className="object-contain rounded-lg" />
@@ -297,12 +324,15 @@ export default function RealModelForm() {
                                     onClick={() => document.getElementById("pose-input").click()}
                                 >
                                     <input
-                                        type="file"
-                                        id="pose-input"
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={(e) => handleFileChange('poseImage', e.target.files[0])}
-                                    />
+  type="file"
+  id="pose-input"
+  className="hidden"
+  accept="image/*"
+  onChange={(e) =>
+    handleFileChange("poseImage", e.target.files[0], e.target)
+  }
+/>
+
                                     {posePreview ? (
                                         <div className="relative w-full h-40">
                                             <Image src={posePreview} alt="Pose Preview" fill className="object-contain rounded-lg" />

@@ -9,9 +9,21 @@ import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import toast from "react-hot-toast"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
+const MAX_IMAGE_MB = 10;
+const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
+
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const IMAGE_LABELS = {
+    productImage: "Product image",
+    referenceImage: "Reference image",
+  };
+
+  
+  
 const BackgroundReplaceForm = () => {
     const router = useRouter()
     const { t } = useLanguage()
+
     const [formData, setFormData] = useState({
         productImage: null,
         referenceImage: null,
@@ -19,6 +31,10 @@ const BackgroundReplaceForm = () => {
         prompt: "",
         dimension: "1:1",
     })
+    const [uploadErrors, setUploadErrors] = useState({
+        productImage: null,
+        referenceImage: null,
+      });
     const [productPreview, setProductPreview] = useState(null)
     const [referencePreview, setReferencePreview] = useState(null)
     const [isDragging, setIsDragging] = useState(false)
@@ -159,20 +175,49 @@ const BackgroundReplaceForm = () => {
             })
         }
     }
-    const handleFileChange = (type, file) => {
-        if (file) {
-            setFormData((prev) => ({ ...prev, [type]: file }))
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                if (type === 'productImage') {
-                    setProductPreview(reader.result)
-                } else {
-                    setReferencePreview(reader.result)
-                }
-            }
-            reader.readAsDataURL(file)
+    const handleFileChange = (type, file, inputEl) => {
+        if (!file) return;
+      
+        // Clear previous error for this field
+        setUploadErrors((prev) => ({ ...prev, [type]: null }));
+      
+        // ❌ Size validation
+        if (file.size > MAX_IMAGE_BYTES) {
+          setUploadErrors((prev) => ({
+            ...prev,
+            [type]: "File size exceeded. Maximum allowed size is 10MB.",
+          }));
+          inputEl.value = ""; // critical for reselect
+          return;
         }
-    }
+      
+        // ❌ Type validation (optional but recommended)
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+          setUploadErrors((prev) => ({
+            ...prev,
+            [type]: "Only JPG, PNG, or WEBP images are allowed.",
+          }));
+          inputEl.value = "";
+          return;
+        }
+      
+        // ✅ Valid file
+        setFormData((prev) => ({ ...prev, [type]: file }));
+      
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (type === "productImage") {
+            setProductPreview(reader.result);
+          } else if (type === "referenceImage") {
+            setReferencePreview(reader.result);
+          }
+        };
+        reader.readAsDataURL(file);
+      };
+      
+      
+
+      
 
     const handleDragOver = (e) => {
         e.preventDefault()
@@ -258,23 +303,41 @@ const BackgroundReplaceForm = () => {
                                 <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
                                     <Upload className="w-5 h-5 text-[#7753ff]" />
                                     {t("images.productImage")}<span className="text-red-500 ml-1">*</span>
+                                    {uploadErrors.productImage && (
+  <p className="mt-2 text-sm text-red-600 flex items-center gap-0=">
+    <AlertCircle className="w-4 h-4" />
+    {uploadErrors.productImage}
+  </p>
+)}
+
                                 </label>
                                 <div
-                                    className={`border-2 border-dashed rounded-2xl p-6 transition-all duration-300 cursor-pointer ${isDragging
-                                        ? "border-[#7753ff] bg-[#7753ff]/5"
-                                        : "border-[#e6e6e6] hover:border-[#7753ff] hover:bg-[#7753ff]/5"
-                                        }`}
-                                    onDragOver={handleDragOver}
-                                    onDragLeave={handleDragLeave}
-                                    onClick={() => document.getElementById("product-image").click()}
-                                >
+  className={`border-2 border-dashed rounded-2xl p-6 transition-all duration-300 cursor-pointer ${
+    uploadErrors?.productImage
+      ? "border-red-500 bg-red-50"
+      : isDragging
+      ? "border-[#7753ff] bg-[#7753ff]/5"
+      : "border-[#e6e6e6] hover:border-[#7753ff] hover:bg-[#7753ff]/5"
+  }`}
+  onDragOver={handleDragOver}
+  onDragLeave={handleDragLeave}
+  onClick={() => document.getElementById("product-image").click()}
+>
+
                                     <input
-                                        type="file"
-                                        id="product-image"
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={(e) => handleFileChange('productImage', e.target.files[0])}
-                                    />
+  type="file"
+  id="product-image"
+  className="hidden"
+  accept="image/*"
+  onChange={(e) =>
+    handleFileChange(
+      "productImage",
+      e.target.files?.[0] || null,
+      e.target
+    )
+  }
+/>
+
                                     {productPreview ? (
                                         <div className="relative w-full h-40">
                                             <Image src={productPreview} alt="Product Preview" fill className="object-contain rounded-lg" />
@@ -294,18 +357,39 @@ const BackgroundReplaceForm = () => {
                                 <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
                                     <ImageIcon className="w-5 h-5 text-[#7753ff]" />
                                     Reference Background Image
+                                    {uploadErrors.referenceImage && (
+  <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+    <AlertCircle className="w-4 h-4" />
+    {uploadErrors.referenceImage}
+  </p>
+)}
                                 </label>
+                                
                                 <div
-                                    className="border-2 border-dashed border-[#e6e6e6] rounded-2xl p-6 hover:border-[#884cff] hover:bg-[#884cff]/5 transition-all duration-300 cursor-pointer"
-                                    onClick={() => document.getElementById("reference-image").click()}
-                                >
+  className={`border-2 border-dashed rounded-2xl p-6 transition-all duration-300 cursor-pointer ${
+    uploadErrors?.referenceImage
+      ? "border-red-500 bg-red-50"
+      : "border-[#e6e6e6] hover:border-[#884cff] hover:bg-[#884cff]/5"
+  }`}
+  onClick={() => document.getElementById("reference-image").click()}
+>
+
                                     <input
-                                        type="file"
-                                        id="reference-image"
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={(e) => handleFileChange('referenceImage', e.target.files[0])}
-                                    />
+  type="file"
+  id="reference-image"
+  className="hidden"
+  accept="image/*"
+  onChange={(e) =>
+    handleFileChange(
+      "referenceImage",
+      e.target.files?.[0] || null,
+      e.target
+    )
+  }
+/>
+
+
+
                                     {referencePreview ? (
                                         <div className="relative w-full h-40">
                                             <Image src={referencePreview} alt="Reference Preview" fill className="object-contain rounded-lg" />

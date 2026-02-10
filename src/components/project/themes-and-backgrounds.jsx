@@ -4,11 +4,22 @@ import { MultiSelect } from "@/components/ui/multi-select"
 import { useState, useEffect, useRef } from "react"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
+const MAX_IMAGE_MB = 10;
+const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 
 export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, project, onSave, onSelectionsChange, onImagesChange, canEdit = true }) {
     const { token } = useAuth()
     const [selectedThemes, setSelectedThemes] = useState([])
     const [selectedBackgrounds, setSelectedBackgrounds] = useState([])
+    const [uploadErrors, setUploadErrors] = useState({
+        themes: null,
+        backgrounds: null,
+        poses: null,
+        locations: null
+      });
+      
     const [selectedPoses, setSelectedPoses] = useState([])
     const [selectedLocations, setSelectedLocations] = useState([])
 
@@ -169,55 +180,77 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
 
     // Handle file upload - now uploads immediately to server
     const handleFileUpload = async (category, files) => {
-        if (!files || files.length === 0) return
+        if (!files || files.length === 0) return;
+      
+        // clear previous error for this category
+        setUploadErrors(prev => ({ ...prev, [category]: null }));
+      
+        // validation
+        for (const file of files) {
+          if (file.size > MAX_IMAGE_BYTES) {
+            setUploadErrors(prev => ({
+              ...prev,
+              [category]: "File size exceeded. Max 10MB allowed."
+            }));
+            return;
+          }
+      
+          if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+            setUploadErrors(prev => ({
+              ...prev,
+              [category]: "Only JPG, PNG or WEBP images are allowed."
+            }));
+            return;
+          }
+        }
+      
         if (!project?.id || !collectionData?.id) {
-            console.error('Missing project or collection data')
-            return
+          console.error("Missing project or collection data");
+          return;
         }
-
-        setUploading(prev => ({ ...prev, [category]: true }))
-
+      
+        setUploading(prev => ({ ...prev, [category]: true }));
+      
         try {
-            // Upload to server immediately
-            const response = await apiService.uploadWorkflowImage(
-                project.id,
-                collectionData.id,
-                category,
-                Array.from(files),
-                token
-            )
-
-            if (response.success) {
-                // Add the uploaded images to local state
-                const newImages = response.uploaded_images.map(img => ({
-                    id: img.id || Date.now() + Math.random(),
-                    local_path: img.local_path,
-                    cloud_url: img.cloud_url,
-                    original_filename: img.original_filename,
-                    uploaded_by: img.uploaded_by,
-                    uploaded_at: img.uploaded_at,
-                    file_size: img.file_size,
-                    category: img.category,
-                    url: img.cloud_url, // Use cloud URL for display
-                    name: img.original_filename,
-                    isFromServer: false // Flag to indicate this image was just uploaded
-                }))
-
-                setUploadedImages(prev => ({
-                    ...prev,
-                    [category]: [...prev[category], ...newImages]
-                }))
-
-                console.log(`Successfully uploaded ${newImages.length} ${category} images`)
-            } else {
-                console.error('Upload failed:', response.error)
-            }
+          const response = await apiService.uploadWorkflowImage(
+            project.id,
+            collectionData.id,
+            category,
+            Array.from(files),
+            token
+          );
+      
+          if (response.success) {
+            const newImages = response.uploaded_images.map(img => ({
+              id: img.id || Date.now() + Math.random(),
+              local_path: img.local_path,
+              cloud_url: img.cloud_url,
+              original_filename: img.original_filename,
+              uploaded_by: img.uploaded_by,
+              uploaded_at: img.uploaded_at,
+              file_size: img.file_size,
+              category: img.category,
+              url: img.cloud_url,
+              name: img.original_filename,
+              isFromServer: false
+            }));
+      
+            setUploadedImages(prev => ({
+              ...prev,
+              [category]: [...prev[category], ...newImages]
+            }));
+      
+            console.log(`Successfully uploaded ${newImages.length} ${category} images`);
+          } else {
+            console.error("Upload failed:", response.error);
+          }
         } catch (error) {
-            console.error('Error uploading images:', error)
+          console.error("Error uploading images:", error);
         } finally {
-            setUploading(prev => ({ ...prev, [category]: false }))
+          setUploading(prev => ({ ...prev, [category]: false }));
         }
-    }
+      };
+      
 
     // Remove uploaded image
     const removeUploadedImage = async (category, imageId) => {
@@ -265,11 +298,11 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
 
     // Handle file input change
     const handleFileInputChange = async (category, event) => {
-        const files = event.target.files
-        await handleFileUpload(category, files)
-        // Reset the input
-        event.target.value = ''
-    }
+        const files = event.target.files;
+        await handleFileUpload(category, files);
+        event.target.value = ""; // allow same file again
+      };
+      
 
     // Trigger file input
     const triggerFileInput = (category) => {
@@ -281,7 +314,16 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
     return (
         <div className="grid grid-cols-2 gap-6">
             {/* Themes */}
-            <div className="border-2 border-dashed border-[#b0bec5] rounded-lg p-6 space-y-4">
+            
+            <div
+    className={`border-2 border-dashed rounded-lg p-6 transition-colors
+      ${uploadErrors.themes
+        ? "border-red-500 bg-red-50"
+        : "border-[#b0bec5]"
+      }`}
+  >
+    
+
                 <div>
                     <h3 className="font-bold text-[#1a1a1a] mb-1">Themes</h3>
                     <p className="text-sm text-[#708090]">Define project vision and upload inspiration</p>
@@ -306,6 +348,13 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                     {showSuggestions && aiSuggestions.themes.length > 0 && (
                         <p className="text-sm text-[#708090] text-center">Or</p>
                     )}
+
+    {uploadErrors.themes && (
+      <p className="text-xs text-red-600">
+        {uploadErrors.themes}
+      </p>
+    )}
+
 
                     {/* Hidden file input */}
                     <input
@@ -371,7 +420,22 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
             </div>
 
             {/* Backgrounds */}
-            <div className="border-2 border-dashed border-[#b0bec5] rounded-lg p-6 space-y-4">
+            {/* {uploadErrors.themes && (
+  <div className="flex items-center gap-2 text-sm text-red-600">
+    <X className="w-4 h-4" />
+    {uploadErrors.backgrounds}
+  </div>
+)} */}
+
+            <div
+            
+  className={`border-2 border-dashed rounded-lg p-6 space-y-4 transition-all ${
+    uploadErrors.backgrounds
+      ? "border-red-500 bg-red-50"
+      : "border-[#b0bec5]"
+  }`}
+>
+
                 <div>
                     <h3 className="font-bold text-[#1a1a1a] mb-1">Backgrounds</h3>
                     <p className="text-sm text-[#708090]">Define project vision and upload inspiration</p>
@@ -396,6 +460,11 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                     {showSuggestions && aiSuggestions.backgrounds.length > 0 && (
                         <p className="text-sm text-[#708090] text-center">Or</p>
                     )}
+{uploadErrors.backgrounds && (
+      <p className="text-xs text-red-600">
+        {uploadErrors.backgrounds}
+      </p>
+    )}
 
                     {/* Hidden file input */}
                     <input
@@ -461,11 +530,20 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
             </div>
 
             {/* Sample Poses */}
-            <div className="border-2 border-dashed border-[#b0bec5] rounded-lg p-6 space-y-4">
+            <div
+  className={`border-2 border-dashed rounded-lg p-6 space-y-4 transition-all ${
+    uploadErrors.poses
+      ? "border-red-500 bg-red-50"
+      : "border-[#b0bec5]"
+  }`}
+>
+
                 <div>
                     <h3 className="font-bold text-[#1a1a1a] mb-1">Sample Poses</h3>
                     <p className="text-sm text-[#708090]">Define project vision and upload inspiration</p>
+                    
                 </div>
+                
 
                 {showSuggestions && aiSuggestions.poses.length > 0 && (
                     <div className="space-y-3">
@@ -486,6 +564,12 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                     {showSuggestions && aiSuggestions.poses.length > 0 && (
                         <p className="text-sm text-[#708090] text-center">Or</p>
                     )}
+                    {uploadErrors.poses && (
+      <p className="text-xs text-red-600">
+        {uploadErrors.poses}
+      </p>
+    )}
+
 
                     {/* Hidden file input */}
                     <input
@@ -550,8 +634,14 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                 </div>
             </div>
 
-            {/* Location Inspiration */}
-            <div className="border-2 border-dashed border-[#b0bec5] rounded-lg p-6 space-y-4">
+            {/* Location Inspiration */}<div
+  className={`border-2 border-dashed rounded-lg p-6 space-y-4 transition-all ${
+    uploadErrors.locations
+      ? "border-red-500 bg-red-50"
+      : "border-[#b0bec5]"
+  }`}
+>
+
                 <div>
                     <h3 className="font-bold text-[#1a1a1a] mb-1">Location Inspiration</h3>
                     <p className="text-sm text-[#708090]">Define project vision and upload inspiration</p>
@@ -576,6 +666,11 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                     {showSuggestions && aiSuggestions.locations.length > 0 && (
                         <p className="text-sm text-[#708090] text-center">Or</p>
                     )}
+{uploadErrors.locations && (
+      <p className="text-xs text-red-600">
+        {uploadErrors.locations}
+      </p>
+    )}
 
                     {/* Hidden file input */}
                     <input

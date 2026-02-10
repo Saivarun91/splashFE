@@ -5,10 +5,22 @@ import { Users, Sparkles, CheckCircle, Upload, Image as ImageIcon, X, Eye } from
 import { Button } from "@/components/ui/button"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
+const MAX_IMAGE_MB = 10;
+const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
+const ALLOWED_REAL_MODEL_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif"
+];
+
 export function ModelSelectionSection({ project, collectionData, onSave, canEdit = true, onModelSelectionChange }) {
     const [activeTab, setActiveTab] = useState("ai") // 'ai' or 'real'
     const { token } = useAuth()
     // AI Models State
+    const [realUploadError, setRealUploadError] = useState(null);
+
     const [aiModels, setAiModels] = useState([])
     const [generatedModels, setGeneratedModels] = useState([])
     const [generating, setGenerating] = useState(false)
@@ -155,32 +167,51 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
     }
 
     const handleUploadRealModels = async (event) => {
-        const files = Array.from(event.target.files)
-
-        if (files.length === 0) return
-
-        setUploadingReal(true)
-        setError(null)
-        setSuccess(null)
-
-        try {
-            const response = await apiService.uploadRealModels(collectionData.id, files, token)
-
-            if (response.success) {
-                // Reload all models
-                await loadAllModels()
-                setSuccess(`${response.count} real model(s) uploaded successfully!`)
-            } else {
-                setError(response.error || 'Failed to upload models')
-            }
-        } catch (err) {
-            console.error('Error uploading real models:', err)
-            setError(err.message || 'Failed to upload real models')
-        } finally {
-            setUploadingReal(false)
-            event.target.value = '' // Reset file input
+        const files = Array.from(event.target.files);
+        setRealUploadError(null);
+      
+        if (!files.length) return;
+      
+        for (const file of files) {
+          if (file.size > MAX_IMAGE_BYTES) {
+            setRealUploadError("File size exceeded. Max 10MB allowed per image.");
+            event.target.value = "";
+            return;
+          }
+      
+          if (!ALLOWED_REAL_MODEL_TYPES.includes(file.type)) {
+            setRealUploadError("Only JPG, PNG, WEBP or HEIC images are allowed.");
+            event.target.value = "";
+            return;
+          }
         }
-    }
+      
+        setUploadingReal(true);
+        setError(null);
+        setSuccess(null);
+      
+        try {
+          const response = await apiService.uploadRealModels(
+            collectionData.id,
+            files,
+            token
+          );
+      
+          if (response.success) {
+            await loadAllModels();
+            setSuccess(`${response.count} real model(s) uploaded successfully!`);
+          } else {
+            setError(response.error || "Failed to upload models");
+          }
+        } catch (err) {
+          console.error("Error uploading real models:", err);
+          setError(err.message || "Failed to upload real models");
+        } finally {
+          setUploadingReal(false);
+          event.target.value = ""; // allow reselect
+        }
+      };
+      
 
     const handleSelectModel = (model, type) => {
         console.log(`DEBUG: handleSelectModel: ${model}, ${type}`)
@@ -266,17 +297,18 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
 
                     {/* Card Content */}
                     <div className="p-6" onClick={(e) => e.stopPropagation()}>
-                        <RealModelsTab
-                            realModels={realModels}
-                            uploading={uploadingReal}
-                            loading={loading}
-                            selectedModel={selectedModel}
-                            onUpload={handleUploadRealModels}
-                            onSelect={(model) => handleSelectModel(model, 'real')}
-                            isModelSelected={(model) => isModelSelected(model, 'real')}
-                            canEdit={canEdit}
-                            onDelete={handleDeleteModel}
-                        />
+                    <RealModelsTab
+  realModels={realModels}
+  uploading={uploadingReal}
+  loading={loading}
+  selectedModel={selectedModel}
+  onUpload={handleUploadRealModels}
+  isModelSelected={(model) => isModelSelected(model, 'real')}
+  canEdit={canEdit}
+  onDelete={handleDeleteModel}
+  uploadError={realUploadError}
+/>
+
                     </div>
                 </div>
 
@@ -666,11 +698,12 @@ function RealModelsTab({
     loading,
     selectedModel,
     onUpload,
-    onSelect,
     isModelSelected,
     canEdit = true,
     onDelete,
-}) {
+    uploadError
+  }) {
+  
     const hasModels = realModels.length > 0
     const fileInputRef = useRef(null)
 
@@ -678,11 +711,20 @@ function RealModelsTab({
         if (!uploading && canEdit && fileInputRef.current) {
             fileInputRef.current.click()
         }
+        setRealUploadError(null);
+
     }
 
     return (
         <div className="space-y-6">
             {/* Upload Model Photo Section */}
+            {uploadError && (
+  <div className="flex items-center gap-2 text-sm text-red-600 mt-2">
+    <X className="w-4 h-4" />
+    {uploadError}
+  </div>
+)}
+
             <div className="space-y-4">
                 <div>
                     <h4 className="text-sm font-semibold text-gray-700 mb-3">Upload Model Photo</h4>
@@ -697,11 +739,15 @@ function RealModelsTab({
                         style={{ display: 'none' }}
                     />
                     <button
-                        onClick={handleButtonClick}
-                        disabled={uploading || !canEdit}
-                        className="w-full bg-gray-100 hover:bg-gray-200 border-2 border-dashed border-gray-300 rounded-lg px-6 py-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title={canEdit ? "" : "You need Editor or Owner role to upload models"}
-                    >
+  onClick={handleButtonClick}
+  disabled={uploading || !canEdit}
+  className={`w-full border-2 border-dashed rounded-lg px-6 py-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+    uploadError
+      ? "border-red-500 bg-red-50"
+      : "bg-gray-100 hover:bg-gray-200 border-gray-300"
+  }`}
+>
+
                         <Upload className="w-5 h-5 text-gray-600" />
                         <span className="text-sm font-medium text-gray-700">
                             {uploading ? 'Uploading...' : 'Upload Model Photo'}

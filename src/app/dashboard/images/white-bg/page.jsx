@@ -13,10 +13,15 @@ import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import toast from "react-hot-toast"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
+const MAX_IMAGE_MB = 10;
+const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const PlainBackgroundForm = () => {
     const router = useRouter()
     const { t } = useLanguage()
+    const [uploadError, setUploadError] = useState(null);
+
     const [formData, setFormData] = useState({
         image: null,
         prompt: "",
@@ -46,15 +51,34 @@ const PlainBackgroundForm = () => {
     //     }
     // }
 
-    const handleFileChange = (file) => {
-        if (file) {
-            setFormData((prev) => ({ ...prev, image: file }));
-
-            const reader = new FileReader();
-            reader.onloadend = () => setImagePreview(reader.result);
-            reader.readAsDataURL(file);
+    const handleFileChange = (file, inputEl) => {
+        if (!file) return;
+      
+        // clear previous error
+        setUploadError(null);
+      
+        // ❌ size validation
+        if (file.size > MAX_IMAGE_BYTES) {
+          setUploadError("File size exceeded. Maximum allowed size is 10MB.");
+          inputEl.value = ""; // 🔥 critical for reselect
+          return;
         }
-    };
+      
+        // ❌ type validation
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+          setUploadError("Only PNG, JPG, or WEBP images are allowed.");
+          inputEl.value = "";
+          return;
+        }
+      
+        // ✅ valid file
+        setFormData((prev) => ({ ...prev, image: file }));
+      
+        const reader = new FileReader();
+        reader.onloadend = () => setImagePreview(reader.result);
+        reader.readAsDataURL(file);
+      };
+      
     const handleDragOver = (e) => {
         e.preventDefault()
         setIsDragging(true)
@@ -276,24 +300,38 @@ const PlainBackgroundForm = () => {
                                 <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
                                     <Upload size={20} className="text-[#884cff]" />
                                     {t("images.productImage")}<span className="text-red-500 ml-1">*</span>
+                                    {uploadError && (
+  <p className="mt-3 text-sm text-red-600 flex items-center gap-2">
+    <AlertCircle className="w-4 h-4" />
+    {uploadError}
+  </p>
+)}
+
                                 </label>
                                 <div
-                                    className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 cursor-pointer ${isDragging
-                                        ? "border-[#884cff] bg-[#884cff]/5"
-                                        : "border-[#e6e6e6] hover:border-[#884cff] hover:bg-[#884cff]/5"
-                                        }`}
-                                    onDragOver={handleDragOver}
-                                    onDragLeave={handleDragLeave}
-                                    onDrop={handleDrop}
-                                    onClick={() => document.getElementById("file-input").click()}
-                                >
+  className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 cursor-pointer ${
+    uploadError
+      ? "border-red-500 bg-red-50"
+      : isDragging
+      ? "border-[#884cff] bg-[#884cff]/5"
+      : "border-[#e6e6e6] hover:border-[#884cff] hover:bg-[#884cff]/5"
+  }`}
+  onDragOver={handleDragOver}
+  onDragLeave={handleDragLeave}
+  onDrop={handleDrop}
+  onClick={() => document.getElementById("file-input")?.click()}
+>
+
                                     <input
                                         id="file-input"
                                         name="image" // <-- add this
                                         type="file"
                                         accept="image/*"
                                         className="hidden"
-                                        onChange={(e) => handleFileChange(e.target.files[0])}
+                                        onChange={(e) =>
+                                            handleFileChange(e.target.files?.[0] || null, e.target)
+                                          }
+                                          
                                     />
 
                                     {imagePreview ? (

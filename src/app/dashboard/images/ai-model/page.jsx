@@ -10,9 +10,18 @@ import { useLanguage } from "@/context/LanguageContext"
 import { OrnamentSelection } from "@/components/images/OrnamentSelection"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 import toast from "react-hot-toast"
+const MAX_IMAGE_MB = 10;
+const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 
 export default function AIModelForm() {
     const router = useRouter()
+    const [uploadErrors, setUploadErrors] = useState({
+        ornamentImage: null,
+        poseImage: null,
+      });
+      
     const { token } = useAuth()
     const { t } = useLanguage()
     const [formData, setFormData] = useState({
@@ -36,20 +45,43 @@ export default function AIModelForm() {
         error: null
     })
 
-    const handleFileChange = (type, file) => {
-        if (file) {
-            setFormData((prev) => ({ ...prev, [type]: file }))
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                if (type === 'ornamentImage') {
-                    setOrnamentPreview(reader.result)
-                } else {
-                    setPosePreview(reader.result)
-                }
-            }
-            reader.readAsDataURL(file)
+    const handleFileChange = (type, file, inputEl) => {
+        if (!file) return;
+      
+        // clear previous error for this field
+        setUploadErrors((prev) => ({ ...prev, [type]: null }));
+      
+        // ❌ size validation
+        if (file.size > MAX_IMAGE_BYTES) {
+          setUploadErrors((prev) => ({
+            ...prev,
+            [type]: "File size exceeded. Maximum allowed size is 10MB.",
+          }));
+          if (inputEl) inputEl.value = "";
+          return;
         }
-    }
+      
+        // ❌ type validation
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+          setUploadErrors((prev) => ({
+            ...prev,
+            [type]: "Only JPG, PNG, or WEBP images are allowed.",
+          }));
+          if (inputEl) inputEl.value = "";
+          return;
+        }
+      
+        // ✅ valid file
+        setFormData((prev) => ({ ...prev, [type]: file }));
+      
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (type === "ornamentImage") setOrnamentPreview(reader.result);
+          else if (type === "poseImage") setPosePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+      };
+      
 
     const handleRegenerate = () => {
         setRegenerateModal({
@@ -221,17 +253,32 @@ export default function AIModelForm() {
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full"></div>
                                     {t("images.ornamentProductImage")}<span className="text-red-500 ml-1">*</span>
+                                    {uploadErrors.ornamentImage && (
+  <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+    <AlertCircle className="w-4 h-4" />
+    {uploadErrors.ornamentImage}
+  </p>
+)}
+
                                 </label>
                                 <div
-                                    className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
-                                    onClick={() => document.getElementById("ornament-input").click()}
-                                >
+  className={`border-2 border-dashed rounded-xl p-6 transition-colors group cursor-pointer ${
+    uploadErrors.ornamentImage
+      ? "border-red-500 bg-red-50"
+      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+  }`}
+  onClick={() => document.getElementById("ornament-input")?.click()}
+>
+
                                     <input
                                         type="file"
                                         id="ornament-input"
                                         className="hidden"
                                         accept="image/*"
-                                        onChange={(e) => handleFileChange('ornamentImage', e.target.files[0])}
+                                        onChange={(e) =>
+                                            handleFileChange("ornamentImage", e.target.files?.[0], e.target)
+                                          }
+                                          
                                     />
                                     {ornamentPreview ? (
                                         <div className="relative w-full h-40">
@@ -251,17 +298,32 @@ export default function AIModelForm() {
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full"></div>
                                     Pose Style Reference (Optional)
+                                    {uploadErrors.poseImage && (
+  <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+    <AlertCircle className="w-4 h-4" />
+    {uploadErrors.poseImage}
+  </p>
+)}
+
                                 </label>
                                 <div
-                                    className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
-                                    onClick={() => document.getElementById("pose-input").click()}
-                                >
+  className={`border-2 border-dashed rounded-xl p-6 transition-colors group cursor-pointer ${
+    uploadErrors.poseImage
+      ? "border-red-500 bg-red-50"
+      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+  }`}
+  onClick={() => document.getElementById("pose-input")?.click()}
+>
+
                                     <input
                                         type="file"
                                         id="pose-input"
                                         className="hidden"
                                         accept="image/*"
-                                        onChange={(e) => handleFileChange('poseImage', e.target.files[0])}
+                                        onChange={(e) =>
+                                            handleFileChange("poseImage", e.target.files?.[0], e.target)
+                                          }
+                                          
                                     />
                                     {posePreview ? (
                                         <div className="relative w-full h-40">

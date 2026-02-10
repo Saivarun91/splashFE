@@ -6,9 +6,15 @@ import { Button } from "@/components/ui/button"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
 import { HierarchicalOrnamentSelect } from "./hierarchical-ornament-select"
+const MAX_IMAGE_MB = 10;
+const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 
 export const ProductUploadPage = React.forwardRef(({ project, collectionData, onSave, canEdit = true }, ref) => {
     const [selectedFiles, setSelectedFiles] = useState([])
+    const [uploadError, setUploadError] = useState(null);
+
     const [fileOrnamentTypes, setFileOrnamentTypes] = useState({}) // Map file index to ornament type
     const [filePreviews, setFilePreviews] = useState({}) // Map file index to preview URL
     const [uploadedProducts, setUploadedProducts] = useState([])
@@ -98,23 +104,39 @@ export const ProductUploadPage = React.forwardRef(({ project, collectionData, on
     }, [selections, uploadedProducts.length])
 
     const handleFileSelect = (e) => {
-        const files = Array.from(e.target.files)
-        if (files.length > 0) {
-            const newFiles = [...selectedFiles, ...files]
-            setSelectedFiles(newFiles)
-
-            // Create previews for new files
-            const newPreviews = { ...filePreviews }
-            files.forEach((file, fileIndex) => {
-                const actualIndex = selectedFiles.length + fileIndex
-                const previewUrl = URL.createObjectURL(file)
-                newPreviews[actualIndex] = previewUrl
-            })
-            setFilePreviews(newPreviews)
+        const files = Array.from(e.target.files);
+        setUploadError(null);
+      
+        if (!files.length) return;
+      
+        for (const file of files) {
+          if (file.size > MAX_IMAGE_BYTES) {
+            setUploadError("File size exceeded. Max 10MB allowed per image.");
+            e.target.value = "";
+            return;
+          }
+      
+          if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+            setUploadError("Only JPG, PNG or WEBP images are allowed.");
+            e.target.value = "";
+            return;
+          }
         }
-        // Reset file input to allow selecting the same file again
-        e.target.value = ''
-    }
+      
+        const newFiles = [...selectedFiles, ...files];
+        setSelectedFiles(newFiles);
+      
+        const newPreviews = { ...filePreviews };
+        files.forEach((file, fileIndex) => {
+          const actualIndex = selectedFiles.length + fileIndex;
+          newPreviews[actualIndex] = URL.createObjectURL(file);
+        });
+        setFilePreviews(newPreviews);
+      
+        // allow reselect same file
+        e.target.value = "";
+      };
+      
 
     const handleRemoveFile = (index) => {
         // Clean up preview URL
@@ -322,7 +344,21 @@ export const ProductUploadPage = React.forwardRef(({ project, collectionData, on
             )}
 
             {/* Upload Area */}
-            <div className="border-2 border-dashed border-[#b0bec5] rounded-lg p-8 mb-6">
+            {uploadError && (
+  <div className="mt-4 flex items-center gap-2 text-sm text-red-600">
+    <X className="w-4 h-4" />
+    {uploadError}
+  </div>
+)}
+
+            <div
+  className={`border-2 border-dashed rounded-lg p-8 mb-6 transition-all ${
+    uploadError
+      ? "border-red-500 bg-red-50"
+      : "border-[#b0bec5]"
+  }`}
+>
+
                 <div className="text-center">
                     <Upload className="w-16 h-16 text-[#708090] mx-auto mb-4" />
                     <h4 className="font-semibold text-[#1a1a1a] mb-2">Upload Product Images</h4>

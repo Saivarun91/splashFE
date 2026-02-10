@@ -12,10 +12,20 @@ import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 import { ReferenceImagesModal } from "@/components/images/ReferenceImagesModal"
 import toast from "react-hot-toast"
 import { SiGooglecampaignmanager360  } from "react-icons/si";
+const MAX_IMAGE_MB = 10;
+const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 export default function CampaignForm() {
     const router = useRouter()
     const { token } = useAuth()
     const { t } = useLanguage()
+    const [uploadErrors, setUploadErrors] = useState({
+        modelImage: null,
+        ornamentImages: null,
+        themeImages: null,
+      });
+      
     const [formData, setFormData] = useState({
         modelType: "ai_model",
         modelImage: null,
@@ -98,46 +108,115 @@ export default function CampaignForm() {
         }
     };
 
-    const handleModelImageChange = (file) => {
-        if (file) {
-            setFormData((prev) => ({ ...prev, modelImage: file }))
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                setModelPreview(reader.result)
-            }
-            reader.readAsDataURL(file)
+    const handleModelImageChange = (file, inputEl) => {
+        if (!file) return;
+      
+        setUploadErrors((p) => ({ ...p, modelImage: null }));
+      
+        if (file.size > MAX_IMAGE_BYTES) {
+          setUploadErrors((p) => ({
+            ...p,
+            modelImage: "File size exceeded. Max 10MB allowed.",
+          }));
+          if (inputEl) inputEl.value = "";
+          return;
         }
-    }
+      
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+          setUploadErrors((p) => ({
+            ...p,
+            modelImage: "Only JPG, PNG or WEBP images allowed.",
+          }));
+          if (inputEl) inputEl.value = "";
+          return;
+        }
+      
+        setFormData((prev) => ({ ...prev, modelImage: file }));
+      
+        const reader = new FileReader();
+        reader.onloadend = () => setModelPreview(reader.result);
+        reader.readAsDataURL(file);
+      };
+      
 
-    const handleOrnamentImagesChange = (files) => {
-        const fileArray = Array.from(files)
+      const handleOrnamentImagesChange = (files, inputEl) => {
+        const fileArray = Array.from(files);
+      
+        setUploadErrors((p) => ({ ...p, ornamentImages: null }));
+      
+        for (const file of fileArray) {
+          if (file.size > MAX_IMAGE_BYTES) {
+            setUploadErrors((p) => ({
+              ...p,
+              ornamentImages: "Ornament Image uploaded exceeds 10MB",
+            }));
+            if (inputEl) inputEl.value = "";
+            return;
+          }
+      
+          if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+            setUploadErrors((p) => ({
+              ...p,
+              ornamentImages: "Only JPG, PNG or WEBP images allowed.",
+            }));
+            if (inputEl) inputEl.value = "";
+            return;
+          }
+        }
+      
         setFormData((prev) => ({
-            ...prev,
-            ornamentImages: [...prev.ornamentImages, ...fileArray],
-            ornamentNames: [...prev.ornamentNames, ...fileArray.map((f) => f.name)],
-        }))
-
+          ...prev,
+          ornamentImages: [...prev.ornamentImages, ...fileArray],
+          ornamentNames: [...prev.ornamentNames, ...fileArray.map((f) => f.name)],
+        }));
+      
         fileArray.forEach((file) => {
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                setOrnamentPreviews((prev) => [...prev, reader.result])
-            }
-            reader.readAsDataURL(file)
-        })
-    }
+          const reader = new FileReader();
+          reader.onloadend = () =>
+            setOrnamentPreviews((prev) => [...prev, reader.result]);
+          reader.readAsDataURL(file);
+        });
+      };
+      
 
-    const handleThemeImagesChange = (files) => {
-        const fileArray = Array.from(files)
-        setFormData((prev) => ({ ...prev, themeImages: [...prev.themeImages, ...fileArray] }))
-
+      const handleThemeImagesChange = (files, inputEl) => {
+        const fileArray = Array.from(files);
+      
+        setUploadErrors((p) => ({ ...p, themeImages: null }));
+      
+        for (const file of fileArray) {
+          if (file.size > MAX_IMAGE_BYTES) {
+            setUploadErrors((p) => ({
+              ...p,
+              themeImages: "Theme image uploaded is more then 10MB",
+            }));
+            if (inputEl) inputEl.value = "";
+            return;
+          }
+      
+          if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+            setUploadErrors((p) => ({
+              ...p,
+              themeImages: "Only JPG, PNG or WEBP images allowed.",
+            }));
+            if (inputEl) inputEl.value = "";
+            return;
+          }
+        }
+      
+        setFormData((prev) => ({
+          ...prev,
+          themeImages: [...prev.themeImages, ...fileArray],
+        }));
+      
         fileArray.forEach((file) => {
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                setThemePreviews((prev) => [...prev, reader.result])
-            }
-            reader.readAsDataURL(file)
-        })
-    }
+          const reader = new FileReader();
+          reader.onloadend = () =>
+            setThemePreviews((prev) => [...prev, reader.result]);
+          reader.readAsDataURL(file);
+        });
+      };
+      
 
     const removeOrnament = (index) => {
         setFormData((prev) => ({
@@ -326,17 +405,32 @@ export default function CampaignForm() {
                                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
                                         {t("images.modelImage")}<span className="text-red-500 ml-1">*</span>
+                                        {uploadErrors.modelImage && (
+  <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+    <AlertCircle className="w-4 h-4" />
+    {uploadErrors.modelImage}
+  </p>
+)}
+
                                     </label>
                                     <div
-                                        className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
-                                        onClick={() => document.getElementById("model-image").click()}
-                                    >
+  className={`border-2 border-dashed rounded-xl p-6 cursor-pointer ${
+    uploadErrors.modelImage
+      ? "border-red-500 bg-red-50"
+      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+  }`}
+  onClick={() => document.getElementById("model-image")?.click()}
+>
+
                                         <input
                                             type="file"
                                             id="model-image"
                                             className="hidden"
                                             accept="image/*"
-                                            onChange={(e) => handleModelImageChange(e.target.files[0])}
+                                            onChange={(e) =>
+                                                handleModelImageChange(e.target.files?.[0], e.target)
+                                              }
+                                              
                                         />
                                         {modelPreview ? (
                                             <div className="relative w-full h-32">
@@ -359,18 +453,34 @@ export default function CampaignForm() {
                                     {t("images.ornamentImages")}<span className="text-red-500 ml-1">*</span>
                                     <span className="text-xs text-gray-500 font-normal">upload the product image which is captured with the help of scale for better measurements.</span>
                                     <button type="button" onClick={(e) => { e.preventDefault(); setShowReferenceModal(true); }} className="text-xs text-blue-600 hover:underline font-medium">(View reference)</button>
+                                    {uploadErrors.ornamentImages && (
+  <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+    <AlertCircle className="w-4 h-4" />
+    {uploadErrors.ornamentImages}
+  </p>
+)}
+
                                 </label>
                                 <div
-                                    className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
-                                    onClick={() => document.getElementById("ornament-images").click()}
-                                >
+  className={`border-2 border-dashed rounded-xl p-6 cursor-pointer ${
+    uploadErrors.ornamentImages
+      ? "border-red-500 bg-red-50"
+      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+  }`}
+  onClick={() => document.getElementById("ornament-images")?.click()}
+>
+
                                     <input
                                         type="file"
                                         id="ornament-images"
                                         className="hidden"
                                         accept="image/*"
                                         multiple
-                                        onChange={(e) => handleOrnamentImagesChange(e.target.files)}
+                                        onChange={(e) =>
+                                            handleOrnamentImagesChange(e.target.files, e.target)
+                                          }
+                                          
+                                          
                                     />
                                     <div className="flex flex-col items-center justify-center gap-3 text-center">
                                         <Upload className="w-8 h-8 text-gray-400 group-hover:text-purple-500 transition-colors" />
@@ -402,18 +512,33 @@ export default function CampaignForm() {
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
                                     {t("images.themeStyleImages")} ({t("common.optional")})
+                                    {uploadErrors.themeImages && (
+  <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+    <AlertCircle className="w-4 h-4" />
+    {uploadErrors.themeImages}
+  </p>
+)}
+
                                 </label>
                                 <div
-                                    className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
-                                    onClick={() => document.getElementById("theme-images").click()}
-                                >
+  className={`border-2 border-dashed rounded-xl p-6 cursor-pointer ${
+    uploadErrors.themeImages
+      ? "border-red-500 bg-red-50"
+      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+  }`}
+  onClick={() => document.getElementById("theme-images")?.click()}
+>
+
                                     <input
                                         type="file"
                                         id="theme-images"
                                         className="hidden"
                                         accept="image/*"
                                         multiple
-                                        onChange={(e) => handleThemeImagesChange(e.target.files)}
+                                        onChange={(e) =>
+                                            handleThemeImagesChange(e.target.files, e.target)
+                                          }
+                                          
                                     />
                                     <div className="flex flex-col items-center justify-center gap-3 text-center">
                                         <Upload className="w-8 h-8 text-gray-400 group-hover:text-purple-500 transition-colors" />

@@ -12,8 +12,25 @@ import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 import { ReferenceImagesModal } from "@/components/images/ReferenceImagesModal"
 import toast from "react-hot-toast"
 import { HiOutlineUserCircle } from "react-icons/hi";
+const MAX_IMAGE_MB = 10;
+const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 export default function ModelGenerationForm() {
     const router = useRouter()
+    // AI upload errors
+const [aiUploadErrors, setAiUploadErrors] = useState({
+    ornamentImage: null,
+    poseImage: null,
+  });
+  
+  // Real upload errors
+  const [realUploadErrors, setRealUploadErrors] = useState({
+    modelImage: null,
+    ornamentImage: null,
+    poseImage: null,
+  });
+  
     const { token } = useAuth()
     const { t } = useLanguage()
     const [activeTab, setActiveTab] = useState("ai_model") // "ai_model" or "real_model"
@@ -148,20 +165,40 @@ export default function ModelGenerationForm() {
     const currentState = getCurrentState()
 
     // AI Model Handlers
-    const handleAiFileChange = (type, file) => {
-        if (file) {
-            setAiFormData((prev) => ({ ...prev, [type]: file }))
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                if (type === 'ornamentImage') {
-                    setAiOrnamentPreview(reader.result)
-                } else {
-                    setAiPosePreview(reader.result)
-                }
-            }
-            reader.readAsDataURL(file)
+    const handleAiFileChange = (type, file, inputEl) => {
+        if (!file) return;
+      
+        setAiUploadErrors((p) => ({ ...p, [type]: null }));
+      
+        if (file.size > MAX_IMAGE_BYTES) {
+          setAiUploadErrors((p) => ({
+            ...p,
+            [type]: "File size exceeded. Max 10MB allowed.",
+          }));
+          if (inputEl) inputEl.value = "";
+          return;
         }
-    }
+      
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+          setAiUploadErrors((p) => ({
+            ...p,
+            [type]: "Only JPG, PNG or WEBP images allowed.",
+          }));
+          if (inputEl) inputEl.value = "";
+          return;
+        }
+      
+        setAiFormData((prev) => ({ ...prev, [type]: file }));
+      
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          type === "ornamentImage"
+            ? setAiOrnamentPreview(reader.result)
+            : setAiPosePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+      };
+      
 
     const handleAiRegenerate = () => {
         setAiRegenerateModal({
@@ -270,22 +307,40 @@ export default function ModelGenerationForm() {
     }
 
     // Real Model Handlers
-    const handleRealFileChange = (type, file) => {
-        if (file) {
-            setRealFormData((prev) => ({ ...prev, [type]: file }))
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                if (type === 'modelImage') {
-                    setRealModelPreview(reader.result)
-                } else if (type === 'ornamentImage') {
-                    setRealOrnamentPreview(reader.result)
-                } else {
-                    setRealPosePreview(reader.result)
-                }
-            }
-            reader.readAsDataURL(file)
+    const handleRealFileChange = (type, file, inputEl) => {
+        if (!file) return;
+      
+        setRealUploadErrors((p) => ({ ...p, [type]: null }));
+      
+        if (file.size > MAX_IMAGE_BYTES) {
+          setRealUploadErrors((p) => ({
+            ...p,
+            [type]: "File size exceeded. Max 10MB allowed.",
+          }));
+          if (inputEl) inputEl.value = "";
+          return;
         }
-    }
+      
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+          setRealUploadErrors((p) => ({
+            ...p,
+            [type]: "Only JPG, PNG or WEBP images allowed.",
+          }));
+          if (inputEl) inputEl.value = "";
+          return;
+        }
+      
+        setRealFormData((prev) => ({ ...prev, [type]: file }));
+      
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (type === "modelImage") setRealModelPreview(reader.result);
+          else if (type === "ornamentImage") setRealOrnamentPreview(reader.result);
+          else setRealPosePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+      };
+      
 
     const handleRealRegenerate = () => {
         setRealRegenerateModal({
@@ -454,17 +509,32 @@ export default function ModelGenerationForm() {
                                         {t("images.ornamentProductImage")}<span className="text-red-500 ml-1">*</span> <br />
                                         <span className="text-xs text-gray-500 font-normal">upload the product image which is captured with the help of scale for better measurements.</span>
                                         <button type="button" onClick={(e) => { e.preventDefault(); setShowReferenceModal(true); }} className="text-xs text-blue-600 hover:underline font-medium">(View reference)</button>
+                                        {aiUploadErrors.ornamentImage && (
+  <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+    <AlertCircle className="w-4 h-4" />
+    {aiUploadErrors.ornamentImage}
+  </p>
+)}
+
                                     </label>
                                     <div
-                                        className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
-                                        onClick={() => document.getElementById("ai-ornament-input").click()}
-                                    >
+  className={`border-2 border-dashed rounded-xl p-6 cursor-pointer ${
+    aiUploadErrors.ornamentImage
+      ? "border-red-500 bg-red-50"
+      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+  }`}
+  onClick={() => document.getElementById("ai-ornament-input")?.click()}
+>
+
                                         <input
                                             type="file"
                                             id="ai-ornament-input"
                                             className="hidden"
                                             accept="image/*"
-                                            onChange={(e) => handleAiFileChange('ornamentImage', e.target.files[0])}
+                                            onChange={(e) =>
+                                                handleAiFileChange("ornamentImage", e.target.files?.[0], e.target)
+                                              }
+                                              
                                         />
                                         {aiOrnamentPreview ? (
                                             <div className="relative w-full h-40">
@@ -484,18 +554,33 @@ export default function ModelGenerationForm() {
                                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
                                         {t("images.poseStyleReference")} ({t("common.optional")})
+                                        {aiUploadErrors.poseImage && (
+  <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+    <AlertCircle className="w-4 h-4" />
+    {aiUploadErrors.poseImage}
+  </p>
+)}
+
                                     </label>
                                     <div
-                                        className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
-                                        onClick={() => document.getElementById("ai-pose-input").click()}
-                                    >
-                                        <input
-                                            type="file"
-                                            id="ai-pose-input"
-                                            className="hidden"
-                                            accept="image/*"
-                                            onChange={(e) => handleAiFileChange('poseImage', e.target.files[0])}
-                                        />
+  className={`border-2 border-dashed rounded-xl p-6 cursor-pointer ${
+    aiUploadErrors.poseImage
+      ? "border-red-500 bg-red-50"
+      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+  }`}
+  onClick={() => document.getElementById("ai-pose-input")?.click()}
+>
+
+<input
+  type="file"
+  id="ai-pose-input"
+  className="hidden"
+  accept="image/*"
+  onChange={(e) =>
+    handleAiFileChange("poseImage", e.target.files?.[0], e.target)
+  }
+/>
+
                                         {aiPosePreview ? (
                                             <div className="relative w-full h-40">
                                                 <Image src={aiPosePreview} alt="Pose Preview" fill className="object-contain rounded-lg" />
@@ -583,18 +668,33 @@ export default function ModelGenerationForm() {
                                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
                                         Model Image<span className="text-red-500 ml-1">*</span>
+                                        {realUploadErrors.modelImage && (
+  <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+    <AlertCircle className="w-4 h-4" />
+    {realUploadErrors.modelImage}
+  </p>
+)}
+
                                     </label>
                                     <div
-                                        className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
-                                        onClick={() => document.getElementById("real-model-input").click()}
-                                    >
+  className={`border-2 border-dashed rounded-xl p-6 cursor-pointer ${
+    realUploadErrors.modelImage
+      ? "border-red-500 bg-red-50"
+      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+  }`}
+  onClick={() => document.getElementById("real-model-input")?.click()}
+>
+
                                         <input
-                                            type="file"
-                                            id="real-model-input"
-                                            className="hidden"
-                                            accept="image/*"
-                                            onChange={(e) => handleRealFileChange('modelImage', e.target.files[0])}
-                                        />
+  type="file"
+  id="real-model-input"
+  className="hidden"
+  accept="image/*"
+  onChange={(e) =>
+    handleRealFileChange("modelImage", e.target.files?.[0], e.target)
+  }
+/>
+
                                         {realModelPreview ? (
                                             <div className="relative w-full h-40">
                                                 <Image src={realModelPreview} alt="Model Preview" fill className="object-contain rounded-lg" />
@@ -615,18 +715,33 @@ export default function ModelGenerationForm() {
                                         {t("images.ornamentProductImage")}<span className="text-red-500 ml-1">*</span> <br />
                                         <span className="text-xs text-gray-500 font-normal">upload the product image which is captured with the help of scale for better measurements.</span>
                                         <button type="button" onClick={(e) => { e.preventDefault(); setShowReferenceModal(true); }} className="text-xs text-blue-600 hover:underline font-medium">(View reference)</button>
+                                        {realUploadErrors.ornamentImage && (
+  <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+    <AlertCircle className="w-4 h-4" />
+    {realUploadErrors.ornamentImage}
+  </p>
+)}
+
                                     </label>
                                     <div
-                                        className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
-                                        onClick={() => document.getElementById("real-ornament-input").click()}
-                                    >
-                                        <input
-                                            type="file"
-                                            id="real-ornament-input"
-                                            className="hidden"
-                                            accept="image/*"
-                                            onChange={(e) => handleRealFileChange('ornamentImage', e.target.files[0])}
-                                        />
+  className={`border-2 border-dashed rounded-xl p-6 cursor-pointer ${
+    realUploadErrors.ornamentImage
+      ? "border-red-500 bg-red-50"
+      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+  }`}
+  onClick={() => document.getElementById("real-ornament-input")?.click()}
+>
+
+<input
+  type="file"
+  id="real-ornament-input"
+  className="hidden"
+  accept="image/*"
+  onChange={(e) =>
+    handleRealFileChange("ornamentImage", e.target.files?.[0], e.target)
+  }
+/>
+
                                         {realOrnamentPreview ? (
                                             <div className="relative w-full h-40">
                                                 <Image src={realOrnamentPreview} alt="Ornament Preview" fill className="object-contain rounded-lg" />
@@ -645,18 +760,33 @@ export default function ModelGenerationForm() {
                                     <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
                                         {t("images.poseStyleReference")} ({t("common.optional")})
+                                        {realUploadErrors.poseImage && (
+  <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+    <AlertCircle className="w-4 h-4" />
+    {realUploadErrors.poseImage}
+  </p>
+)}
+
                                     </label>
                                     <div
-                                        className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-colors group cursor-pointer"
-                                        onClick={() => document.getElementById("real-pose-input").click()}
-                                    >
-                                        <input
-                                            type="file"
-                                            id="real-pose-input"
-                                            className="hidden"
-                                            accept="image/*"
-                                            onChange={(e) => handleRealFileChange('poseImage', e.target.files[0])}
-                                        />
+  className={`border-2 border-dashed rounded-xl p-6 cursor-pointer ${
+    realUploadErrors.poseImage
+      ? "border-red-500 bg-red-50"
+      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+  }`}
+  onClick={() => document.getElementById("real-pose-input")?.click()}
+>
+
+<input
+  type="file"
+  id="real-pose-input"
+  className="hidden"
+  accept="image/*"
+  onChange={(e) =>
+    handleRealFileChange("poseImage", e.target.files?.[0], e.target)
+  }
+/>
+
                                         {realPosePreview ? (
                                             <div className="relative w-full h-40">
                                                 <Image src={realPosePreview} alt="Pose Preview" fill className="object-contain rounded-lg" />
