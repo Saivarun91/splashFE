@@ -12,11 +12,13 @@ import {
     Loader2,
     Building2,
     ChevronDown,
-    LogOut
+    LogOut,
+    Coins
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useCredits } from "@/context/CreditsContext";
 import { apiService } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +40,9 @@ export function Topbar({ collapsed }) {
 
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const profileRef = useRef(null);
+
+    const { organizationCredits, userCredits, creditsLoading } = useCredits();
+    const liveCredits = organizationCredits?.balance ?? userCredits?.balance ?? null;
 
     /* -------------------- Fetch Invites -------------------- */
     const fetchInvites = useCallback(async () => {
@@ -200,7 +205,7 @@ export function Topbar({ collapsed }) {
             {/* Right Section */}
             <div className="flex items-center gap-4">
 
-                {/* Notifications */}
+                {/* Notifications
                 <div className="relative" ref={notificationRef}>
                     <button
                         onClick={() => setShowNotifications(!showNotifications)}
@@ -213,10 +218,25 @@ export function Topbar({ collapsed }) {
                             </span>
                         )}
                     </button>
-                </div>
+                </div> */}
+
+                {/* Live credits */}
+                {token && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
+                        {creditsLoading ? (
+                            <Loader2 className="w-4 h-4 text-amber-600 animate-spin" />
+                        ) : (
+                            <>
+                                <Coins className="w-4 h-4 text-amber-600" />
+                                <span className="text-sm font-semibold text-amber-800">
+                                    {liveCredits != null ? liveCredits.toLocaleString() : "—"} credits
+                                </span>
+                            </>
+                        )}
+                    </div>
+                )}
 
                 {/* Profile Dropdown */}
-                
                 <div className="relative" ref={profileRef}>
                 <button
                         onClick={() => setShowProfileMenu(!showProfileMenu)} 

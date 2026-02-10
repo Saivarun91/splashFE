@@ -100,32 +100,35 @@
 // export default ShowcaseSection;
 import React from "react";
 
-const showcaseImages = [
-  { src: "/images/showcase-01.jpg", alt: "Pearl and diamond drop earrings editorial close-up", tall: true },
-  { src: "/images/showcase-02.jpg", alt: "Luxury tennis bracelet with diamonds", tall: false },
-  { src: "/images/showcase-03.jpg", alt: "Stack of gold rings with gemstones", tall: false },
-  { src: "/images/showcase-04.jpg", alt: "Pendant necklace editorial portrait", tall: true },
-  { src: "/images/showcase-05.jpg", alt: "Flat lay jewelry collection on marble", tall: false },
-  { src: "/images/showcase-06.jpg", alt: "Model wearing statement earrings and necklaces", tall: true },
-];
+const defaultShowcase = {
+  heading: "See it in action",
+  subheading: "Campaign-ready visuals created entirely with Splash AI Studio.",
+  images: [
+    { src: "/images/showcase-01.jpg", alt: "Pearl and diamond drop earrings editorial close-up", tall: true },
+    { src: "/images/showcase-02.jpg", alt: "Luxury tennis bracelet with diamonds", tall: false },
+    { src: "/images/showcase-03.jpg", alt: "Stack of gold rings with gemstones", tall: false },
+    { src: "/images/showcase-04.jpg", alt: "Pendant necklace editorial portrait", tall: true },
+    { src: "/images/showcase-05.jpg", alt: "Flat lay jewelry collection on marble", tall: false },
+    { src: "/images/showcase-06.jpg", alt: "Model wearing statement earrings and necklaces", tall: true },
+  ],
+};
 
-const ShowcaseSection = () => {
+const ShowcaseSection = ({ showcase: propShowcase }) => {
+  const showcase = propShowcase?.images?.length ? propShowcase : defaultShowcase;
+  const images = showcase.images || defaultShowcase.images;
   return (
     <section id="showcase" className="py-8 sm:py-10 md:py-12 lg:py-16 bg-white">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-12">
-        {/* Section Header */}
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-            See it in action
+            {showcase.heading || defaultShowcase.heading}
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-2">
-            Campaign-ready visuals created entirely with Splash AI Studio.
+            {showcase.subheading || defaultShowcase.subheading}
           </p>
         </div>
-
-        {/* Image Grid - Mobile: 2 columns, Tablet+: 3 columns */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
-          {showcaseImages.map((image, index) => (
+          {images.map((image, index) => (
             <div
               key={index}
               className={`relative overflow-hidden rounded-lg sm:rounded-xl shadow-md sm:shadow-lg hover:scale-105 transition-transform duration-300 ${
@@ -134,7 +137,7 @@ const ShowcaseSection = () => {
             >
               <img
                 src={image.src}
-                alt={image.alt}
+                alt={image.alt || ""}
                 className="w-full h-full object-cover min-h-[150px] sm:min-h-[200px] md:min-h-[250px]"
                 loading="lazy"
               />

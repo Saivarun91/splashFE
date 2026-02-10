@@ -152,45 +152,34 @@ import {
   Wand2,
 } from "lucide-react";
 
-const steps = [
-  { icon: FileText, title: "Brief", description: "Upload moodboards and define your brand feel." },
-  { icon: Users, title: "Model", description: "Choose AI models or upload approved talent." },
-  { icon: Sparkles, title: "Generate", description: "Create multiple takes and refine details." },
-  { icon: Share2, title: "Publish", description: "Export for PDP, marketplace, and social." },
+const stepIcons = [FileText, Users, Sparkles, Share2];
+const defaultSteps = [
+  { title: "Brief", description: "Upload moodboards and define your brand feel." },
+  { title: "Model", description: "Choose AI models or upload approved talent." },
+  { title: "Generate", description: "Create multiple takes and refine details." },
+  { title: "Publish", description: "Export for PDP, marketplace, and social." },
 ];
 
-const imageOptions = [
-  {
-    icon: ImagePlus,
-    title: "Background Generation",
-    description: "Generate plain background images or replace existing backgrounds for your product.",
-  },
-  {
-    icon: UserCircle,
-    title: "Model Integration",
-    description: "Generate AI or real model images with the product for authentic representation.",
-  },
-  {
-    icon: Camera,
-    title: "Campaign Shots",
-    description: "Generate campaign shots after selecting your campaign reference materials.",
-  },
-  {
-    icon: Wand2,
-    title: "Direct Prompting",
-    description: "Generate custom images by providing direct text prompts for maximum flexibility.",
-  },
+const imageOptionIcons = [ImagePlus, UserCircle, Camera, Wand2];
+const defaultImageOptions = [
+  { title: "Background Generation", description: "Generate plain background images or replace existing backgrounds for your product." },
+  { title: "Model Integration", description: "Generate AI or real model images with the product for authentic representation." },
+  { title: "Campaign Shots", description: "Generate campaign shots after selecting your campaign reference materials." },
+  { title: "Direct Prompting", description: "Generate custom images by providing direct text prompts for maximum flexibility." },
 ];
 
-const HowItWorks = () => {
+const HowItWorks = ({ howItWorks: propHowItWorks }) => {
   const [activeTab, setActiveTab] = useState("projects");
+  const steps = (propHowItWorks?.steps?.length ? propHowItWorks.steps : defaultSteps).map((s, i) => ({ ...s, iconComponent: stepIcons[i] || FileText }));
+  const imageOptions = (propHowItWorks?.image_options?.length ? propHowItWorks.image_options : defaultImageOptions).map((o, i) => ({ ...o, iconComponent: imageOptionIcons[i] || ImagePlus }));
+  const heading = propHowItWorks?.heading ?? "How it works";
 
   return (
     <section id="how-it-works" className="py-8 sm:py-10 md:py-12 lg:py-16 bg-white">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-12">
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-3 sm:mb-4">
-            How it works
+            {heading}
           </h2>
         </div>
 
@@ -226,16 +215,18 @@ const HowItWorks = () => {
             </p>
             {/* Mobile: 1 column, Tablet: 2 columns, Desktop: 4 columns */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
-              {steps.map((step, index) => (
+              {steps.map((step, index) => {
+                const StepIcon = step.iconComponent || FileText;
+                return (
                 <div key={index} className="text-center space-y-3 sm:space-y-4">
                   <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl bg-purple-100 text-purple-600 mb-2">
-                    <step.icon size={24} className="sm:w-7 sm:h-7 md:w-8 md:h-8" strokeWidth={1.5} />
+                    <StepIcon size={24} className="sm:w-7 sm:h-7 md:w-8 md:h-8" strokeWidth={1.5} />
                   </div>
                   <div className="text-xs sm:text-sm font-medium text-gray-500">Step {index + 1}</div>
                   <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">{step.title}</h3>
                   <p className="text-sm sm:text-base text-gray-600 px-2">{step.description}</p>
                 </div>
-              ))}
+              ); })}
             </div>
           </div>
         )}
@@ -245,18 +236,19 @@ const HowItWorks = () => {
             <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto text-center mb-6 sm:mb-8 md:mb-12 px-2">
               Quick and powerful AI image generation for individual creators.
             </p>
-            {/* Mobile: 1 column, Tablet: 2 columns, Desktop: 4 columns */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
-              {imageOptions.map((option, index) => (
+              {imageOptions.map((option, index) => {
+                const OptIcon = option.iconComponent || ImagePlus;
+                return (
                 <div key={index} className="text-center space-y-3 sm:space-y-4">
                   <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl bg-purple-100 text-purple-600 mb-2">
-                    <option.icon size={24} className="sm:w-7 sm:h-7 md:w-8 md:h-8" strokeWidth={1.5} />
+                    <OptIcon size={24} className="sm:w-7 sm:h-7 md:w-8 md:h-8" strokeWidth={1.5} />
                   </div>
                   <div className="text-xs sm:text-sm font-medium text-gray-500">Option {index + 1}</div>
                   <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">{option.title}</h3>
                   <p className="text-sm sm:text-base text-gray-600 px-2">{option.description}</p>
                 </div>
-              ))}
+              ); })}
             </div>
           </div>
         )}

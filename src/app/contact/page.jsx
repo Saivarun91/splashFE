@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { apiService } from "@/lib/api";
 import { Loader2, Mail, Phone, MapPin, CheckCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -10,7 +10,13 @@ import { Label } from "@/components/ui/label";
 import { MoveLeft } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Navigation from "@/components/home/Navigation";
+
 export default function ContactPage() {
+  const generateCaptcha = () => {
+    return Math.random().toString(36).substring(2, 6).toLocaleLowerCase() + Math.random().toString(36).substring(2, 6).toLocaleLowerCase();
+  };
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -23,6 +29,10 @@ export default function ContactPage() {
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
+  const [captcha, setCaptcha] = useState("");
+  const [captchaInput, setCaptchaInput] = useState("");
+  const [captchaValid, setCaptchaValid] = useState(false);
+
   const validate = () => {
     if (!form.name.trim()) return "Name is required.";
     if (!form.mobile.trim()) return "Mobile number is required.";
@@ -32,6 +42,13 @@ export default function ContactPage() {
     if (!form.reason.trim()) return "Reason for contact is required.";
     return null;
   };
+  useEffect(() => {
+    setCaptcha(generateCaptcha());
+  }, []);
+  
+  useEffect(() => {
+    setCaptchaValid(captchaInput === captcha);
+  }, [captchaInput, captcha]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,6 +75,8 @@ export default function ContactPage() {
   };
 
   return (
+    <>
+    <Navigation />
     <div className="min-h-screen bg-white text-[#0c1421]">
       {/* Header */}
       <section className="relative py-20 md:py-32 bg-[#f8f9fc] text-center">
@@ -85,9 +104,15 @@ export default function ContactPage() {
                 <div>
                   <h3 className="text-lg font-semibold">Office Address</h3>
                   <p className="text-[#313957] mt-1 leading-relaxed">
-                    202, Serinity Diamond, ,
-                    <br />
-                    Serilingampally, Hyderabad, India – 500046
+                    <a
+                      href="https://maps.app.goo.gl/3tMuX7F4xemYYrxH6"
+                      className="hover:text-[#5533ff]"
+                      target="_blank"
+                    >
+                      501, Manjeera Majestic Commercial Complex,
+                      <br />
+                      JNTU Road,KPHB, Hyderabad , Telangana, India 500085
+                    </a>
                   </p>
                 </div>
               </div>
@@ -113,10 +138,10 @@ export default function ContactPage() {
                   <h3 className="text-lg font-semibold">Email Address</h3>
                   <p className="text-[#313957] mt-1">
                     <a
-                      href="mailto:support@findmyguru.com"
+                      href="mailto:support@gosplash.ai"
                       className="hover:text-[#5533ff]"
                     >
-                      support@findmyguru.com
+                      support@gosplash.ai
                     </a>
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
@@ -127,7 +152,7 @@ export default function ContactPage() {
             </div>
 {/* Google Map Embed */} 
 <div className="mt-10 h-64 w-full bg-gray-100 rounded-lg overflow-hidden border border-gray-200"> 
-  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.457891392658!2d78.3361113148769!3d17.43779778804825!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb939105555555%3A0x1234567890abcdef!2sSerenity%20Diamond!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin" width="100%" height="100%" style={{ border: 0 }} allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Office Location" >
+<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3805.323180100733!2d78.39097917516732!3d17.492079483413075!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb910057424ed5%3A0x199dce60198e6b9b!2sTechsprout%20AI%20Labs%20Pvt.%20Ltd.!5e0!3m2!1sen!2sin!4v1770624140087!5m2!1sen!2sin" width="100%" height="100%" style={{ border: 0 }} allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Office Location" >
   </iframe> 
   </div> 
   </div>
@@ -191,28 +216,60 @@ export default function ContactPage() {
                     placeholder="How can we help you?"
                   />
                 </div>
+                <div className="space-y-2">
+  <Label>Captcha</Label>
 
-                <Button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full bg-[#5533ff] hover:bg-[#4322e8] text-white font-bold"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    "Send Message"
-                  )}
-                </Button>
+  <div className="flex items-center gap-4">
+    <div className="px-4 py-2 bg-gray-100 border rounded font-mono text-lg tracking-widest">
+      {captcha}
+    </div>
+
+    <Button
+      type="button"
+      variant="outline"
+      onClick={() => {
+        setCaptcha(generateCaptcha());
+        setCaptchaInput("");
+      }}
+    >
+      Refresh
+    </Button>
+  </div>
+
+  <Input
+    value={captchaInput}
+    onChange={(e) => setCaptchaInput(e.target.value.toLowerCase())}
+    placeholder="Enter captcha"
+  />
+
+  {!captchaValid && captchaInput && (
+    <p className="text-sm text-red-500" style={{ fontSize: '12px' }}>Captcha does not match</p>
+  )}
+</div>
+
+
+<Button
+  type="submit"
+  disabled={submitting || !captchaValid}
+  className="w-full bg-[#5533ff] hover:bg-[#4322e8] text-white font-bold disabled:opacity-50"
+>
+  {submitting ? (
+    <>
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      Sending...
+    </>
+  ) : (
+    "Send Message"
+  )}
+</Button>
+
               </form>
             )}
           </div>
         </div>
       </section>
 
-      <button
+      {/* <button
         onClick={() => {
           router.push("/");
         }}
@@ -222,7 +279,8 @@ export default function ContactPage() {
                    px-4 py-2 rounded-full shadow-sm transition-all flex items-center gap-2"
       >
         <MoveLeft size={16} /> Back
-      </button>
+      </button> */}
     </div>
+    </>
   );
 }

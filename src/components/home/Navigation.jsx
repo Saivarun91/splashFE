@@ -264,7 +264,7 @@ const Navigation = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const isAuthPage = pathname === "/login" || pathname === "/signup";
-
+const isHomePage = pathname === "/";
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -299,7 +299,7 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          {!isAuthPage && (
+          {isHomePage && (
             <div className="hidden md:flex items-center gap-6 lg:gap-8">
               {navLinks.map((link) => (
                 <a
@@ -316,7 +316,7 @@ const Navigation = () => {
           {/* CTA Button - Desktop */}
           <div className="hidden md:block">
             <Link
-              href={isAuthPage ? "/" : "/login"}
+              href={isAuthPage ? "/" : "/login "}
               className="inline-block px-4 py-2 text-sm lg:text-base font-medium text-white bg-gradient-to-br from-indigo-600 to-purple-500 rounded-lg hover:bg-indigo-700 transition-colors"
             >
               {isAuthPage ? "Back to Home" : "Get Started for free"}
