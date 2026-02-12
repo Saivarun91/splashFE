@@ -139,290 +139,165 @@ export default function CompleteProfilePage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4 py-12">
-            <div className="w-full max-w-3xl">
-                {/* Header Card */}
-                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden mb-6">
-                    <div className="bg-gradient-to-r from-[#5533ff] to-[#7c5fff] p-8 text-white">
-                        <div className="flex items-center gap-4 mb-4">
-                            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                                <Sparkles className="w-8 h-8" />
-                            </div>
-                            <div>
-                                <h1 className="text-3xl font-bold mb-1">Complete Your Profile</h1>
-                                <p className="text-blue-100 text-sm">
-                                    Just a few more steps to get started
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-blue-100">
-                            <CheckCircle className="w-4 h-4" />
-                            <span>This will only take a minute</span>
-                        </div>
-                    </div>
-
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="p-8 space-y-6">
-                        {/* Read-only Fields Section */}
-                        <div className="bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-xl p-6 border border-gray-200">
-                            <div className="flex items-center gap-2 mb-4">
-                                <Shield className="w-5 h-5 text-gray-600" />
-                                <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                                    Account Information
-                                </h3>
-                            </div>
-                            <p className="text-xs text-gray-500 mb-4">These fields are set by your organization and cannot be changed.</p>
-                            
-                            <div className="space-y-4">
-                                {/* Email */}
-                                <div className="space-y-2">
-                                    <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                        <Mail className="w-4 h-4 text-gray-500" />
-                                        Email Address
-                                    </label>
-                                    <div className="relative">
-                                        <Input
-                                            type="email"
-                                            value={profileData.email || ""}
-                                            disabled
-                                            className="w-full pl-10 px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-700 opacity-75 cursor-not-allowed font-medium"
-                                        />
-                                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    </div>
-                                </div>
-
-                                {/* Organization Name */}
-                                {profileData.organization && (
-                                    <div className="space-y-2">
-                                        <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                            <Building2 className="w-4 h-4 text-gray-500" />
-                                            Organization
-                                        </label>
-                                        <div className="relative">
-                                            <Input
-                                                type="text"
-                                                value={profileData.organization.name || "N/A"}
-                                                disabled
-                                                className="w-full pl-10 px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-700 opacity-75 cursor-not-allowed font-medium"
-                                            />
-                                            <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Role */}
-                                {profileData.organization_role && (
-                                    <div className="space-y-2">
-                                        <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                            <Shield className="w-4 h-4 text-gray-500" />
-                                            Role
-                                        </label>
-                                        <div className="relative">
-                                            <Input
-                                                type="text"
-                                                value={profileData.organization_role.charAt(0).toUpperCase() + profileData.organization_role.slice(1).replace(/_/g, " ") || "N/A"}
-                                                disabled
-                                                className="w-full pl-10 px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-700 opacity-75 cursor-not-allowed font-medium"
-                                            />
-                                            <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Editable Fields Section */}
-                        <div className="bg-white rounded-xl p-6 border-2 border-gray-200">
-                            <div className="flex items-center gap-2 mb-4">
-                                <User className="w-5 h-5 text-[#5533ff]" />
-                                <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                                    Personal Information
-                                </h3>
-                            </div>
-                            
-                            <div className="space-y-5">
-                                {/* Full Name */}
-                                <div className="space-y-2">
-                                    <label
-                                        htmlFor="fullName"
-                                        className="block text-sm font-semibold text-gray-700"
-                                    >
-                                        Full Name <span className="text-red-500">*</span>
-                                    </label>
-                                    <div className="relative">
-                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                        <Input
-                                            id="fullName"
-                                            type="text"
-                                            placeholder="Enter your full name"
-                                            value={fullName}
-                                            onChange={(e) => {
-                                                setFullName(e.target.value);
-                                                if (errors.fullName) setErrors({...errors, fullName: ""});
-                                            }}
-                                            required
-                                            className={`w-full pl-10 px-4 py-3 bg-gray-50 border-2 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5533ff] focus:border-[#5533ff] transition-all ${
-                                                errors.fullName ? "border-red-300 focus:ring-red-500" : "border-gray-300"
-                                            }`}
-                                        />
-                                    </div>
-                                    {errors.fullName && (
-                                        <p className="text-sm text-red-600 flex items-center gap-1">
-                                            <AlertCircle className="w-4 h-4" />
-                                            {errors.fullName}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Username */}
-                                <div className="space-y-2">
-                                    <label
-                                        htmlFor="username"
-                                        className="block text-sm font-semibold text-gray-700"
-                                    >
-                                        Username <span className="text-gray-400 text-xs">(Optional)</span>
-                                    </label>
-                                    <div className="relative">
-                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                        <Input
-                                            id="username"
-                                            type="text"
-                                            placeholder="Enter your username"
-                                            value={username}
-                                            onChange={(e) => setUsername(e.target.value)}
-                                            className="w-full pl-10 px-4 py-3 bg-gray-50 border-2 border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5533ff] focus:border-[#5533ff] transition-all"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Password */}
-                                <div className="space-y-2">
-                                    <label
-                                        htmlFor="password"
-                                        className="block text-sm font-semibold text-gray-700"
-                                    >
-                                        Set Password <span className="text-red-500">*</span>
-                                    </label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                        <Input
-                                            id="password"
-                                            type={showPassword ? "text" : "password"}
-                                            placeholder="At least 8 characters"
-                                            value={password}
-                                            onChange={(e) => {
-                                                setPassword(e.target.value);
-                                                if (errors.password) setErrors({...errors, password: ""});
-                                            }}
-                                            required
-                                            className={`w-full pl-10 pr-10 px-4 py-3 bg-gray-50 border-2 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5533ff] focus:border-[#5533ff] transition-all ${
-                                                errors.password ? "border-red-300 focus:ring-red-500" : "border-gray-300"
-                                            }`}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                        >
-                                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                        </button>
-                                    </div>
-                                    {errors.password ? (
-                                        <p className="text-sm text-red-600 flex items-center gap-1">
-                                            <AlertCircle className="w-4 h-4" />
-                                            {errors.password}
-                                        </p>
-                                    ) : password && !validatePassword(password) ? (
-                                        <p className="text-sm text-amber-600 flex items-center gap-1">
-                                            <AlertCircle className="w-4 h-4" />
-                                            Password must be at least 8 characters long
-                                        </p>
-                                    ) : password && validatePassword(password) ? (
-                                        <p className="text-sm text-green-600 flex items-center gap-1">
-                                            <CheckCircle className="w-4 h-4" />
-                                            Password strength: Good
-                                        </p>
-                                    ) : null}
-                                </div>
-
-                                {/* Confirm Password */}
-                                <div className="space-y-2">
-                                    <label
-                                        htmlFor="confirmPassword"
-                                        className="block text-sm font-semibold text-gray-700"
-                                    >
-                                        Confirm Password <span className="text-red-500">*</span>
-                                    </label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                        <Input
-                                            id="confirmPassword"
-                                            type={showConfirmPassword ? "text" : "password"}
-                                            placeholder="Re-enter your password"
-                                            value={confirmPassword}
-                                            onChange={(e) => {
-                                                setConfirmPassword(e.target.value);
-                                                if (errors.confirmPassword) setErrors({...errors, confirmPassword: ""});
-                                            }}
-                                            required
-                                            className={`w-full pl-10 pr-10 px-4 py-3 bg-gray-50 border-2 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5533ff] focus:border-[#5533ff] transition-all ${
-                                                errors.confirmPassword ? "border-red-300 focus:ring-red-500" : "border-gray-300"
-                                            }`}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                        >
-                                            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                        </button>
-                                    </div>
-                                    {errors.confirmPassword ? (
-                                        <p className="text-sm text-red-600 flex items-center gap-1">
-                                            <AlertCircle className="w-4 h-4" />
-                                            {errors.confirmPassword}
-                                        </p>
-                                    ) : confirmPassword && password === confirmPassword && validatePassword(password) ? (
-                                        <p className="text-sm text-green-600 flex items-center gap-1">
-                                            <CheckCircle className="w-4 h-4" />
-                                            Passwords match
-                                        </p>
-                                    ) : confirmPassword && password !== confirmPassword ? (
-                                        <p className="text-sm text-red-600 flex items-center gap-1">
-                                            <AlertCircle className="w-4 h-4" />
-                                            Passwords do not match
-                                        </p>
-                                    ) : null}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Submit Button */}
-                        <div className="pt-4">
-                            <Button
-                                type="submit"
-                                className="w-full py-4 bg-gradient-to-r from-[#5533ff] to-[#7c5fff] hover:from-[#4422dd] hover:to-[#6b4fee] text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <span className="flex items-center gap-2">
-                                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                                        Completing Profile...
-                                    </span>
-                                ) : (
-                                    <span className="flex items-center gap-2">
-                                        <CheckCircle className="w-5 h-5" />
-                                        Complete Profile
-                                    </span>
-                                )}
-                            </Button>
-                            <p className="text-xs text-gray-500 text-center mt-3">
-                                By completing your profile, you agree to our terms of service
-                            </p>
-                        </div>
-                    </form>
-                </div>
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4">
+      
+          {/* Invitation Message */}
+          <div className="w-full max-w-3xl mb-6">
+            <div className="bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl p-4 text-center">
+              <p className="font-semibold text-lg">
+                You have been invited to Splash — please complete your profile to continue.
+              </p>
             </div>
+          </div>
+      
+          <div className="w-full max-w-3xl">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+      
+              {/* Header */}
+              <div className="p-8 border-b border-gray-100">
+                <h1 className="text-2xl font-bold text-gray-800">
+                  Complete Your Profile
+                </h1>
+                <p className="text-gray-500 text-sm mt-1">
+                  Just a few details to activate your account
+                </p>
+              </div>
+      
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="p-8 space-y-8">
+      
+                {/* Account Info */}
+                <div className="space-y-6">
+                  <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+                    Account Information
+                  </h3>
+      
+                  <div className="grid md:grid-cols-2 gap-6">
+      
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email Address
+                      </label>
+                      <Input
+                        type="email"
+                        value={profileData.email || ""}
+                        disabled
+                        className="bg-gray-100 border-gray-200 text-gray-600"
+                      />
+                    </div>
+      
+                    {profileData.organization && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Organization
+                        </label>
+                        <Input
+                          type="text"
+                          value={profileData.organization.name || ""}
+                          disabled
+                          className="bg-gray-100 border-gray-200 text-gray-600"
+                        />
+                      </div>
+                    )}
+      
+                    {profileData.organization_role && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Role
+                        </label>
+                        <Input
+                          type="text"
+                          value={
+                            profileData.organization_role
+                              .replace(/_/g, " ")
+                              .replace(/\b\w/g, (c) => c.toUpperCase())
+                          }
+                          disabled
+                          className="bg-gray-100 border-gray-200 text-gray-600"
+                        />
+                      </div>
+                    )}
+      
+                  </div>
+                </div>
+      
+                {/* Personal Info */}
+                <div className="space-y-6">
+                  <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+                    Personal Information
+                  </h3>
+      
+                  <div className="grid md:grid-cols-2 gap-6">
+      
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Full Name *
+                      </label>
+                      <Input
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                      />
+                    </div>
+      
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Username (Optional)
+                      </label>
+                      <Input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                      />
+                    </div>
+      
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Set Password *
+                      </label>
+                      <Input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                      />
+                    </div>
+      
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Confirm Password *
+                      </label>
+                      <Input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                      />
+                    </div>
+      
+                  </div>
+                </div>
+      
+                {/* Submit */}
+                <div className="pt-4">
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition"
+                  >
+                    {loading ? "Completing..." : "Complete Profile"}
+                  </Button>
+      
+                  <p className="text-xs text-gray-500 text-center mt-3">
+                    By completing your profile, you agree to our terms of service.
+                  </p>
+                </div>
+      
+              </form>
+            </div>
+          </div>
         </div>
-    );
+      );
 }

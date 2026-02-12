@@ -4,6 +4,7 @@ import { useState } from "react"
 import { ChevronDown, Ruler, Sparkles } from "lucide-react"
 import { getOrnamentFittingRules } from "@/lib/ornamentRules"
 
+
 const ORNAMENT_TYPES = [
     // Necklaces
     {
@@ -352,6 +353,10 @@ export function OrnamentSelection({
         return measurements[measurementId] || ""
     }
 
+    const sortedOrnaments = [...ORNAMENT_TYPES].sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
+
     const getFittingRules = (ornamentType) => {
         return getOrnamentFittingRules(ornamentType)
     }
@@ -372,10 +377,10 @@ export function OrnamentSelection({
                     >
                         <div className="flex items-center gap-3">
                             {selectedOrnament ? (
-                                <>
+                                <div key={index}>
                                     <span className="text-lg">{selectedOrnament.icon}</span>
-                                    <span>{selectedOrnament.name}</span>
-                                </>
+                                    <span>{selectedOrnament.name }</span>
+                                </div>
                             ) : (
                                 <span className="text-gray-400">Select ornament type </span>
                             )}
@@ -385,7 +390,7 @@ export function OrnamentSelection({
 
                     {isOpen && (
                         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 max-h-60 overflow-y-auto">
-                            {ORNAMENT_TYPES.map((type) => (
+                            {sortedOrnaments.map((type) => (
                                 <button
                                     key={type.id}
                                     type="button"
