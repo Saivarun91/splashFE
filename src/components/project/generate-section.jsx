@@ -5,6 +5,26 @@ import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
 import { useImageGeneration } from "@/context/ImageGenerationContext"
 
+function getUserFriendlyError(error) {
+    if (!error) return "Something went wrong. Please try again."
+    if (error.response) {
+        const status = error.response.status
+        const msg = error.response.data?.error || error.response.data?.message
+        if (msg && typeof msg === "string" && msg.length < 300) return msg
+        switch (status) {
+            case 400: return "Something seems incorrect. Please check your selection and try again."
+            case 401: return "Your session has expired. Please log in again."
+            case 403: return "You don't have permission to perform this action."
+            case 404: return "The requested item was not found."
+            case 429: return "Too many requests. Please wait a moment and try again."
+            case 500: return "Something went wrong on our side. Please try again in a few moments."
+            default: return "An unexpected error occurred. Please try again."
+        }
+    }
+    if (error.request) return "Network issue. Please check your connection and try again."
+    return error.message || "Something went wrong. Please try again."
+}
+
 export function GenerateSection({ project, collectionData, onGenerate, canEdit, isOwner = false, productUploadPageRef = null }) {
     const [generating, setGenerating] = useState(false)
     const [error, setError] = useState(null)
@@ -129,7 +149,7 @@ export function GenerateSection({ project, collectionData, onGenerate, canEdit, 
             }
         } catch (err) {
             console.error('Error generating images:', err)
-            setError(err.message || 'Failed to generate images')
+            setError(getUserFriendlyError(err) || err?.message || 'Failed to generate images')
         } finally {
             setGenerating(false)
             setIsGenerating(false)
