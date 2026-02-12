@@ -145,8 +145,13 @@ export default function CompleteProfilePage() {
           <div className="w-full max-w-3xl mb-6">
             <div className="bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl p-4 text-center">
               <p className="font-semibold text-lg">
-                You have been invited to Splash — please complete your profile to continue.
-              </p>
+  You have been invited to Splash by {" "}
+  <span className="font-bold">
+    {profileData.organization?.name || "Splash"}
+  </span>{" "}
+  Organization— please complete your profile to continue.
+</p>
+
             </div>
           </div>
       
