@@ -35,7 +35,44 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
     const { t } = useLanguage()
     const [activeTab, setActiveTab] = useState("ai_model") // "ai_model" or "real_model"
     const [showReferenceModal, setShowReferenceModal] = useState(false)
-
+    const getUserFriendlyError = (error) => {
+        if (error.response) {
+            const status = error.response.status;
+    
+            switch (status) {
+                case 400:
+                    return "Some information seems incorrect. Please check your inputs and try again.";
+    
+                case 401:
+                    return "Your session has expired. Please log in again.";
+    
+                case 403:
+                    return "You don’t have permission to perform this action.";
+    
+                case 404:
+                    return "Requested resource was not found.";
+    
+                case 413:
+                    return "The uploaded file is too large. Please upload a smaller image.";
+    
+                case 422:
+                    return "Please make sure all required fields are filled correctly.";
+    
+                case 500:
+                    return "Something went wrong on our side. Please try again in a few moments.";
+    
+                default:
+                    return "An unexpected error occurred. Please try again.";
+            }
+        }
+    
+        if (error.request) {
+            return "Network issue detected. Please check your internet connection.";
+        }
+    
+        return "Something went wrong. Please try again.";
+    };
+    
     // AI Model State
     const [aiFormData, setAiFormData] = useState({
         ornamentImage: null,
@@ -251,7 +288,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             setAiRegenerateModal(prev => ({
                 ...prev,
                 loading: false,
-                error: error.response?.data?.error || error.message || t("images.failedToRegenerate")
+                error: error.response?.data?.error || error.message || getUserFriendlyError(error) || t("images.failedToRegenerate")
             }))
         }
     }
@@ -296,12 +333,14 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             if (response.status === "success") {
                 setAiResult(response)
             } else {
-                setAiError(response.message || t("images.failedToGenerate"))
+                setAiError("We couldn’t generate the model. Please check your images and try again.");
             }
+            
         } catch (err) {
-            console.error("Error generating image:", err)
-            setAiError(err.message || t("images.errorGeneratingImage"))
-        } finally {
+            console.error("AI Generation Error:", err);
+            setAiError(getUserFriendlyError(err));
+        }
+        finally {
             setAiIsLoading(false)
         }
     }
@@ -393,7 +432,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             setRealRegenerateModal(prev => ({
                 ...prev,
                 loading: false,
-                error: error.response?.data?.error || error.message || t("images.failedToRegenerate")
+                error: error.response?.data?.error || error.message || getUserFriendlyError(error) || t("images.failedToRegenerate")
             }))
         }
     }
@@ -447,9 +486,10 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                 setRealError(response.message || t("images.failedToGenerate"))
             }
         } catch (err) {
-            console.error("Error generating image:", err)
-            setRealError(err.message || t("images.errorGeneratingImage"))
-        } finally {
+            console.error("Real Model Generation Error:", err);
+            setRealError(getUserFriendlyError(err));
+        }
+        finally {
             setRealIsLoading(false)
         }
     }
@@ -628,7 +668,9 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                 {aiError && (
                                     <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                         <AlertCircle className="w-5 h-5 text-red-500" />
-                                        <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
+                                        <p className="text-red-700 text-sm">
+    {aiError}
+</p>
                                     </div>
                                 )}
 
@@ -849,7 +891,9 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                 {realError && (
                                     <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                         <AlertCircle className="w-5 h-5 text-red-500" />
-                                        <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
+                                        <p className="text-red-700 text-sm">
+    {realError}
+</p>
                                     </div>
                                 )}
 
@@ -1083,7 +1127,9 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                             {aiRegenerateModal.error && (
                                 <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                    <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
+                                    <p className="text-red-700 text-sm">
+            {aiRegenerateModal.error}
+        </p>
                                 </div>
                             )}
 
