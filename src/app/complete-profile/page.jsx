@@ -142,7 +142,7 @@ export default function CompleteProfilePage() {
         <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4">
       
           {/* Invitation Message */}
-          <div className="w-full max-w-3xl mb-6">
+          <div className="w-full max-w-6xl mb-6">
             <div className="bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl p-4 text-center">
               <p className="font-semibold text-lg">
   You have been invited to Splash by {" "}
@@ -155,7 +155,7 @@ export default function CompleteProfilePage() {
             </div>
           </div>
       
-          <div className="w-full max-w-3xl">
+          <div className="w-full max-w-6xl">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
       
               {/* Header */}
