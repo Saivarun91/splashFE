@@ -376,14 +376,15 @@ export function OrnamentSelection({
                         className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all shadow-sm flex items-center justify-between"
                     >
                         <div className="flex items-center gap-3">
-                            {selectedOrnament ? (
-                                <div key={index}>
-                                    <span className="text-lg">{selectedOrnament.icon}</span>
-                                    <span>{selectedOrnament.name }</span>
-                                </div>
-                            ) : (
-                                <span className="text-gray-400">Select ornament type </span>
-                            )}
+                        {selectedOrnament ? (
+    <div>
+        <span className="text-lg">{selectedOrnament.icon}</span>
+        <span>{selectedOrnament.name}</span>
+    </div>
+) : (
+    <span className="text-gray-400">Select ornament type</span>
+)}
+
                         </div>
                         <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                     </button>
@@ -463,3 +464,5 @@ export function OrnamentSelection({
         </div>
     )
 }
+
+export { ORNAMENT_TYPES }

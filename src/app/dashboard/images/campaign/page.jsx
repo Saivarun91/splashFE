@@ -9,6 +9,7 @@ import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
+import { ORNAMENT_TYPES } from "@/components/images/OrnamentSelection"
 import { ReferenceImagesModal } from "@/components/images/ReferenceImagesModal"
 import toast from "react-hot-toast"
 import { SiGooglecampaignmanager360  } from "react-icons/si";
@@ -31,6 +32,9 @@ export default function CampaignForm() {
         modelImage: null,
         ornamentImages: [],
         ornamentNames: [],
+        ornamentTypes: [],
+        // Per-ornament measurements (optional for each ornament)
+        ornamentMeasurements: [],
         themeImages: [],
         prompt: "",
         dimension: "1:1",
@@ -42,6 +46,7 @@ export default function CampaignForm() {
     const [showReferenceModal, setShowReferenceModal] = useState(false)
     const [result, setResult] = useState(null)
     const [error, setError] = useState(null)
+    const [openMeasurements, setOpenMeasurements] = useState({});
     const [regenerateModal, setRegenerateModal] = useState({
         isOpen: false,
         prompt: '',
@@ -52,6 +57,13 @@ export default function CampaignForm() {
     const handleView = (url) => {
         window.open(url, '_blank');
     };
+    const toggleMeasurements = (index) => {
+        setOpenMeasurements(prev => ({
+          ...prev,
+          [index]: !prev[index]
+        }));
+      };
+      
 
     const downloadImage = async (url, filename = "image.png") => {
         try {
@@ -168,6 +180,15 @@ export default function CampaignForm() {
           ...prev,
           ornamentImages: [...prev.ornamentImages, ...fileArray],
           ornamentNames: [...prev.ornamentNames, ...fileArray.map((f) => f.name)],
+          ornamentTypes: [
+            ...(prev.ornamentTypes || []),
+            ...fileArray.map(() => ""),
+          ],
+          ornamentMeasurements: [
+            ...(prev.ornamentMeasurements || []),
+            // Initialise empty measurements object for each new ornament
+            ...fileArray.map(() => ({})),
+          ],
         }));
       
         fileArray.forEach((file) => {
@@ -223,8 +244,36 @@ export default function CampaignForm() {
             ...prev,
             ornamentImages: prev.ornamentImages.filter((_, i) => i !== index),
             ornamentNames: prev.ornamentNames.filter((_, i) => i !== index),
+            ornamentTypes: (prev.ornamentTypes || []).filter((_, i) => i !== index),
+            ornamentMeasurements: (prev.ornamentMeasurements || []).filter((_, i) => i !== index),
         }))
         setOrnamentPreviews((prev) => prev.filter((_, i) => i !== index))
+    }
+
+    const handleOrnamentTypeChange = (index, typeId) => {
+        setFormData((prev) => {
+            const updatedTypes = [...(prev.ornamentTypes || [])]
+            updatedTypes[index] = typeId
+            return {
+                ...prev,
+                ornamentTypes: updatedTypes,
+            }
+        })
+    }
+
+    const handleOrnamentMeasurementChange = (index, measurementId, value) => {
+        setFormData((prev) => {
+            const allMeasurements = [...(prev.ornamentMeasurements || [])]
+            const current = allMeasurements[index] || {}
+            allMeasurements[index] = {
+                ...current,
+                [measurementId]: value,
+            }
+            return {
+                ...prev,
+                ornamentMeasurements: allMeasurements,
+            }
+        })
     }
 
     const removeTheme = (index) => {
@@ -312,6 +361,15 @@ export default function CampaignForm() {
             return
         }
 
+        if (
+            !formData.ornamentTypes ||
+            formData.ornamentTypes.length !== formData.ornamentImages.length ||
+            formData.ornamentTypes.some((type) => !type)
+        ) {
+            setError("Please select ornament type for each ornament image.")
+            return
+        }
+
         if (formData.modelType === "real_model" && !formData.modelImage) {
             setError(t("images.pleaseUploadModelImageForRealModel"))
             return
@@ -331,6 +389,14 @@ export default function CampaignForm() {
             formData.ornamentNames.forEach((name) => {
                 formDataToSend.append("ornament_names", name)
             })
+            ;(formData.ornamentTypes || []).forEach((typeId) => {
+                formDataToSend.append("ornament_types", typeId || "")
+            })
+            // Optional per-ornament measurements (can be an empty array)
+            formDataToSend.append(
+                "ornament_measurements",
+                JSON.stringify(formData.ornamentMeasurements || [])
+            )
             formData.themeImages.forEach((image) => {
                 formDataToSend.append("theme_images", image)
             })
@@ -489,20 +555,123 @@ export default function CampaignForm() {
                                 </div>
                                 {ornamentPreviews.length > 0 && (
                                     <div className="mt-4 grid grid-cols-3 gap-3">
-                                        {ornamentPreviews.map((preview, index) => (
-                                            <div key={index} className="relative group">
-                                                <div className="relative w-full h-24 rounded-lg overflow-hidden border border-gray-200">
-                                                    <Image src={preview} alt={`Ornament ${index + 1}`} fill className="object-cover" />
+                                        {ornamentPreviews.map((preview, index) => {
+                                            const selectedTypeId = formData.ornamentTypes?.[index] || ""
+                                            const selectedType = ORNAMENT_TYPES.find(
+                                                (type) => type.id === selectedTypeId
+                                            )
+                                            const measurementsForThis =
+                                                (formData.ornamentMeasurements || [])[index] || {}
+
+                                            return (
+                                                <div key={index} className="relative group space-y-2">
+                                                    <div className="relative w-full h-24 rounded-lg overflow-hidden border border-gray-200">
+                                                        <Image
+                                                            src={preview}
+                                                            alt={`Ornament ${index + 1}`}
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeOrnament(index)}
+                                                        className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                    <div className="mt-1 space-y-2">
+                                                        <div>
+                                                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                                Ornament type
+                                                            </label>
+                                                            <select
+                                                                value={selectedTypeId}
+                                                                onChange={(e) =>
+                                                                    handleOrnamentTypeChange(
+                                                                        index,
+                                                                        e.target.value
+                                                                    )
+                                                                }
+                                                                className="w-full px-2 py-1.5 border border-gray-200 rounded-lg bg-white text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#7753ff] focus:border-transparent"
+                                                                required
+                                                            >
+                                                                <option value="">Select type</option>
+                                                                {ORNAMENT_TYPES.map((type) => (
+                                                                    <option key={type.id} value={type.id}>
+                                                                        {type.name}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+
+                                                        {selectedType && selectedType.measurements?.length > 0 && (
+  <div className="mt-2 border border-gray-200 rounded-xl bg-gray-50 overflow-hidden">
+    
+    {/* Header (dropdown-like button) */}
+    <button
+      type="button"
+      onClick={() => toggleMeasurements(index)}
+      className="w-full px-3 py-2 flex items-center justify-between text-xs font-medium text-gray-700 hover:bg-gray-100 transition"
+    >
+      <span>
+        Measurements (
+        {
+          Object.keys(measurementsForThis).filter(
+            key => measurementsForThis[key]
+          ).length
+        }{" "}
+        added)
+      </span>
+
+      <span className={`transition-transform ${
+        openMeasurements[index] ? "rotate-180" : ""
+      }`}>
+        ▼
+      </span>
+    </button>
+
+    {/* Expandable content */}
+    {openMeasurements[index] && (
+      <div className="p-3 border-t border-gray-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {selectedType.measurements.map((measurement) => (
+            <div key={measurement.id} className="flex flex-col">
+              <label className="text-xs text-gray-600 mb-1">
+                {measurement.label}
+                {measurement.unit && (
+                  <span className="text-gray-400 ml-1">
+                    ({measurement.unit})
+                  </span>
+                )}
+              </label>
+
+              <input
+                type="text"
+                placeholder={measurement.placeholder}
+                value={measurementsForThis[measurement.id] || ""}
+                onChange={(e) =>
+                  handleOrnamentMeasurementChange(
+                    index,
+                    measurement.id,
+                    e.target.value
+                  )
+                }
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#7753ff]/30"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+)}
+
+
+                                                    </div>
                                                 </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeOrnament(index)}
-                                                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                                                >
-                                                    <X size={14} />
-                                                </button>
-                                            </div>
-                                        ))}
+                                            )
+                                        })}
                                     </div>
                                 )}
                             </div>
@@ -688,6 +857,8 @@ export default function CampaignForm() {
                                                     modelImage: null,
                                                     ornamentImages: [],
                                                     ornamentNames: [],
+                                                    ornamentTypes: [],
+                                                    ornamentMeasurements: [],
                                                     themeImages: [],
                                                     prompt: "",
                                                     dimension: "1:1",
