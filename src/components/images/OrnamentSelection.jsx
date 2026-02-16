@@ -377,7 +377,7 @@ export function OrnamentSelection({
                     >
                         <div className="flex items-center gap-3">
                             {selectedOrnament ? (
-                                <div key={index}>
+                                <div className="flex items-center gap-2">
                                     <span className="text-lg">{selectedOrnament.icon}</span>
                                     <span>{selectedOrnament.name }</span>
                                 </div>
