@@ -16,6 +16,7 @@ export const ProductUploadPage = React.forwardRef(({ project, collectionData, on
     const [uploadError, setUploadError] = useState(null);
 
     const [fileOrnamentTypes, setFileOrnamentTypes] = useState({}) // Map file index to ornament type
+    const [fileOrnamentRules, setFileOrnamentRules] = useState({}) // Map file index to ornament fitting rules (from ornamentRules.js)
     const [filePreviews, setFilePreviews] = useState({}) // Map file index to preview URL
     const [uploadedProducts, setUploadedProducts] = useState([])
     const [uploading, setUploading] = useState(false)
@@ -174,9 +175,21 @@ export const ProductUploadPage = React.forwardRef(({ project, collectionData, on
                 } else if (keyNum > index) {
                     newTypes[keyNum - 1] = prev[key]
                 }
-                // Skip the deleted index
             })
             return newTypes
+        })
+
+        setFileOrnamentRules(prev => {
+            const newRules = {}
+            Object.keys(prev).forEach(key => {
+                const keyNum = parseInt(key)
+                if (keyNum < index) {
+                    newRules[keyNum] = prev[key]
+                } else if (keyNum > index) {
+                    newRules[keyNum - 1] = prev[key]
+                }
+            })
+            return newRules
         })
     }
 
@@ -184,6 +197,13 @@ export const ProductUploadPage = React.forwardRef(({ project, collectionData, on
         setFileOrnamentTypes(prev => ({
             ...prev,
             [fileIndex]: ornamentType
+        }))
+    }
+
+    const handleOrnamentRulesChange = (fileIndex, rules) => {
+        setFileOrnamentRules(prev => ({
+            ...prev,
+            [fileIndex]: rules || ""
         }))
     }
 
@@ -253,14 +273,16 @@ export const ProductUploadPage = React.forwardRef(({ project, collectionData, on
         setError(null)
 
         try {
-            // Prepare ornament types array matching the files order
+            // Prepare ornament types and rules arrays matching the files order (rules from ornamentRules.js)
             const ornamentTypes = selectedFiles.map((_, index) => fileOrnamentTypes[index] || '')
+            const ornamentRules = selectedFiles.map((_, index) => fileOrnamentRules[index] ?? '')
 
             const response = await apiService.uploadProductImages(
                 collectionData.id,
                 selectedFiles,
                 ornamentTypes,
-                token
+                token,
+                ornamentRules
             )
 
             if (response.success) {
@@ -278,6 +300,7 @@ export const ProductUploadPage = React.forwardRef(({ project, collectionData, on
                 setSelectedFiles([])
                 setFilePreviews({})
                 setFileOrnamentTypes({})
+                setFileOrnamentRules({})
                 if (onSave) {
                     await onSave({ productsUploaded: true })
                 }
@@ -438,6 +461,7 @@ export const ProductUploadPage = React.forwardRef(({ project, collectionData, on
                                             <HierarchicalOrnamentSelect
                                                 selectedType={fileOrnamentTypes[index] || ''}
                                                 onTypeChange={(type) => handleOrnamentTypeChange(index, type)}
+                                                onOrnamentRulesChange={(rules) => handleOrnamentRulesChange(index, rules)}
                                                 className="w-full"
                                             />
                                         </div>
