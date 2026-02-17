@@ -1115,13 +1115,13 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                     />
                                 </div>
                             </div>
-
+{/* 
                             {aiResult?.prompt && (
                                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                     <p className="text-xs font-semibold text-blue-900 mb-2">{t("images.originalPrompt")}:</p>
                                     <p className="text-sm text-blue-700">{aiResult.prompt}</p>
                                 </div>
-                            )}
+                            )} */}
 
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
@@ -1233,13 +1233,13 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                     />
                                 </div>
                             </div>
-
+{/* 
                             {realResult?.prompt && (
                                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                     <p className="text-xs font-semibold text-blue-900 mb-2">{t("images.originalPrompt")}:</p>
                                     <p className="text-sm text-blue-700">{realResult.prompt}</p>
                                 </div>
-                            )}
+                            )} */}
 
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">

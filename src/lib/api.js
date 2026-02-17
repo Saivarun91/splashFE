@@ -969,17 +969,32 @@ class ApiService {
     }
 
     async generateCampaignShot(formData, token) {
-        // Extract ornament names and base prompt from formData
-        const ornamentNames = formData.getAll('ornament_names');
+        // Extract ornament types, measurements and base prompt from formData
+        const ornamentTypes = formData.getAll('ornament_types');
         const basePrompt = formData.get('prompt') || 'Generate campaign shot with multiple ornaments';
-        console.log("basePrompt : ", basePrompt);
+        const rawMeasurements = formData.get('ornament_measurements');
+
+        // Parse optional per-ornament measurements (JSON array of objects)
+        let ornamentMeasurements = [];
+        if (rawMeasurements) {
+            try {
+                const parsed = JSON.parse(rawMeasurements);
+                if (Array.isArray(parsed)) {
+                    ornamentMeasurements = parsed;
+                }
+            } catch (error) {
+                console.warn('Failed to parse ornament measurements for campaign shot:', error);
+            }
+        }
+
         // Generate enhanced prompt with fitting rules for multiple ornaments
         let enhancedPrompt = basePrompt;
-        if (ornamentNames && ornamentNames.length > 0) {
-            // For campaign shots, we'll use the ornament names as types
-            // This is a simplified approach - in a real scenario, you might want to
-            // pass ornament types separately
-            enhancedPrompt = generateEnhancedCampaignPrompt(basePrompt, ornamentNames, []);
+        if (ornamentTypes && ornamentTypes.length > 0) {
+            enhancedPrompt = generateEnhancedCampaignPrompt(
+                basePrompt,
+                ornamentTypes,
+                ornamentMeasurements
+            );
         }
 
         // Update the prompt in formData

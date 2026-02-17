@@ -307,6 +307,7 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
   canEdit={canEdit}
   onDelete={handleDeleteModel}
   uploadError={realUploadError}
+  onSelect={(model) => handleSelectModel(model, 'real')}
 />
 
                     </div>
@@ -701,18 +702,16 @@ function RealModelsTab({
     isModelSelected,
     canEdit = true,
     onDelete,
-    uploadError
+    uploadError,
+    onSelect,
   }) {
-  
     const hasModels = realModels.length > 0
     const fileInputRef = useRef(null)
-
     const handleButtonClick = () => {
         if (!uploading && canEdit && fileInputRef.current) {
             fileInputRef.current.click()
+            setRealUploadError(null);
         }
-        setRealUploadError(null);
-
     }
 
     return (
