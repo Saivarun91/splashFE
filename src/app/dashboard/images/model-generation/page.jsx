@@ -8,7 +8,7 @@ import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import { OrnamentSelection } from "@/components/images/OrnamentSelection"
-import { DimensionsSelector } from "@/components/images/DimensionsSelector"
+import { DimensionsSelector, getDimensionForSubmit } from "@/components/images/DimensionsSelector"
 import { ReferenceImagesModal } from "@/components/images/ReferenceImagesModal"
 import toast from "react-hot-toast"
 import { HiOutlineUserCircle } from "react-icons/hi";
@@ -80,6 +80,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
         prompt: "",
         measurements: "",
         dimension: "1:1",
+        customDimensionInput: "",
     })
     const [aiOrnamentType, setAiOrnamentType] = useState("")
     const [aiOrnamentMeasurements, setAiOrnamentMeasurements] = useState({})
@@ -103,6 +104,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
         prompt: "",
         measurements: "",
         dimension: "1:1",
+        customDimensionInput: "",
     })
     const [realOrnamentType, setRealOrnamentType] = useState("")
     const [realOrnamentMeasurements, setRealOrnamentMeasurements] = useState({})
@@ -314,6 +316,12 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             return
         }
 
+        const aiDimensionToSend = getDimensionForSubmit(aiFormData.dimension, aiFormData.customDimensionInput)
+        if (aiDimensionToSend == null) {
+            setAiError(t("images.pleaseEnterCustomDimensions") || "Please enter custom dimensions (e.g. 3:2 or 16:9).")
+            return
+        }
+
         setAiIsLoading(true)
 
         try {
@@ -326,7 +334,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             formDataToSend.append("measurements", aiFormData.measurements || "")
             formDataToSend.append("ornament_type", aiOrnamentType || "")
             formDataToSend.append("ornament_measurements", JSON.stringify(aiOrnamentMeasurements))
-            formDataToSend.append("dimension", aiFormData.dimension)
+            formDataToSend.append("dimension", aiDimensionToSend)
 
             const response = await apiService.generateModelWithOrnament(formDataToSend, token)
 
@@ -463,6 +471,12 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             return
         }
 
+        const realDimensionToSend = getDimensionForSubmit(realFormData.dimension, realFormData.customDimensionInput)
+        if (realDimensionToSend == null) {
+            setRealError(t("images.pleaseEnterCustomDimensions") || "Please enter custom dimensions (e.g. 3:2 or 16:9).")
+            return
+        }
+
         setRealIsLoading(true)
 
         try {
@@ -476,7 +490,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             formDataToSend.append("measurements", realFormData.measurements || "")
             formDataToSend.append("ornament_type", realOrnamentType || "")
             formDataToSend.append("ornament_measurements", JSON.stringify(realOrnamentMeasurements))
-            formDataToSend.append("dimension", realFormData.dimension)
+            formDataToSend.append("dimension", realDimensionToSend)
 
             const response = await apiService.generateRealModelWithOrnament(formDataToSend, token)
 
@@ -661,6 +675,8 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                 <DimensionsSelector
                                     selectedDimension={aiFormData.dimension}
                                     onDimensionChange={(dimension) => setAiFormData((prev) => ({ ...prev, dimension }))}
+                                    customDimensionInput={aiFormData.customDimensionInput}
+                                    onCustomDimensionChange={(value) => setAiFormData((prev) => ({ ...prev, customDimensionInput: value }))}
                                     primaryColor="#7753ff"
                                 />
 
@@ -884,6 +900,8 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                 <DimensionsSelector
                                     selectedDimension={realFormData.dimension}
                                     onDimensionChange={(dimension) => setRealFormData((prev) => ({ ...prev, dimension }))}
+                                    customDimensionInput={realFormData.customDimensionInput}
+                                    onCustomDimensionChange={(value) => setRealFormData((prev) => ({ ...prev, customDimensionInput: value }))}
                                     primaryColor="#7753ff"
                                 />
 
@@ -997,6 +1015,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                                         prompt: "",
                                                         measurements: "",
                                                         dimension: "1:1",
+                                                        customDimensionInput: "",
                                                     })
                                                     setAiOrnamentType("")
                                                     setAiOrnamentMeasurements({})
@@ -1011,6 +1030,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                                         prompt: "",
                                                         measurements: "",
                                                         dimension: "1:1",
+                                                        customDimensionInput: "",
                                                     })
                                                     setRealOrnamentType("")
                                                     setRealOrnamentMeasurements({})

@@ -8,7 +8,7 @@ import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import { OrnamentSelection } from "@/components/images/OrnamentSelection"
-import { DimensionsSelector } from "@/components/images/DimensionsSelector"
+import { DimensionsSelector, getDimensionForSubmit } from "@/components/images/DimensionsSelector"
 import toast from "react-hot-toast"
 const MAX_IMAGE_MB = 10;
 const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
@@ -30,6 +30,7 @@ export default function AIModelForm() {
         prompt: "",
         measurements: "",
         dimension: "1:1",
+        customDimensionInput: "",
     })
     const [ornamentType, setOrnamentType] = useState("")
     const [ornamentMeasurements, setOrnamentMeasurements] = useState({})
@@ -192,6 +193,12 @@ export default function AIModelForm() {
             return
         }
 
+        const dimensionToSend = getDimensionForSubmit(formData.dimension, formData.customDimensionInput)
+        if (dimensionToSend == null) {
+            setError(t("images.pleaseEnterCustomDimensions") || "Please enter custom dimensions (e.g. 3:2 or 16:9).")
+            return
+        }
+
         setIsLoading(true)
 
         try {
@@ -204,7 +211,7 @@ export default function AIModelForm() {
             formDataToSend.append("measurements", formData.measurements || "")
             formDataToSend.append("ornament_type", ornamentType || "")
             formDataToSend.append("ornament_measurements", JSON.stringify(ornamentMeasurements))
-            formDataToSend.append("dimension", formData.dimension)
+            formDataToSend.append("dimension", dimensionToSend)
 
             const response = await apiService.generateModelWithOrnament(formDataToSend, token)
 
@@ -380,6 +387,8 @@ export default function AIModelForm() {
                             <DimensionsSelector
                                 selectedDimension={formData.dimension}
                                 onDimensionChange={(dimension) => setFormData((prev) => ({ ...prev, dimension }))}
+                                customDimensionInput={formData.customDimensionInput}
+                                onCustomDimensionChange={(value) => setFormData((prev) => ({ ...prev, customDimensionInput: value }))}
                                 primaryColor="#9333ea"
                             />
 
@@ -480,6 +489,7 @@ export default function AIModelForm() {
                                                     prompt: "",
                                                     measurements: "",
                                                     dimension: "1:1",
+                                                    customDimensionInput: "",
                                                 })
                                                 setOrnamentType("")
                                                 setOrnamentMeasurements({})

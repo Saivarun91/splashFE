@@ -12,7 +12,7 @@ import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import toast from "react-hot-toast"
-import { DimensionsSelector } from "@/components/images/DimensionsSelector"
+import { DimensionsSelector, getDimensionForSubmit } from "@/components/images/DimensionsSelector"
 const MAX_IMAGE_MB = 10;
 const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -27,6 +27,7 @@ const PlainBackgroundForm = () => {
         prompt: "",
         backgroundColor: "#ffffff",
         dimension: "1:1",
+        customDimensionInput: "",
     })
     const [imagePreview, setImagePreview] = useState(null)
     const [isDragging, setIsDragging] = useState(false)
@@ -239,6 +240,12 @@ const PlainBackgroundForm = () => {
             return
         }
 
+        const dimensionToSend = getDimensionForSubmit(formData.dimension, formData.customDimensionInput)
+        if (dimensionToSend == null) {
+            setError(t("images.pleaseEnterCustomDimensions") || "Please enter custom dimensions (e.g. 3:2 or 16:9).")
+            return
+        }
+
         setIsLoading(true)
 
         try {
@@ -247,7 +254,7 @@ const PlainBackgroundForm = () => {
             formDataToSend.append("image", formData.image)
             formDataToSend.append("prompt", formData.prompt)
             formDataToSend.append("background_color", formData.backgroundColor)
-            formDataToSend.append("dimension", formData.dimension)
+            formDataToSend.append("dimension", dimensionToSend)
             console.log("FormData to send:");
             for (let [key, value] of formDataToSend.entries()) {
                 console.log(key, value);
@@ -372,6 +379,8 @@ const PlainBackgroundForm = () => {
                             <DimensionsSelector
                                 selectedDimension={formData.dimension}
                                 onDimensionChange={(dimension) => setFormData((prev) => ({ ...prev, dimension }))}
+                                customDimensionInput={formData.customDimensionInput}
+                                onCustomDimensionChange={(value) => setFormData((prev) => ({ ...prev, customDimensionInput: value }))}
                                 primaryColor="#884cff"
                             />
 
@@ -510,6 +519,7 @@ const PlainBackgroundForm = () => {
                                                     prompt: "",
                                                     backgroundColor: "#ffffff",
                                                     dimension: "1:1",
+                                                    customDimensionInput: "",
                                                 })
                                                 setImagePreview(null)
                                             }}

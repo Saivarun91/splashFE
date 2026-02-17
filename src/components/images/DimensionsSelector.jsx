@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Maximize2 } from "lucide-react"
 
 const DIMENSION_OPTIONS = [
@@ -12,24 +12,85 @@ const DIMENSION_OPTIONS = [
     { value: "custom", label: "Custom", ratio: "" },
 ]
 
+const RATIO_REGEX = /^\d+:\d+$/
+
+/** Normalize "5 : 4" or "5: 4" to "5:4" for API */
+export function normalizeRatio(input) {
+    if (!input || typeof input !== "string") return ""
+    const trimmed = input.trim().replace(/\s*:\s*/, ":")
+    return trimmed
+}
+
+/** Use at submit: returns dimension to send to API, or null if custom selected but invalid */
+export function getDimensionForSubmit(selectedDimension, customDimensionInput) {
+    if (selectedDimension !== "custom") return selectedDimension
+    const normalized = normalizeRatio(customDimensionInput || "")
+    return RATIO_REGEX.test(normalized) ? normalized : null
+}
+
+function isValidRatio(value) {
+    return RATIO_REGEX.test(normalizeRatio(value))
+}
+
+function isPresetRatio(value) {
+    return DIMENSION_OPTIONS.some(
+        (o) => o.value !== "custom" && o.value === value
+    )
+}
+
 export function DimensionsSelector({
     selectedDimension,
     onDimensionChange,
+    customDimensionInput = "",
+    onCustomDimensionChange,
     primaryColor = "#884cff",
 }) {
-    const [customWidth, setCustomWidth] = useState("")
-    const [customHeight, setCustomHeight] = useState("")
+    const [localCustom, setLocalCustom] = useState("")
+    const isControlled = onCustomDimensionChange != null
+    const customRatio = isControlled ? (customDimensionInput ?? "") : localCustom
 
-    // When custom values change, update parent
-    useEffect(() => {
-        if (
-            selectedDimension === "custom" &&
-            customWidth &&
-            customHeight
-        ) {
-            onDimensionChange(`${customWidth}x${customHeight}`)
+    const isCustomRatio =
+        selectedDimension?.includes(":") && !isPresetRatio(selectedDimension)
+    const showCustomInput =
+        selectedDimension === "custom" || isCustomRatio
+
+    const inputValue =
+        selectedDimension === "custom" || customRatio !== selectedDimension
+            ? customRatio
+            : selectedDimension
+
+    const syncDimensionToParent = (raw) => {
+        const normalized = normalizeRatio(raw)
+        if (RATIO_REGEX.test(normalized)) {
+            onDimensionChange(normalized)
+        } else if (!raw.trim() && selectedDimension !== "custom") {
+            onDimensionChange("custom")
         }
-    }, [customWidth, customHeight])
+    }
+
+    const handleCustomRatioChange = (e) => {
+        const raw = e.target.value
+        if (isControlled) {
+            onCustomDimensionChange(raw)
+            syncDimensionToParent(raw)
+        } else {
+            setLocalCustom(raw)
+            syncDimensionToParent(raw)
+        }
+    }
+
+    const handleCustomRatioBlur = () => {
+        const normalized = normalizeRatio(customRatio)
+        if (normalized) {
+            if (isControlled) {
+                onCustomDimensionChange(normalized)
+                if (RATIO_REGEX.test(normalized)) onDimensionChange(normalized)
+            } else {
+                setLocalCustom(normalized)
+                if (RATIO_REGEX.test(normalized)) onDimensionChange(normalized)
+            }
+        }
+    }
 
     return (
         <div className="w-full">
@@ -48,7 +109,7 @@ export function DimensionsSelector({
                     const isSelected =
                         selectedDimension === option.value ||
                         (option.value === "custom" &&
-                            selectedDimension?.includes("x"))
+                            (selectedDimension === "custom" || isCustomRatio))
 
                     return (
                         <button
@@ -82,42 +143,28 @@ export function DimensionsSelector({
                 })}
             </div>
 
-{/* Custom Input Section */}
-{(selectedDimension === "custom" ||
-  selectedDimension?.includes("x")) && (
-  <div className="mt-3 flex items-center gap-3 justify-end">
-    <input
-      type="number"
-      placeholder="Width"
-      value={customWidth}
-      onChange={(e) => setCustomWidth(e.target.value)}
-      className="w-28 px-4 py-2.5 rounded-xl border border-gray-300 bg-white text-gray-800 text-left
-                 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
-      style={{
-        boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-      }}
-    />
-
-    <span className="text-gray-400 font-semibold text-lg">×</span>
-
-    <input
-      type="number"
-      placeholder="Height"
-      value={customHeight}
-      onChange={(e) => setCustomHeight(e.target.value)}
-      className="w-28 px-4 py-2.5 rounded-xl border border-gray-300 bg-white text-gray-800 text-left
-                 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
-      style={{
-        boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-      }}
-    />
-  </div>
-)}
+            {/* Custom input: single field, value sent to API as a:b */}
+            {showCustomInput && (
+                <div className="mt-3 flex items-center gap-3 justify-end">
+                    <input
+                        type="text"
+                        placeholder="e.g. 16:9 or 3:2"
+                        value={inputValue}
+                        onChange={handleCustomRatioChange}
+                        onBlur={handleCustomRatioBlur}
+                        className="w-36 px-4 py-2.5 rounded-xl border border-gray-300 bg-white text-gray-800 text-left
+                                   focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                        style={{
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                        }}
+                    />
+                </div>
+            )}
 
             {/* Selected Info */}
             {selectedDimension &&
                 selectedDimension !== "custom" &&
-                !selectedDimension.includes("x") && (
+                !isCustomRatio && (
                     <p className="text-sm text-gray-500 mt-3">
                         Selected:{" "}
                         <span

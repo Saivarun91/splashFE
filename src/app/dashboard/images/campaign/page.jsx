@@ -8,7 +8,7 @@ import { apiService } from "@/lib/api"
 import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
-import { DimensionsSelector } from "@/components/images/DimensionsSelector"
+import { DimensionsSelector, getDimensionForSubmit } from "@/components/images/DimensionsSelector"
 import { ReferenceImagesModal } from "@/components/images/ReferenceImagesModal"
 import toast from "react-hot-toast"
 import { SiGooglecampaignmanager360  } from "react-icons/si";
@@ -34,6 +34,7 @@ export default function CampaignForm() {
         themeImages: [],
         prompt: "",
         dimension: "1:1",
+        customDimensionInput: "",
     })
     const [modelPreview, setModelPreview] = useState(null)
     const [ornamentPreviews, setOrnamentPreviews] = useState([])
@@ -317,6 +318,12 @@ export default function CampaignForm() {
             return
         }
 
+        const dimensionToSend = getDimensionForSubmit(formData.dimension, formData.customDimensionInput)
+        if (dimensionToSend == null) {
+            setError(t("images.pleaseEnterCustomDimensions") || "Please enter custom dimensions (e.g. 3:2 or 16:9).")
+            return
+        }
+
         setIsLoading(true)
 
         try {
@@ -335,7 +342,7 @@ export default function CampaignForm() {
                 formDataToSend.append("theme_images", image)
             })
             formDataToSend.append("prompt", formData.prompt || t("images.createProfessionalCampaignShot"))
-            formDataToSend.append("dimension", formData.dimension)
+            formDataToSend.append("dimension", dimensionToSend)
 
             const response = await apiService.generateCampaignShot(formDataToSend, token)
 
@@ -584,6 +591,8 @@ export default function CampaignForm() {
                             <DimensionsSelector
                                 selectedDimension={formData.dimension}
                                 onDimensionChange={(dimension) => setFormData((prev) => ({ ...prev, dimension }))}
+                                customDimensionInput={formData.customDimensionInput}
+                                onCustomDimensionChange={(value) => setFormData((prev) => ({ ...prev, customDimensionInput: value }))}
                                 primaryColor="#7753ff"
                             />
 
