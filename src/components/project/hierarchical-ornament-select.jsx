@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { ChevronDown, ChevronRight, Sparkles } from "lucide-react"
+import { getOrnamentFittingRules } from "@/lib/ornamentRules"
 
 // Hierarchical structure for ornament types
 const ORNAMENT_CATEGORIES = {
@@ -60,7 +61,7 @@ const ORNAMENT_CATEGORIES = {
     ],
 }
 
-export function HierarchicalOrnamentSelect({ selectedType, onTypeChange, className = "" }) {
+export function HierarchicalOrnamentSelect({ selectedType, onTypeChange, onOrnamentRulesChange, className = "" }) {
     const [isOpen, setIsOpen] = useState(false)
     const [expandedCategories, setExpandedCategories] = useState(new Set())
     const dropdownRef = useRef(null)
@@ -72,6 +73,10 @@ export function HierarchicalOrnamentSelect({ selectedType, onTypeChange, classNa
 
     const handleTypeSelect = (typeId) => {
         onTypeChange(typeId)
+        const rules = getOrnamentFittingRules(typeId) || ""
+        if (onOrnamentRulesChange) {
+            onOrnamentRulesChange(rules)
+        }
         setIsOpen(false)
     }
 
