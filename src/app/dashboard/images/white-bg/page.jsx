@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, Zap, Upload, Palette, Sparkles, Loader2, CheckCircle, AlertCircle, RefreshCw, X, Download, Eye } from "lucide-react"
-import { MdPhotoSizeSelectLarge } from "react-icons/md";
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -178,8 +177,7 @@ const PlainBackgroundForm = () => {
         setRegenerateModal(prev => ({ ...prev, loading: true, error: null }))
 
         try {
-            // Only use mongo_id - ornament_id is a Django model ID, not a MongoDB ObjectId
-            if (!result.mongo_id) {
+            if (!result?.mongo_id) {
                 throw new Error('Cannot regenerate: MongoDB ID is missing. Please generate a new image first.')
             }
 
@@ -196,14 +194,12 @@ const PlainBackgroundForm = () => {
                     mongo_id: response.mongo_id,
                     prompt: response.combined_prompt
                 })
-
                 setRegenerateModal({
                     isOpen: false,
                     prompt: '',
                     loading: false,
                     error: null
                 })
-
                 toast.success('Image regenerated successfully!')
             } else {
                 throw new Error(response.error || 'Regeneration failed')
@@ -475,10 +471,10 @@ const PlainBackgroundForm = () => {
                                 <div className="space-y-3">
                                     <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
                                         <p className="text-green-700 font-semibold">✓ {t("images.imageGeneratedSuccess")}</p>
-
                                     </div>
                                     <div className="grid grid-cols-3 gap-3">
                                         <button
+                                            type="button"
                                             onClick={() => handleView(result.generated_image_url)}
                                             className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
                                         >
@@ -486,16 +482,15 @@ const PlainBackgroundForm = () => {
                                             {t("images.view")}
                                         </button>
                                         <button
-                                            onClick={() =>
-                                                downloadImage(result.generated_image_url, "generated-image.png")
-                                            }
+                                            type="button"
+                                            onClick={() => downloadImage(result.generated_image_url, "generated-image.png")}
                                             className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
                                         >
                                             <Download size={16} />
                                             {t("images.download")}
                                         </button>
-
                                         <button
+                                            type="button"
                                             onClick={handleRegenerate}
                                             className="px-4 py-3 border-2 border-[#884cff] text-[#884cff] rounded-xl font-semibold hover:bg-[#f0e6ff] transition-all flex items-center justify-center gap-2"
                                         >
@@ -503,14 +498,10 @@ const PlainBackgroundForm = () => {
                                             {t("images.regenerate")}
                                         </button>
                                         <button
+                                            type="button"
                                             onClick={() => {
                                                 setResult(null)
-                                                setFormData({
-                                                    image: null,
-                                                    prompt: "",
-                                                    backgroundColor: "#ffffff",
-                                                    dimension: "1:1",
-                                                })
+                                                setFormData({ image: null, prompt: "", backgroundColor: "#ffffff", dimension: "1:1" })
                                                 setImagePreview(null)
                                             }}
                                             className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
@@ -572,7 +563,7 @@ const PlainBackgroundForm = () => {
                                 <p className="text-sm font-semibold text-gray-700 mb-3">Current Image:</p>
                                 <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-gray-200">
                                     <Image
-                                        src={result.generated_image_url}
+                                        src={result?.generated_image_url}
                                         alt="Current image"
                                         fill
                                         className="object-contain bg-gray-50"

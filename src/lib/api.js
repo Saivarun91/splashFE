@@ -814,6 +814,22 @@ class ApiService {
     // Image Generation helpers (imgbackendapp)
     // =======================
 
+    // Get credit settings for image generation (cost per image)
+    async getImageCreditSettings(token) {
+        try {
+            const response = await axios.get(`${this.baseURL}/api/credits/settings/`, {
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+            });
+            if (response.data?.success && response.data?.settings) {
+                return response.data.settings;
+            }
+            return { credits_per_image_generation: 2, credits_per_regeneration: 1 };
+        } catch (err) {
+            console.warn('Failed to fetch image credit settings:', err);
+            return { credits_per_image_generation: 2, credits_per_regeneration: 1 };
+        }
+    }
+
     // Get Celery task status for image generation
     async getImageTaskStatus(taskId, token) {
         const response = await axios.get(
@@ -826,6 +842,25 @@ class ApiService {
             }
         );
         return response.data;
+    }
+
+    // Wait for multiple Celery image-generation tasks and return { images: [...] }
+    async waitForImageTasks(taskIds, token, options = {}) {
+        const results = await Promise.all(
+            taskIds.map((id) => this.waitForImageTask(id, token, options))
+        );
+        const images = results.map((r, index) => {
+            const url = r.generated_image_url || r.uploaded_image_url;
+            return {
+                success: true,
+                generated_image_url: r.generated_image_url || url,
+                mongo_id: r.mongo_id,
+                prompt: r.prompt || r.original_prompt,
+                index,
+                ...r,
+            };
+        });
+        return { success: true, images };
     }
 
     // Wait for a Celery image-generation task to complete and return its result
@@ -848,11 +883,16 @@ class ApiService {
             }
 
             if (status.status === 'SUCCESS') {
-                // Celery task result is the original view-style response dict
+                // Celery task result: single image dict or batch { images: [...] }
                 if (!status.result) {
                     throw new Error('Task completed but no result was returned');
                 }
-                return status.result;
+                const result = status.result;
+                // Normalize batch response to same shape as single for consumers that expect .images
+                if (result.images && Array.isArray(result.images)) {
+                    return result;
+                }
+                return result;
             }
 
             if (status.status === 'FAILURE') {
@@ -895,6 +935,9 @@ class ApiService {
         });
         const data = response.data;
 
+        if (data && data.task_ids && data.task_ids.length > 0) {
+            return await this.waitForImageTasks(data.task_ids, token);
+        }
         if (data && data.task_id) {
             return await this.waitForImageTask(data.task_id, token);
         }
@@ -930,6 +973,9 @@ class ApiService {
         });
         const data = response.data;
 
+        if (data && data.task_ids && data.task_ids.length > 0) {
+            return await this.waitForImageTasks(data.task_ids, token);
+        }
         if (data && data.task_id) {
             return await this.waitForImageTask(data.task_id, token);
         }
@@ -965,6 +1011,9 @@ class ApiService {
         });
         const data = response.data;
 
+        if (data && data.task_ids && data.task_ids.length > 0) {
+            return await this.waitForImageTasks(data.task_ids, token);
+        }
         if (data && data.task_id) {
             return await this.waitForImageTask(data.task_id, token);
         }
@@ -1010,6 +1059,10 @@ class ApiService {
             }
         });
         const data = response.data;
+
+        if (data && data.task_ids && data.task_ids.length > 0) {
+            return await this.waitForImageTasks(data.task_ids, token);
+        }
 
         if (data && data.task_id) {
             return await this.waitForImageTask(data.task_id, token);
