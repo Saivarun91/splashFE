@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 import { ORNAMENT_TYPES } from "@/components/images/OrnamentSelection"
+import { OrnamentTypeSelect } from "@/components/images/OrnamentTypeSelect"
 import { ReferenceImagesModal } from "@/components/images/ReferenceImagesModal"
 import toast from "react-hot-toast"
 import { SiGooglecampaignmanager360  } from "react-icons/si";
@@ -581,29 +582,14 @@ export default function CampaignForm() {
                                                         <X size={14} />
                                                     </button>
                                                     <div className="mt-1 space-y-2">
-                                                        <div>
-                                                            <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                                Ornament type
-                                                            </label>
-                                                            <select
-                                                                value={selectedTypeId}
-                                                                onChange={(e) =>
-                                                                    handleOrnamentTypeChange(
-                                                                        index,
-                                                                        e.target.value
-                                                                    )
-                                                                }
-                                                                className="w-full px-2 py-1.5 border border-gray-200 rounded-lg bg-white text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#7753ff] focus:border-transparent"
-                                                                required
-                                                            >
-                                                                <option value="">Select type</option>
-                                                                {ORNAMENT_TYPES.map((type) => (
-                                                                    <option key={type.id} value={type.id}>
-                                                                        {type.name}
-                                                                    </option>
-                                                                ))}
-                                                            </select>
-                                                        </div>
+                                                        <OrnamentTypeSelect
+                                                            selectedType={selectedTypeId}
+                                                            onTypeChange={(typeId) => handleOrnamentTypeChange(index, typeId)}
+                                                            size="sm"
+                                                            placeholder="Select type"
+                                                            label="Ornament type"
+                                                            showLabel={true}
+                                                        />
 
                                                         {selectedType && selectedType.measurements?.length > 0 && (
   <div className="mt-2 border border-gray-200 rounded-xl bg-gray-50 overflow-hidden">

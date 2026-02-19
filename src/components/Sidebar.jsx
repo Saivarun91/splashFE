@@ -634,7 +634,7 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                     <>
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
                         {collapsed && !hovered && (
-                                <img src="/images/favicon.png" alt="Splash AI Studio" className="w-full h-full object-contain"  />
+                                <img src="/images/favicon.png" alt="Splash AI Studio" className="w-25 h-25 object-contain"  />
                             ) }
                         </div>
                         {isExpanded && (
@@ -643,7 +643,7 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                                 <img
                                     src="/images/sidebar.png"
                                     alt="Splash AI Studio"
-                                    className="h-32 lg:h-40 w-auto object-contain hover:scale-105 transition-transform duration-300 translate-y-2 mb-px"
+                                    className="h-25 lg:h-25 w-auto object-contain hover:scale-105 transition-transform duration-300 translate-y-2 mb-px"
                                 />
                             </Link>
                             </div>
