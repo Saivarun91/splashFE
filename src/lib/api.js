@@ -505,7 +505,7 @@ class ApiService {
     }
 
     // Product Image endpoints
-    async uploadProductImages(collectionId, images, ornamentTypes, token) {
+    async uploadProductImages(collectionId, images, ornamentTypes, token, ornamentRules = null) {
         const formData = new FormData();
         for (const image of images) {
             formData.append('images', image);
@@ -513,6 +513,10 @@ class ApiService {
         // Append ornament types as JSON array
         if (ornamentTypes && ornamentTypes.length > 0) {
             formData.append('ornament_types', JSON.stringify(ornamentTypes));
+        }
+        // Append ornament fitting rules (from ornamentRules.js) as JSON array, same order as ornamentTypes
+        if (ornamentRules && ornamentRules.length > 0) {
+            formData.append('ornament_rules', JSON.stringify(ornamentRules));
         }
 
         return fetch(`${this.baseURL}/probackendapp/api/collections/${collectionId}/upload-products/`, {
