@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Star, Sparkles, Upload, Image as ImageIcon, Settings, Loader2, CheckCircle, AlertCircle, RefreshCw, X, Download, Eye } from "lucide-react"
+import { ChevronLeft, Star, Sparkles, Upload, Image as ImageIcon, Settings, Loader2, CheckCircle, AlertCircle, RefreshCw, X, Download, Eye, Coins } from "lucide-react"
+import { MdPhotoSizeSelectLarge } from "react-icons/md"
 import { apiService } from "@/lib/api"
 import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
@@ -13,6 +14,8 @@ const MAX_IMAGE_MB = 10;
 const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MIN_IMAGES = 1;
+const MAX_IMAGES = 10;
 const IMAGE_LABELS = {
     productImage: "Product image",
     referenceImage: "Reference image",
@@ -42,19 +45,31 @@ const BackgroundReplaceForm = () => {
     const [result, setResult] = useState(null)
     const [error, setError] = useState(null)
     const { token } = useAuth()
+    const [numImages, setNumImages] = useState(1)
+    const [creditSettings, setCreditSettings] = useState({ credits_per_image_generation: 2 })
     const [regenerateModal, setRegenerateModal] = useState({
         isOpen: false,
         prompt: '',
         loading: false,
-        error: null
+        error: null,
+        image: null
     })
 
-    const handleRegenerate = () => {
+    useEffect(() => {
+        let cancelled = false
+        apiService.getImageCreditSettings(token).then((s) => {
+            if (!cancelled && s) setCreditSettings(s)
+        })
+        return () => { cancelled = true }
+    }, [token])
+
+    const handleRegenerate = (imageItem = null) => {
         setRegenerateModal({
             isOpen: true,
             prompt: '',
             loading: false,
-            error: null
+            error: null,
+            image: imageItem ?? (result?.generated_image_url ? result : null)
         })
     }
 
@@ -130,28 +145,30 @@ const BackgroundReplaceForm = () => {
         setRegenerateModal(prev => ({ ...prev, loading: true, error: null }))
 
         try {
+            const target = regenerateModal.image || result
+            if (!target?.mongo_id) {
+                setRegenerateModal(prev => ({ ...prev, loading: false, error: 'Cannot regenerate: missing image ID.' }))
+                return
+            }
             const response = await apiService.regenerateImage(
-                result.mongo_id,
+                target.mongo_id,
                 regenerateModal.prompt,
                 token
             )
 
             if (response.success) {
-                setResult({
-                    ...result,
-                    generated_image_url: response.generated_image_url,
-                    mongo_id: response.mongo_id,
-                    prompt: response.combined_prompt
-                })
-
-                setRegenerateModal({
-                    isOpen: false,
-                    prompt: '',
-                    loading: false,
-                    error: null
-                })
-
-                alert(t("images.imageRegeneratedSuccess"))
+                const updated = { generated_image_url: response.generated_image_url, mongo_id: response.mongo_id, prompt: response.combined_prompt }
+                if (result?.images && Array.isArray(result.images)) {
+                    const idx = regenerateModal.image?.index ?? 0
+                    setResult({
+                        ...result,
+                        images: result.images.map((img, i) => (i === idx ? { ...img, ...updated } : img))
+                    })
+                } else {
+                    setResult({ ...result, ...updated })
+                }
+                setRegenerateModal({ isOpen: false, prompt: '', loading: false, error: null, image: null })
+                toast.success(t("images.imageRegeneratedSuccess"))
             } else {
                 throw new Error(response.error || 'Regeneration failed')
             }
@@ -171,7 +188,8 @@ const BackgroundReplaceForm = () => {
                 isOpen: false,
                 prompt: '',
                 loading: false,
-                error: null
+                error: null,
+                image: null
             })
         }
     }
@@ -249,10 +267,11 @@ const BackgroundReplaceForm = () => {
             formDataToSend.append("background_color", formData.backgroundColor)
             formDataToSend.append("prompt", formData.prompt || t("images.changeTheBackground"))
             formDataToSend.append("dimension", formData.dimension)
+            formDataToSend.append("num_images", String(numImages))
 
             const response = await apiService.changeBackground(formDataToSend, token)
 
-            if (response.success) {
+            if (response && (response.success !== false)) {
                 setResult(response)
             } else {
                 setError(response.error || t("images.failedToGenerate"))
@@ -442,6 +461,31 @@ const BackgroundReplaceForm = () => {
                             </div>
 
                             {/* Dimensions */}
+                            {/* Number of images */}
+                            <div>
+                                <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
+                                    <MdPhotoSizeSelectLarge size={20} className="text-[#7753ff]" />
+                                    {t("images.numberOfImages") || "Number of images"}
+                                </label>
+                                <div className="flex flex-wrap items-center gap-4">
+                                    <input
+                                        type="number"
+                                        min={MIN_IMAGES}
+                                        max={MAX_IMAGES}
+                                        value={numImages}
+                                        onChange={(e) => {
+                                            const v = parseInt(e.target.value, 10)
+                                            if (!isNaN(v)) setNumImages(Math.max(MIN_IMAGES, Math.min(MAX_IMAGES, v)))
+                                        }}
+                                        className="w-24 px-4 py-3 border border-[#e6e6e6] rounded-xl bg-white text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent"
+                                    />
+                                    <span className="text-[#737373] text-sm">{MIN_IMAGES}–{MAX_IMAGES} {t("images.images") || "images"}</span>
+                                    <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+                                        <Coins className="w-5 h-5 text-amber-600" />
+                                        <span className="text-amber-800 font-semibold">{t("images.creditsCost") || "Cost:"} {numImages * (creditSettings.credits_per_image_generation || 2)} {t("images.credits") || "credits"}</span>
+                                    </div>
+                                </div>
+                            </div>
                             <DimensionsSelector
                                 selectedDimension={formData.dimension}
                                 onDimensionChange={(dimension) => setFormData((prev) => ({ ...prev, dimension }))}
@@ -501,64 +545,45 @@ const BackgroundReplaceForm = () => {
                             </div>
                         ) : result ? (
                             <div className="space-y-6">
-                                <div className="relative w-full h-[450px] rounded-2xl overflow-hidden border-2 border-[#7753ff]/20">
-                                    <Image
-                                        src={result.generated_image_url}
-                                        alt="Generated"
-                                        fill
-                                        className="object-contain bg-gray-50"
-                                    />
-                                </div>
-                                <div className="space-y-3">
-                                    <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                                        <p className="text-green-700 font-semibold">✓ {t("images.themedImageGeneratedSuccess")}</p>
-                                    </div>
-                                    <div className="space-y-3">
-                                        <div className="grid grid-cols-3 gap-3">
-                                            <button
-                                                onClick={() => handleView(result.generated_image_url)}
-                                                className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
-                                            >
-                                                <Eye size={16} />
-                                                {t("images.view")}
-                                            </button>
-                                            <button
-                                                onClick={() =>
-                                                    downloadImage(result.generated_image_url, "themed-image.png")
-                                                }
-                                                className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
-                                            >
-                                                <Download size={16} />
-                                                {t("images.download")}
-                                            </button>
-
-                                            <button
-                                                onClick={handleRegenerate}
-                                                className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] rounded-xl font-semibold hover:bg-[#7753ff]/10 transition-all flex items-center justify-center gap-2"
-                                            >
-                                                <RefreshCw size={18} />
-                                                {t("images.regenerate")}
-                                            </button>
+                                {result.images && Array.isArray(result.images) ? (
+                                    <>
+                                        <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
+                                            <p className="text-green-700 font-semibold">✓ {t("images.themedImageGeneratedSuccess")} ({result.images.length} {t("images.images") || "images"})</p>
                                         </div>
-                                        <button
-                                            onClick={() => {
-                                                setResult(null)
-                                                setFormData({
-                                                    productImage: null,
-                                                    referenceImage: null,
-                                                    backgroundColor: "#ffffff",
-                                                    prompt: "",
-                                                    dimension: "1:1",
-                                                })
-                                                setProductPreview(null)
-                                                setReferencePreview(null)
-                                            }}
-                                            className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
-                                        >
-                                            {t("images.newImage")}
-                                        </button>
-                                    </div>
-                                </div>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                            {result.images.map((img, idx) => (
+                                                <div key={img.mongo_id || idx} className="rounded-xl border-2 border-[#7753ff]/20 overflow-hidden bg-gray-50">
+                                                    <div className="relative aspect-square">
+                                                        <Image src={img.generated_image_url} alt={`Generated ${idx + 1}`} fill className="object-contain" />
+                                                    </div>
+                                                    <div className="p-2 flex flex-wrap gap-1 justify-center">
+                                                        <button type="button" onClick={() => handleView(img.generated_image_url)} className="p-2 border border-gray-300 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-50"><Eye size={14} /></button>
+                                                        <button type="button" onClick={() => downloadImage(img.generated_image_url, `themed-${idx + 1}.png`)} className="p-2 bg-[#7753ff] text-white rounded-lg text-xs font-medium"><Download size={14} /></button>
+                                                        <button type="button" onClick={() => handleRegenerate({ ...img, index: idx })} className="p-2 border border-[#7753ff] text-[#7753ff] rounded-lg text-xs font-medium hover:bg-[#7753ff]/10"><RefreshCw size={14} /></button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <button type="button" onClick={() => { setResult(null); setFormData({ productImage: null, referenceImage: null, backgroundColor: "#ffffff", prompt: "", dimension: "1:1" }); setProductPreview(null); setReferencePreview(null); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all">{t("images.newImage")}</button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="relative w-full h-[450px] rounded-2xl overflow-hidden border-2 border-[#7753ff]/20">
+                                            <Image src={result.generated_image_url} alt="Generated" fill className="object-contain bg-gray-50" />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
+                                                <p className="text-green-700 font-semibold">✓ {t("images.themedImageGeneratedSuccess")}</p>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <button onClick={() => handleView(result.generated_image_url)} className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"><Eye size={16} />{t("images.view")}</button>
+                                                <button onClick={() => downloadImage(result.generated_image_url, "themed-image.png")} className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"><Download size={16} />{t("images.download")}</button>
+                                                <button onClick={handleRegenerate} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] rounded-xl font-semibold hover:bg-[#7753ff]/10 transition-all flex items-center justify-center gap-2"><RefreshCw size={18} />{t("images.regenerate")}</button>
+                                            </div>
+                                            <button onClick={() => { setResult(null); setFormData({ productImage: null, referenceImage: null, backgroundColor: "#ffffff", prompt: "", dimension: "1:1" }); setProductPreview(null); setReferencePreview(null); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all">{t("images.newImage")}</button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center h-[500px] text-center">

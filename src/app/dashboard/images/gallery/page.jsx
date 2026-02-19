@@ -513,14 +513,14 @@ export default function GalleryPage() {
                             </div>
 
                             {/* Original Prompt */}
-                            {regenerateModal.image.original_prompt && (
+                            {/* {regenerateModal.image.original_prompt && (
                                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                     <p className="text-xs font-semibold text-blue-900 mb-2">Original Prompt:</p>
                                     <p className="text-sm text-blue-700">
                                         {regenerateModal.image.original_prompt}
                                     </p>
                                 </div>
-                            )}
+                            )} */}
 
                             {/* New Prompt Input */}
                             <div>
