@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, Sparkles, Upload, Award, Zap, Loader2, CheckCircle, AlertCircle, X, Download, RefreshCw, Cpu, Users, Eye, Coins } from "lucide-react"
 import { MdPhotoSizeSelectLarge } from "react-icons/md"
@@ -19,7 +19,7 @@ const MAX_IMAGE_MB = 10;
 const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MIN_IMAGES = 1;
-const MAX_IMAGES = 10;
+const MAX_IMAGES = 3;
 
 export default function CampaignForm() {
     const router = useRouter()
@@ -60,6 +60,8 @@ export default function CampaignForm() {
     })
     const [numImages, setNumImages] = useState(1)
     const [creditSettings, setCreditSettings] = useState({ credits_per_image_generation: 2 })
+    const [showCostNote, setShowCostNote] = useState(false)
+    const generateSectionRef = useRef(null)
 
     useEffect(() => {
         let cancelled = false
@@ -68,6 +70,21 @@ export default function CampaignForm() {
         })
         return () => { cancelled = true }
     }, [token])
+
+    useEffect(() => {
+        if (!showCostNote) return
+        const handleClickOutside = (e) => {
+            if (generateSectionRef.current && !generateSectionRef.current.contains(e.target)) {
+                setShowCostNote(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        document.addEventListener("touchstart", handleClickOutside)
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside)
+            document.removeEventListener("touchstart", handleClickOutside)
+        }
+    }, [showCostNote])
 
     const handleView = (url) => {
         window.open(url, '_blank');
@@ -393,6 +410,12 @@ export default function CampaignForm() {
             setError(t("images.pleaseUploadModelImageForRealModel"))
             return
         }
+
+        if (numImages > 1 && !showCostNote) {
+            setShowCostNote(true)
+            return
+        }
+        setShowCostNote(false)
 
         setIsLoading(true)
 
@@ -769,10 +792,6 @@ export default function CampaignForm() {
                                 <div className="flex flex-wrap items-center gap-4">
                                     <input type="number" min={MIN_IMAGES} max={MAX_IMAGES} value={numImages} onChange={(e) => { const v = parseInt(e.target.value, 10); if (!isNaN(v)) setNumImages(Math.max(MIN_IMAGES, Math.min(MAX_IMAGES, v))); }} className="w-24 px-4 py-3 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7753ff]" />
                                     <span className="text-gray-500 text-sm">{MIN_IMAGES}–{MAX_IMAGES} {t("images.images") || "images"}</span>
-                                    <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl">
-                                        <Coins className="w-5 h-5 text-amber-600" />
-                                        <span className="text-amber-800 font-semibold">{t("images.creditsCost") || "Cost:"} {numImages * (creditSettings.credits_per_image_generation || 2)} {t("images.credits") || "credits"}</span>
-                                    </div>
                                 </div>
                             </div>
                             <DimensionsSelector
@@ -790,32 +809,46 @@ export default function CampaignForm() {
                             )}
 
                             {/* Action Buttons */}
-                            <div className="flex items-center justify-between pt-8 border-t border-gray-200">
-                                <button
-                                    type="button"
-                                    onClick={() => router.back()}
-                                    className="flex items-center gap-2 text-[#7753ff] font-semibold hover:text-[#6a47e6] transition-colors group"
-                                >
-                                    <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-                                    {t("common.back")}
-                                </button>
-                                <Button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="bg-[#7753ff] hover:bg-[#6a47e6] text-white px-8 py-3 rounded-xl flex items-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                            {t("images.generating")}
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Sparkles className="w-5 h-5" />
-                                            {t("images.generateCampaignShots")}
-                                        </>
-                                    )}
-                                </Button>
+                            <div ref={generateSectionRef} className="pt-8 border-t border-gray-200">
+                                {showCostNote && numImages > 1 && (
+                                    <div className="flex items-center gap-2 px-4 py-3 
+bg-gray-100/80 
+border border-gray-200 
+rounded-xl 
+text-gray-800 text-sm">
+
+
+                                        <Coins className="w-5 h-5 text-amber-600 shrink-0" />
+                                        <span>{t("images.creditsCost") || "Cost:"} {numImages * (creditSettings.credits_per_image_generation || 2)} {t("images.credits") || "credits"}. {t("images.clickGenerateAgainToConfirm") || "Click Generate again to confirm."}</span>
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between">
+                                    <button
+                                        type="button"
+                                        onClick={() => router.back()}
+                                        className="flex items-center gap-2 text-[#7753ff] font-semibold hover:text-[#6a47e6] transition-colors group"
+                                    >
+                                        <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+                                        {t("common.back")}
+                                    </button>
+                                    <Button
+                                        type="submit"
+                                        disabled={isLoading}
+                                        className="bg-[#7753ff] hover:bg-[#6a47e6] text-white px-8 py-3 rounded-xl flex items-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                {t("images.generating")}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Sparkles className="w-5 h-5" />
+                                                {t("images.generateCampaignShots")}
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -839,16 +872,17 @@ export default function CampaignForm() {
                                         <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
                                             <p className="text-green-700 font-semibold">✓ {t("images.campaignShotGeneratedSuccess")} ({result.images.length} {t("images.images") || "images"})</p>
                                         </div>
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                        <div className="flex flex-col gap-6">
                                             {result.images.map((img, idx) => (
                                                 <div key={img.mongo_id || idx} className="rounded-xl border-2 border-[#7753ff]/20 overflow-hidden bg-gray-50">
-                                                    <div className="relative aspect-square">
+                                                    <div className="relative w-full h-[450px]">
                                                         <Image src={img.generated_image_url} alt={`Campaign ${idx + 1}`} fill className="object-contain" />
                                                     </div>
-                                                    <div className="p-2 flex flex-wrap gap-1 justify-center">
-                                                        <button type="button" onClick={() => handleView(img.generated_image_url)} className="p-2 border border-gray-300 rounded-lg text-xs font-medium hover:bg-gray-50"><Eye size={14} /></button>
-                                                        <button type="button" onClick={() => downloadImage(img.generated_image_url, `campaign-${idx + 1}.png`)} className="p-2 bg-[#7753ff] text-white rounded-lg text-xs font-medium"><Download size={14} /></button>
-                                                        <button type="button" onClick={() => handleRegenerate({ ...img, index: idx })} className="p-2 border border-[#7753ff] text-[#7753ff] rounded-lg text-xs font-medium hover:bg-[#7753ff]/10"><RefreshCw size={14} /></button>
+                                                    <div className="p-4 flex flex-wrap gap-3 justify-center border-t border-[#7753ff]/10 items-center">
+                                                        <span className="text-sm font-medium text-[#7753ff] bg-white/90 px-2 py-1 rounded border border-[#7753ff]/20">Image {idx + 1}</span>
+                                                        <button type="button" onClick={() => handleView(img.generated_image_url)} className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 flex items-center gap-2"><Eye size={16} />{t("images.view")}</button>
+                                                        <button type="button" onClick={() => downloadImage(img.generated_image_url, `campaign-${idx + 1}.png`)} className="px-4 py-3 bg-[#7753ff] text-white rounded-xl font-semibold flex items-center gap-2"><Download size={16} />{t("images.download")}</button>
+                                                        <button type="button" onClick={() => handleRegenerate({ ...img, index: idx })} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] rounded-xl font-semibold hover:bg-[#7753ff]/10 flex items-center gap-2"><RefreshCw size={16} />{t("images.regenerate")}</button>
                                                     </div>
                                                 </div>
                                             ))}
