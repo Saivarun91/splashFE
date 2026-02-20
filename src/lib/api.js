@@ -927,6 +927,26 @@ class ApiService {
         return data;
     }
 
+    /**
+     * Analyze a reference image for themed / model / campaign context.
+     * Returns { success, analysis_text }.
+     * @param {File} imageFile - reference image file
+     * @param {string} context - 'themed' | 'model' | 'campaign'
+     * @param {string} token - auth token
+     */
+    async analyzeReferenceImage(imageFile, context, token) {
+        if (!imageFile) return { success: false, analysis_text: '' };
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        formData.append('context', context || 'themed');
+        const response = await axios.post(`${this.baseURL}/image/analyze-reference/`, formData, {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+        return response.data;
+    }
+
     async changeBackground(formData, token) {
         const response = await axios.post(`${this.baseURL}/image/change_background/`, formData, {
             headers: {

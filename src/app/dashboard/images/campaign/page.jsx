@@ -46,6 +46,7 @@ export default function CampaignForm() {
     const [modelPreview, setModelPreview] = useState(null)
     const [ornamentPreviews, setOrnamentPreviews] = useState([])
     const [themePreviews, setThemePreviews] = useState([])
+    const [themeReferenceAnalyses, setThemeReferenceAnalyses] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [showReferenceModal, setShowReferenceModal] = useState(false)
     const [result, setResult] = useState(null)
@@ -268,6 +269,12 @@ export default function CampaignForm() {
             setThemePreviews((prev) => [...prev, reader.result]);
           reader.readAsDataURL(file);
         });
+        // Analyze each theme image for campaign context (theme, style, mood, attire); preserve order
+        Promise.all(
+          fileArray.map((file) =>
+            apiService.analyzeReferenceImage(file, "campaign", token).then((data) => data?.analysis_text || "").catch(() => "")
+          )
+        ).then((texts) => setThemeReferenceAnalyses((prev) => [...prev, ...texts]));
       };
       
 
@@ -314,6 +321,7 @@ export default function CampaignForm() {
             themeImages: prev.themeImages.filter((_, i) => i !== index),
         }))
         setThemePreviews((prev) => prev.filter((_, i) => i !== index))
+        setThemeReferenceAnalyses((prev) => prev.filter((_, i) => i !== index))
     }
 
     const handleRegenerate = (imageItem = null) => {
@@ -442,6 +450,8 @@ export default function CampaignForm() {
             formData.themeImages.forEach((image) => {
                 formDataToSend.append("theme_images", image)
             })
+            const themeAnalysisCombined = themeReferenceAnalyses.filter(Boolean).join(" | ")
+            if (themeAnalysisCombined) formDataToSend.append("theme_reference_analysis", themeAnalysisCombined)
             formDataToSend.append("prompt", formData.prompt || t("images.createProfessionalCampaignShot"))
             formDataToSend.append("dimension", formData.dimension)
             formDataToSend.append("num_images", String(numImages))
@@ -886,7 +896,7 @@ text-gray-800 text-sm">
                                                 </div>
                                             ))}
                                         </div>
-                                        <button type="button" onClick={() => { setResult(null); setFormData({ modelType: "ai_model", modelImage: null, ornamentImages: [], ornamentNames: [], ornamentTypes: [], ornamentMeasurements: [], themeImages: [], prompt: "", dimension: "1:1" }); setModelPreview(null); setOrnamentPreviews([]); setThemePreviews([]); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">{t("images.newCampaign")}</button>
+                                        <button type="button" onClick={() => { setResult(null); setFormData({ modelType: "ai_model", modelImage: null, ornamentImages: [], ornamentNames: [], ornamentTypes: [], ornamentMeasurements: [], themeImages: [], prompt: "", dimension: "1:1" }); setModelPreview(null); setOrnamentPreviews([]); setThemePreviews([]); setThemeReferenceAnalyses([]); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">{t("images.newCampaign")}</button>
                                     </>
                                 ) : (
                                     <>
@@ -902,7 +912,7 @@ text-gray-800 text-sm">
                                                 <button onClick={() => downloadImage(result.generated_image_url, "campaign-shot.png")} className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"><Download size={16} />{t("images.download")}</button>
                                                 <button onClick={handleRegenerate} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] hover:bg-[#7753ff]/10 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"><RefreshCw size={16} />{t("images.regenerate")}</button>
                                             </div>
-                                            <button onClick={() => { setResult(null); setFormData({ modelType: "ai_model", modelImage: null, ornamentImages: [], ornamentNames: [], ornamentTypes: [], ornamentMeasurements: [], themeImages: [], prompt: "", dimension: "1:1" }); setModelPreview(null); setOrnamentPreviews([]); setThemePreviews([]); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">{t("images.newCampaign")}</button>
+                                            <button onClick={() => { setResult(null); setFormData({ modelType: "ai_model", modelImage: null, ornamentImages: [], ornamentNames: [], ornamentTypes: [], ornamentMeasurements: [], themeImages: [], prompt: "", dimension: "1:1" }); setModelPreview(null); setOrnamentPreviews([]); setThemePreviews([]); setThemeReferenceAnalyses([]); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">{t("images.newCampaign")}</button>
                                             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                                 <p className="text-blue-700 text-sm flex items-center gap-2"><Sparkles className="w-4 h-4" />{t("images.clickRegenerateToModify")}</p>
                                             </div>

@@ -115,6 +115,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
     const [aiOrnamentMeasurements, setAiOrnamentMeasurements] = useState({})
     const [aiOrnamentPreview, setAiOrnamentPreview] = useState(null)
     const [aiPosePreview, setAiPosePreview] = useState(null)
+    const [aiReferenceAnalysis, setAiReferenceAnalysis] = useState("")
     const [aiResult, setAiResult] = useState(null)
     const [aiError, setAiError] = useState(null)
     const [aiIsLoading, setAiIsLoading] = useState(false)
@@ -140,6 +141,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
     const [realModelPreview, setRealModelPreview] = useState(null)
     const [realOrnamentPreview, setRealOrnamentPreview] = useState(null)
     const [realPosePreview, setRealPosePreview] = useState(null)
+    const [realReferenceAnalysis, setRealReferenceAnalysis] = useState("")
     const [realResult, setRealResult] = useState(null)
     const [realError, setRealError] = useState(null)
     const [realIsLoading, setRealIsLoading] = useState(false)
@@ -266,6 +268,12 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             : setAiPosePreview(reader.result);
         };
         reader.readAsDataURL(file);
+        if (type === "poseImage") {
+          setAiReferenceAnalysis("");
+          apiService.analyzeReferenceImage(file, "model", token).then((data) => {
+            if (data?.success && data.analysis_text) setAiReferenceAnalysis(data.analysis_text);
+          }).catch(() => {});
+        }
       };
 
     const removeAiOrnamentImage = (e) => {
@@ -280,6 +288,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
         e?.stopPropagation?.();
         setAiFormData((prev) => ({ ...prev, poseImage: null }));
         setAiPosePreview(null);
+        setAiReferenceAnalysis("");
         setAiUploadErrors((p) => ({ ...p, poseImage: null }));
         const input = document.getElementById("ai-pose-input");
         if (input) input.value = "";
@@ -386,6 +395,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             if (aiFormData.poseImage) {
                 formDataToSend.append("pose_style", aiFormData.poseImage)
             }
+            if (aiReferenceAnalysis) formDataToSend.append("reference_analysis", aiReferenceAnalysis)
             formDataToSend.append("prompt", aiFormData.prompt || t("images.generateAIModelWearingOrnament"))
             formDataToSend.append("measurements", aiFormData.measurements || "")
             formDataToSend.append("ornament_type", aiOrnamentType || "")
@@ -443,6 +453,12 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
           else setRealPosePreview(reader.result);
         };
         reader.readAsDataURL(file);
+        if (type === "poseImage") {
+          setRealReferenceAnalysis("");
+          apiService.analyzeReferenceImage(file, "model", token).then((data) => {
+            if (data?.success && data.analysis_text) setRealReferenceAnalysis(data.analysis_text);
+          }).catch(() => {});
+        }
       };
 
     const removeRealModelImage = (e) => {
@@ -465,6 +481,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
         e?.stopPropagation?.();
         setRealFormData((prev) => ({ ...prev, poseImage: null }));
         setRealPosePreview(null);
+        setRealReferenceAnalysis("");
         setRealUploadErrors((p) => ({ ...p, poseImage: null }));
         const input = document.getElementById("real-pose-input");
         if (input) input.value = "";
@@ -577,6 +594,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             if (realFormData.poseImage) {
                 formDataToSend.append("pose_style", realFormData.poseImage)
             }
+            if (realReferenceAnalysis) formDataToSend.append("reference_analysis", realReferenceAnalysis)
             formDataToSend.append("prompt", realFormData.prompt || t("images.generateRealisticImageWithModel"))
             formDataToSend.append("measurements", realFormData.measurements || "")
             formDataToSend.append("ornament_type", realOrnamentType || "")
