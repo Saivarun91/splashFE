@@ -249,8 +249,23 @@ const BackgroundReplaceForm = () => {
         };
         reader.readAsDataURL(file);
       };
-      
-      
+
+    const removeProductImage = (e) => {
+        e?.stopPropagation?.();
+        setFormData((prev) => ({ ...prev, productImage: null }));
+        setProductPreview(null);
+        setUploadErrors((prev) => ({ ...prev, productImage: null }));
+        const input = document.getElementById("product-image");
+        if (input) input.value = "";
+    };
+    const removeReferenceImage = (e) => {
+        e?.stopPropagation?.();
+        setFormData((prev) => ({ ...prev, referenceImage: null }));
+        setReferencePreview(null);
+        setUploadErrors((prev) => ({ ...prev, referenceImage: null }));
+        const input = document.getElementById("reference-image");
+        if (input) input.value = "";
+    };
 
       
 
@@ -383,6 +398,13 @@ const BackgroundReplaceForm = () => {
                                     {productPreview ? (
                                         <div className="relative w-full h-40">
                                             <Image src={productPreview} alt="Product Preview" fill className="object-contain rounded-lg" />
+                                            <button
+                                                type="button"
+                                                onClick={removeProductImage}
+                                                className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                            >
+                                                <X size={14} />
+                                            </button>
                                         </div>
                                     ) : (
                                         <div className="text-center">
@@ -435,6 +457,13 @@ const BackgroundReplaceForm = () => {
                                     {referencePreview ? (
                                         <div className="relative w-full h-40">
                                             <Image src={referencePreview} alt="Reference Preview" fill className="object-contain rounded-lg" />
+                                            <button
+                                                type="button"
+                                                onClick={removeReferenceImage}
+                                                className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                            >
+                                                <X size={14} />
+                                            </button>
                                         </div>
                                     ) : (
                                         <div className="text-center">
@@ -544,7 +573,7 @@ text-gray-800 text-sm">
                                     <button
                                         type="submit"
                                         disabled={isLoading}
-                                        className="flex items-center gap-3 px-8 py-4 bg-[#7753ff] hover:bg-[#6a47e6] text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-[#7753ff]/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-[#7753ff] hover:bg-[#6a47e6] text-white px-8 py-3 rounded-xl flex items-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {isLoading ? (
                                             <>

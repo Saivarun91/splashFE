@@ -809,28 +809,27 @@ export default function CampaignForm() {
                             )}
 
                             {/* Action Buttons */}
-                            <div ref={generateSectionRef} className="pt-8 border-t border-gray-200">
-                                {showCostNote && numImages > 1 && (
-                                    <div className="flex items-center gap-2 px-4 py-3 
+                            <div className="flex items-center justify-between pt-8 border-t border-[#e6e6e6]">
+                                <button
+                                    type="button"
+                                    onClick={() => router.back()}
+                                    className="flex items-center gap-3 px-6 py-3 text-[#7753ff] font-semibold hover:bg-[#7753ff]/10 rounded-xl transition-all duration-300 hover:scale-105"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                    {t("common.back")}
+                                </button>
+                                <div ref={generateSectionRef} className="flex flex-col items-end gap-2">
+                                    {showCostNote && numImages > 1 && (
+                                        <div className="flex items-center gap-2 px-4 py-3 
 bg-gray-100/80 
 border border-gray-200 
 rounded-xl 
 text-gray-800 text-sm">
 
-
-                                        <Coins className="w-5 h-5 text-amber-600 shrink-0" />
-                                        <span>{t("images.creditsCost") || "Cost:"} {numImages * (creditSettings.credits_per_image_generation || 2)} {t("images.credits") || "credits"}. {t("images.clickGenerateAgainToConfirm") || "Click Generate again to confirm."}</span>
-                                    </div>
-                                )}
-                                <div className="flex items-center justify-between">
-                                    <button
-                                        type="button"
-                                        onClick={() => router.back()}
-                                        className="flex items-center gap-2 text-[#7753ff] font-semibold hover:text-[#6a47e6] transition-colors group"
-                                    >
-                                        <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-                                        {t("common.back")}
-                                    </button>
+                                            <Coins className="w-5 h-5 text-amber-600 shrink-0" />
+                                            <span>{t("images.creditsCost") || "Cost:"} {numImages * (creditSettings.credits_per_image_generation || 2)} {t("images.credits") || "credits"}. {t("images.clickGenerateAgainToConfirm") || "Click Generate again to confirm."}</span>
+                                        </div>
+                                    )}
                                     <Button
                                         type="submit"
                                         disabled={isLoading}
