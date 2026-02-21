@@ -40,6 +40,9 @@ function checkResponseAuth(response) {
 class ApiService {
     constructor() {
         this.baseURL = API_BASE_URL;
+        this.userProfileCache = new Map();
+        this.userProfileInFlight = new Map();
+        this.userProfileCacheTtlMs = 30000;
     }
 
     // Low-level request helper (uses fetch)
@@ -177,33 +180,65 @@ class ApiService {
         })
     }
 
-    async getUserProfile(token) {
-        return this.request('/api/profile/', {
+    async getUserProfile(token, options = {}) {
+        const authToken = token || '';
+        const cacheKey = authToken || 'anonymous';
+        const now = Date.now();
+        const forceRefresh = Boolean(options?.forceRefresh);
+
+        if (!forceRefresh) {
+            const cached = this.userProfileCache.get(cacheKey);
+            if (cached && (now - cached.timestamp) < this.userProfileCacheTtlMs) {
+                return cached.data;
+            }
+
+            const inFlight = this.userProfileInFlight.get(cacheKey);
+            if (inFlight) {
+                return inFlight;
+            }
+        }
+
+        const requestPromise = this.request('/api/profile/', {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${token || ''}`,
+                'Authorization': `Bearer ${authToken}`,
             },
+        }).then((response) => {
+            this.userProfileCache.set(cacheKey, {
+                data: response,
+                timestamp: Date.now(),
+            });
+            return response;
+        }).finally(() => {
+            this.userProfileInFlight.delete(cacheKey);
         });
+
+        this.userProfileInFlight.set(cacheKey, requestPromise);
+        return requestPromise;
     }
 
     async updateUserProfile(profileData, token) {
-        return this.request('/api/profile/update/', {
+        const response = await this.request('/api/profile/update/', {
             method: 'PUT',
             body: JSON.stringify(profileData),
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
             },
         });
+        this.userProfileCache.clear();
+        return response;
     }
 
     async completeProfile(profileData, token) {
-        return this.request('/api/profile/complete/', {
+        const response = await this.request('/api/profile/complete/', {
             method: 'POST',
             body: JSON.stringify(profileData),
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
             },
         });
+        this.userProfileCache.clear();
+        return response;
     }
 
     async forgotPassword(email) {
@@ -338,6 +373,18 @@ class ApiService {
         return this.request(`/probackendapp/api/projects/${projectId}/setup/description/`, {
             method: 'POST',
             body: JSON.stringify(requestData),
+        });
+    }
+
+    async updateDescriptionComments(projectId, collectionId, descriptionComments, token) {
+        return this.request(`/probackendapp/api/projects/${projectId}/collections/${collectionId}/description-comments/`, {
+            method: 'POST',
+            body: JSON.stringify({
+                description_comments: Array.isArray(descriptionComments) ? descriptionComments : [],
+            }),
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
         });
     }
 
@@ -744,6 +791,35 @@ class ApiService {
         return this.request(`/probackendapp/api/${projectId}/update-member-role`, {
             method: 'POST',
             body: JSON.stringify({ user_id: userId, role }),
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    async removeProjectMember(projectId, userId, token) {
+        return this.request(`/probackendapp/api/${projectId}/remove-member`, {
+            method: 'POST',
+            body: JSON.stringify({ user_id: userId }),
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    async updateProjectInviteRole(projectId, inviteId, role, token) {
+        return this.request(`/probackendapp/api/${projectId}/invites/${inviteId}/update-role`, {
+            method: 'POST',
+            body: JSON.stringify({ role }),
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    async cancelProjectInvite(projectId, inviteId, token) {
+        return this.request(`/probackendapp/api/${projectId}/invites/${inviteId}/cancel`, {
+            method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
             },

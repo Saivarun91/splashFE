@@ -9,6 +9,9 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
@@ -24,7 +27,8 @@ import {
     Star,
     Loader2,
     CheckCircle,
-    UserCog,
+    Trash2,
+    Calendar,
 } from "lucide-react"
 import InviteModal from "@/components/project/InviteModal"
 import { apiService } from "@/lib/api"
@@ -39,6 +43,8 @@ export default function CollaborationPage({ projectId, projectData }) {
     const [loading, setLoading] = useState(true)
     const [successMessage, setSuccessMessage] = useState("")
     const [roleChangeLoading, setRoleChangeLoading] = useState(null)
+    const [memberDeleteLoading, setMemberDeleteLoading] = useState(null)
+    const [inviteActionLoading, setInviteActionLoading] = useState(null)
 
     useEffect(() => {
         if (projectId) {
@@ -111,6 +117,62 @@ export default function CollaborationPage({ projectId, projectData }) {
             setTimeout(() => setSuccessMessage(""), 5000)
         } finally {
             setRoleChangeLoading(null)
+        }
+    }
+
+    const handleRemoveMember = async (memberId, memberEmail) => {
+        if (!isOwner) {
+            setSuccessMessage("Only project owners can remove members")
+            setTimeout(() => setSuccessMessage(""), 3000)
+            return
+        }
+
+        setMemberDeleteLoading(memberId)
+        try {
+            await apiService.removeProjectMember(projectId, memberId, token)
+            setSuccessMessage(`Removed ${memberEmail} from this project`)
+            setTimeout(() => setSuccessMessage(""), 5000)
+            await fetchProjectData()
+        } catch (err) {
+            console.error("Error removing member:", err)
+            setSuccessMessage(`Failed to remove member: ${err.message}`)
+            setTimeout(() => setSuccessMessage(""), 5000)
+        } finally {
+            setMemberDeleteLoading(null)
+        }
+    }
+
+    const handlePendingInviteRoleChange = async (inviteId, role) => {
+        if (!isOwner) return
+        setInviteActionLoading(inviteId)
+        try {
+            await apiService.updateProjectInviteRole(projectId, inviteId, role, token)
+            setSuccessMessage(`Updated invitation role to ${role}`)
+            setTimeout(() => setSuccessMessage(""), 5000)
+            await fetchPendingInvites()
+        } catch (err) {
+            console.error("Error updating invite role:", err)
+            setSuccessMessage(`Failed to update invite role: ${err.message}`)
+            setTimeout(() => setSuccessMessage(""), 5000)
+        } finally {
+            setInviteActionLoading(null)
+        }
+    }
+
+    const handleDeletePendingInvite = async (inviteId) => {
+        if (!isOwner) return
+        setInviteActionLoading(inviteId)
+        try {
+            await apiService.cancelProjectInvite(projectId, inviteId, token)
+            setSuccessMessage("Invitation deleted successfully")
+            setTimeout(() => setSuccessMessage(""), 5000)
+            await fetchPendingInvites()
+        } catch (err) {
+            console.error("Error deleting invitation:", err)
+            setSuccessMessage(`Failed to delete invitation: ${err.message}`)
+            setTimeout(() => setSuccessMessage(""), 5000)
+        } finally {
+            setInviteActionLoading(null)
         }
     }
 
@@ -204,7 +266,7 @@ export default function CollaborationPage({ projectId, projectData }) {
                     <Card className="p-6 border-[#e6e6e6] hover:shadow-lg transition-shadow">
                         <div className="flex items-start justify-between mb-4">
                             <span className="text-[#708090] text-sm font-medium">Created On</span>
-                            <div className="w-8 h-8 rounded-lg bg-[#f0e6ff] flex items-center justify-center text-[#a020f0]">📅</div>
+                            <div className="w-8 h-8 rounded-lg bg-[#f0e6ff] flex items-center justify-center text-[#a020f0]"><Calendar className="w-4 h-4 text-[#a020f0]" /></div>
                         </div>
                         <div className="text-2xl font-bold text-[#a020f0]">{createdDate}</div>
                     </Card>
@@ -228,14 +290,7 @@ export default function CollaborationPage({ projectId, projectData }) {
                             <p className="text-[#708090] text-sm">Manage your team members and their access levels</p>
                         </div>
                         <div className="flex gap-3">
-                            <Button
-                                onClick={copyInviteLink}
-                                variant="outline"
-                                className="gap-2 bg-transparent hover:bg-[#f5f5f5]"
-                            >
-                                <Copy className="w-4 h-4" />
-                                Copy Invite Link
-                            </Button>
+                           
                             {isOwner && (
                                 <Button
                                     onClick={() => setIsInviteModalOpen(true)}
@@ -289,8 +344,10 @@ export default function CollaborationPage({ projectId, projectData }) {
                                 ) : (
                                     teamMembers.map((member) => {
                                         const RoleIcon = getRoleIcon(member.role)
-                                        const canChangeRole = isOwner && member.user_id !== user?.id && member.role !== "owner"
+                                        const canManageMember = isOwner && member.user_id !== user?.id && member.role !== "owner"
                                         const isChangingRole = roleChangeLoading === member.user_id
+                                        const isDeletingMember = memberDeleteLoading === member.user_id
+                                        const isMemberActionLoading = isChangingRole || isDeletingMember
 
                                         return (
                                             <Card
@@ -327,59 +384,70 @@ export default function CollaborationPage({ projectId, projectData }) {
                                                         {member.role === "owner" && (
                                                             <Star className="w-5 h-5 text-[#ffc107] fill-[#ffc107]" />
                                                         )}
-                                                        {canChangeRole && (
+                                                        {canManageMember && (
                                                             <DropdownMenu>
                                                                 <DropdownMenuTrigger asChild>
                                                                     <Button
                                                                         size="sm"
                                                                         variant="ghost"
                                                                         className="p-1 h-auto hover:bg-[#f5f5f5]"
-                                                                        disabled={isChangingRole}
+                                                                        disabled={isMemberActionLoading}
                                                                     >
-                                                                        {isChangingRole ? (
+                                                                        {isMemberActionLoading ? (
                                                                             <Loader2 className="w-5 h-5 text-[#708090] animate-spin" />
                                                                         ) : (
-                                                                            <UserCog className="w-5 h-5 text-[#708090]" />
+                                                                            <MoreVertical className="w-5 h-5 text-[#708090]" />
                                                                         )}
                                                                     </Button>
                                                                 </DropdownMenuTrigger>
                                                                 <DropdownMenuContent align="end" className="w-48">
-                                                                    <div className="px-2 py-1.5 text-sm font-semibold text-[#1a1a2e]">
-                                                                        Change Role
-                                                                    </div>
+                                                                    <DropdownMenuSub>
+                                                                        <DropdownMenuSubTrigger className="cursor-pointer">
+                                                                            Change Role
+                                                                        </DropdownMenuSubTrigger>
+                                                                        <DropdownMenuSubContent className="w-44">
+                                                                            <DropdownMenuItem
+                                                                                onClick={() => handleRoleChange(member.user_id, member.user_email, "owner")}
+                                                                                disabled={member.role === "owner"}
+                                                                                className="cursor-pointer"
+                                                                            >
+                                                                                <Crown className="w-4 h-4 mr-2 text-[#7753ff]" />
+                                                                                <span>Owner</span>
+                                                                                {member.role === "owner" && (
+                                                                                    <CheckCircle className="w-4 h-4 ml-auto text-[#7753ff]" />
+                                                                                )}
+                                                                            </DropdownMenuItem>
+                                                                            <DropdownMenuItem
+                                                                                onClick={() => handleRoleChange(member.user_id, member.user_email, "editor")}
+                                                                                disabled={member.role === "editor"}
+                                                                                className="cursor-pointer"
+                                                                            >
+                                                                                <Edit3 className="w-4 h-4 mr-2 text-[#7753ff]" />
+                                                                                <span>Editor</span>
+                                                                                {member.role === "editor" && (
+                                                                                    <CheckCircle className="w-4 h-4 ml-auto text-[#7753ff]" />
+                                                                                )}
+                                                                            </DropdownMenuItem>
+                                                                            <DropdownMenuItem
+                                                                                onClick={() => handleRoleChange(member.user_id, member.user_email, "viewer")}
+                                                                                disabled={member.role === "viewer"}
+                                                                                className="cursor-pointer"
+                                                                            >
+                                                                                <Eye className="w-4 h-4 mr-2 text-[#708090]" />
+                                                                                <span>Viewer</span>
+                                                                                {member.role === "viewer" && (
+                                                                                    <CheckCircle className="w-4 h-4 ml-auto text-[#708090]" />
+                                                                                )}
+                                                                            </DropdownMenuItem>
+                                                                        </DropdownMenuSubContent>
+                                                                    </DropdownMenuSub>
                                                                     <DropdownMenuSeparator />
                                                                     <DropdownMenuItem
-                                                                        onClick={() => handleRoleChange(member.user_id, member.user_email, "owner")}
-                                                                        disabled={member.role === "owner"}
-                                                                        className="cursor-pointer"
+                                                                        onClick={() => handleRemoveMember(member.user_id, member.user_email)}
+                                                                        className="cursor-pointer text-red-600 focus:text-red-600"
                                                                     >
-                                                                        <Crown className="w-4 h-4 mr-2 text-[#7753ff]" />
-                                                                        <span>Owner</span>
-                                                                        {member.role === "owner" && (
-                                                                            <CheckCircle className="w-4 h-4 ml-auto text-[#7753ff]" />
-                                                                        )}
-                                                                    </DropdownMenuItem>
-                                                                    <DropdownMenuItem
-                                                                        onClick={() => handleRoleChange(member.user_id, member.user_email, "editor")}
-                                                                        disabled={member.role === "editor"}
-                                                                        className="cursor-pointer"
-                                                                    >
-                                                                        <Edit3 className="w-4 h-4 mr-2 text-[#7753ff]" />
-                                                                        <span>Editor</span>
-                                                                        {member.role === "editor" && (
-                                                                            <CheckCircle className="w-4 h-4 ml-auto text-[#7753ff]" />
-                                                                        )}
-                                                                    </DropdownMenuItem>
-                                                                    <DropdownMenuItem
-                                                                        onClick={() => handleRoleChange(member.user_id, member.user_email, "viewer")}
-                                                                        disabled={member.role === "viewer"}
-                                                                        className="cursor-pointer"
-                                                                    >
-                                                                        <Eye className="w-4 h-4 mr-2 text-[#708090]" />
-                                                                        <span>Viewer</span>
-                                                                        {member.role === "viewer" && (
-                                                                            <CheckCircle className="w-4 h-4 ml-auto text-[#708090]" />
-                                                                        )}
+                                                                        <Trash2 className="w-4 h-4 mr-2" />
+                                                                        <span>Delete Member</span>
                                                                     </DropdownMenuItem>
                                                                 </DropdownMenuContent>
                                                             </DropdownMenu>
@@ -404,9 +472,12 @@ export default function CollaborationPage({ projectId, projectData }) {
                                         <p className="text-[#708090]">No pending invitations</p>
                                     </Card>
                                 ) : (
-                                    pendingInvites.map((invite) => (
+                                    pendingInvites.map((invite) => {
+                                        const inviteId = invite.id
+                                        const isInviteLoading = inviteActionLoading === inviteId
+                                        return (
                                         <Card
-                                            key={invite.id}
+                                            key={inviteId}
                                             className="p-4 border-[#e6e6e6] hover:shadow-md transition-shadow"
                                         >
                                             <div className="flex items-center justify-between">
@@ -436,18 +507,78 @@ export default function CollaborationPage({ projectId, projectData }) {
                                                         Pending
                                                     </Badge>
                                                     {isOwner && (
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            className="p-1 h-auto"
-                                                        >
-                                                            <MoreVertical className="w-5 h-5 text-[#708090]" />
-                                                        </Button>
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    className="p-1 h-auto"
+                                                                    disabled={isInviteLoading}
+                                                                >
+                                                                    {isInviteLoading ? (
+                                                                        <Loader2 className="w-5 h-5 text-[#708090] animate-spin" />
+                                                                    ) : (
+                                                                        <MoreVertical className="w-5 h-5 text-[#708090]" />
+                                                                    )}
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end" className="w-52">
+                                                                <DropdownMenuSub>
+                                                                    <DropdownMenuSubTrigger className="cursor-pointer">
+                                                                        Change Role
+                                                                    </DropdownMenuSubTrigger>
+                                                                    <DropdownMenuSubContent className="w-44">
+                                                                        <DropdownMenuItem
+                                                                            onClick={() => handlePendingInviteRoleChange(inviteId, "owner")}
+                                                                            disabled={invite.role === "owner"}
+                                                                            className="cursor-pointer"
+                                                                        >
+                                                                            <Crown className="w-4 h-4 mr-2 text-[#7753ff]" />
+                                                                            <span>Owner</span>
+                                                                            {invite.role === "owner" && (
+                                                                                <CheckCircle className="w-4 h-4 ml-auto text-[#7753ff]" />
+                                                                            )}
+                                                                        </DropdownMenuItem>
+                                                                        <DropdownMenuItem
+                                                                            onClick={() => handlePendingInviteRoleChange(inviteId, "editor")}
+                                                                            disabled={invite.role === "editor"}
+                                                                            className="cursor-pointer"
+                                                                        >
+                                                                            <Edit3 className="w-4 h-4 mr-2 text-[#7753ff]" />
+                                                                            <span>Editor</span>
+                                                                            {invite.role === "editor" && (
+                                                                                <CheckCircle className="w-4 h-4 ml-auto text-[#7753ff]" />
+                                                                            )}
+                                                                        </DropdownMenuItem>
+                                                                        <DropdownMenuItem
+                                                                            onClick={() => handlePendingInviteRoleChange(inviteId, "viewer")}
+                                                                            disabled={invite.role === "viewer"}
+                                                                            className="cursor-pointer"
+                                                                        >
+                                                                            <Eye className="w-4 h-4 mr-2 text-[#708090]" />
+                                                                            <span>Viewer</span>
+                                                                            {invite.role === "viewer" && (
+                                                                                <CheckCircle className="w-4 h-4 ml-auto text-[#708090]" />
+                                                                            )}
+                                                                        </DropdownMenuItem>
+                                                                    </DropdownMenuSubContent>
+                                                                </DropdownMenuSub>
+                                                                <DropdownMenuSeparator />
+                                                                <DropdownMenuItem
+                                                                    onClick={() => handleDeletePendingInvite(inviteId)}
+                                                                    className="cursor-pointer text-red-600 focus:text-red-600"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                                    <span>Delete Invite</span>
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
                                                     )}
                                                 </div>
                                             </div>
                                         </Card>
-                                    ))
+                                            )
+                                    })
                                 )}
                             </div>
                         </div>

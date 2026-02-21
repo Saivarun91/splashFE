@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import Image from "next/image"
-import { Download, Image as ImageIcon, Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react"
+import { Download, Image as ImageIcon, Calendar, Clock, ChevronLeft, ChevronRight, Box, User, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductImagesDisplay } from "../product-images-display"
 import { apiService } from "@/lib/api"
@@ -336,6 +336,91 @@ export default function ResultsTab({ project }) {
         }
     };
 
+    const sanitizePathSegment = (value) => {
+        return String(value || "unknown")
+            .trim()
+            .replace(/[<>:"/\\|?*]+/g, "-")
+            .replace(/\s+/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-|-$/g, "")
+            .toLowerCase() || "unknown";
+    };
+
+    const guessExtension = (url, contentType) => {
+        if (contentType) {
+            if (contentType.includes("png")) return "png";
+            if (contentType.includes("jpeg") || contentType.includes("jpg")) return "jpg";
+            if (contentType.includes("webp")) return "webp";
+            if (contentType.includes("gif")) return "gif";
+        }
+        const cleanUrl = String(url || "").split("?")[0];
+        const match = cleanUrl.match(/\.([a-zA-Z0-9]+)$/);
+        return match?.[1]?.toLowerCase() || "png";
+    };
+
+    const createZipBlob = async (images) => {
+        const zip = new window.JSZip();
+        const usedPaths = new Set();
+
+        for (const image of images) {
+            if (!image?.url) continue;
+            try {
+                const response = await fetch(image.url, { mode: "cors", cache: "no-cache" });
+                if (!response.ok) {
+                    console.error(`Skipping image (HTTP ${response.status}):`, image.url);
+                    continue;
+                }
+                const blob = await response.blob();
+                const extension = guessExtension(image.url, blob.type);
+                const folderName = sanitizePathSegment(
+                    image.folderName || getImageTypeLabel(image.type) || "generated"
+                );
+
+                let baseFileName = sanitizePathSegment(
+                    image.fileName ||
+                    `product-${image.productIndex || "x"}-image-${image.imageIndex || Date.now()}`
+                );
+                if (!baseFileName.endsWith(`.${extension}`)) {
+                    baseFileName = `${baseFileName}.${extension}`;
+                }
+
+                let fullPath = `${folderName}/${baseFileName}`;
+                let duplicateCounter = 1;
+                while (usedPaths.has(fullPath)) {
+                    const withoutExt = baseFileName.replace(new RegExp(`\\.${extension}$`), "");
+                    fullPath = `${folderName}/${withoutExt}-${duplicateCounter}.${extension}`;
+                    duplicateCounter += 1;
+                }
+
+                usedPaths.add(fullPath);
+                zip.file(fullPath, blob);
+            } catch (error) {
+                console.error("Skipping image while creating zip:", image.url, error);
+            }
+        }
+
+        return zip.generateAsync({ type: "blob" });
+    };
+
+    const downloadZipFromImages = async (images, zipNamePrefix = "generated-images") => {
+        if (!images.length) return;
+        if (!window.JSZip) {
+            const { default: JSZip } = await import("jszip");
+            window.JSZip = JSZip;
+        }
+
+        const zipBlob = await createZipBlob(images);
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+        const zipUrl = window.URL.createObjectURL(zipBlob);
+        const link = document.createElement("a");
+        link.href = zipUrl;
+        link.download = `${sanitizePathSegment(zipNamePrefix)}-${timestamp}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(zipUrl);
+    };
+
     const handleDownloadImage = async (imageUrl, imageType, productIndex, imageIndex = null, isHistory = false) => {
         // Generate filename based on context
         let filename;
@@ -351,7 +436,7 @@ export default function ResultsTab({ project }) {
         await downloadImageAsBlob(imageUrl, filename);
     }
 
-    const handleDownloadAll = () => {
+    const handleDownloadAll = async () => {
         if (isDownloading) {
             return;
         }
@@ -423,44 +508,34 @@ export default function ResultsTab({ project }) {
             });
         }
 
-        // Download all images with a small delay between each
         if (imagesToDownload.length === 0) {
+            setIsDownloading(false);
             return;
         }
 
-        // Download all images with a delay between each
-        let completedDownloads = 0;
-        imagesToDownload.forEach((image, index) => {
-            setTimeout(async () => {
-                try {
-                    let filename;
-                    if (image.isHistory) {
-                        const imageTypeLabel = getImageTypeLabel(image.type).toLowerCase().replace(/\s+/g, '-');
-                        filename = `product-${image.productIndex}-${imageTypeLabel}-history-${image.imageIndex}.png`;
-                    } else {
-                        const imageTypeLabel = image.type?.replace(/_/g, '-') || 'generated';
-                        filename = `product-${image.productIndex}-${imageTypeLabel}-${image.imageIndex}${image.version ? `-v${image.version}` : ''}.png`;
-                    }
+        try {
+            const zipImages = imagesToDownload.map((image) => {
+                const imageTypeLabel = sanitizePathSegment(getImageTypeLabel(image.type));
+                const folderName = image.isHistory ? `history/${imageTypeLabel}` : `generated/${imageTypeLabel}`;
+                const fileName = image.isHistory
+                    ? `product-${image.productIndex}-history-${image.imageIndex}`
+                    : `product-${image.productIndex}-image-${image.imageIndex}${image.version ? `-v${image.version}` : ""}`;
+                return {
+                    ...image,
+                    folderName,
+                    fileName,
+                };
+            });
 
-                    await downloadImageAsBlob(image.url, filename);
-                    completedDownloads++;
-
-                    // Reset downloading flag when all downloads complete
-                    if (completedDownloads === imagesToDownload.length) {
-                        setTimeout(() => setIsDownloading(false), 1000);
-                    }
-                } catch (error) {
-                    console.error(`Error downloading image ${index + 1}:`, error);
-                    completedDownloads++;
-                    if (completedDownloads === imagesToDownload.length) {
-                        setTimeout(() => setIsDownloading(false), 1000);
-                    }
-                }
-            }, index * 500); // 500ms delay between downloads to allow time for blob processing
-        });
+            await downloadZipFromImages(zipImages, `${project?.name || "project"}-all-images`);
+        } catch (error) {
+            console.error("Failed to create zip for all images:", error);
+        } finally {
+            setIsDownloading(false);
+        }
     }
 
-    const handleDownloadAllHistory = () => {
+    const handleDownloadAllHistory = async () => {
         if (!historyData?.history_by_product) return;
         if (isDownloading) {
             return;
@@ -483,32 +558,22 @@ export default function ResultsTab({ project }) {
         });
 
         if (imagesToDownload.length === 0) {
+            setIsDownloading(false);
             return;
         }
 
-        // Download all history images with a delay between each
-        let completedDownloads = 0;
-        imagesToDownload.forEach((image, index) => {
-            setTimeout(async () => {
-                try {
-                    const imageTypeLabel = getImageTypeLabel(image.type).toLowerCase().replace(/\s+/g, '-');
-                    const filename = `product-${image.productIndex}-${imageTypeLabel}-history-${image.imageIndex}.png`;
-                    await downloadImageAsBlob(image.url, filename);
-                    completedDownloads++;
-
-                    // Reset downloading flag when all downloads complete
-                    if (completedDownloads === imagesToDownload.length) {
-                        setTimeout(() => setIsDownloading(false), 1000);
-                    }
-                } catch (error) {
-                    console.error(`Error downloading history image ${index + 1}:`, error);
-                    completedDownloads++;
-                    if (completedDownloads === imagesToDownload.length) {
-                        setTimeout(() => setIsDownloading(false), 1000);
-                    }
-                }
-            }, index * 500); // 500ms delay between downloads to allow time for blob processing
-        });
+        try {
+            const zipImages = imagesToDownload.map((image) => ({
+                ...image,
+                folderName: `history/${sanitizePathSegment(getImageTypeLabel(image.type))}`,
+                fileName: `product-${image.productIndex}-history-${image.imageIndex}`,
+            }));
+            await downloadZipFromImages(zipImages, `${project?.name || "project"}-history-images`);
+        } catch (error) {
+            console.error("Failed to create zip for history images:", error);
+        } finally {
+            setIsDownloading(false);
+        }
     }
 
     // Show skeleton only if no cached data - never block with spinner
@@ -586,7 +651,7 @@ export default function ResultsTab({ project }) {
                         <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                                    <span className="text-xl">📦</span>
+                                    <span className="text-xl"><Box className="w-5 h-5 text-[#884cff]" /></span>
                                 </div>
                                 <p className="text-sm text-[#708090]">Products</p>
                             </div>
@@ -596,7 +661,7 @@ export default function ResultsTab({ project }) {
                         <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                                    <span className="text-xl">👤</span>
+                                    <span className="text-xl"><User className="w-5 h-5 text-[#884cff]" /></span>
                                 </div>
                                 <p className="text-sm text-[#708090]">Total Models Used</p>
                             </div>
@@ -606,7 +671,7 @@ export default function ResultsTab({ project }) {
                         <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                                    <span className="text-xl">✓</span>
+                                    <span className="text-xl"><CheckCircle className="w-5 h-5 text-[#884cff]" /></span>
                                 </div>
                                 <p className="text-sm text-[#708090]">Completion</p>
                             </div>

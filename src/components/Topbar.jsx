@@ -50,7 +50,11 @@ export function Topbar({ collapsed }) {
         try {
             setLoading(true);
             const data = await apiService.getAllInvites(token);
-            setInvites(data.pending_invites || []);
+            const normalizedInvites = (data.pending_invites || []).map((invite) => ({
+                ...invite,
+                invite_id: invite.invite_id || invite.id || null,
+            }));
+            setInvites(normalizedInvites);
         } catch (err) {
             console.error("Error fetching invites:", err);
         } finally {
@@ -173,6 +177,23 @@ export function Topbar({ collapsed }) {
 
     const pendingCount = invites.length;
 
+    const handleInviteAction = async (inviteId, action) => {
+        if (!token || !inviteId || !action) return;
+        try {
+            setProcessingInvite(inviteId);
+            if (action === "accept") {
+                await apiService.acceptInviteById(inviteId, token);
+            } else {
+                await apiService.rejectInvite(inviteId, token);
+            }
+            await fetchInvites();
+        } catch (err) {
+            console.error(`Failed to ${action} invite:`, err);
+        } finally {
+            setProcessingInvite(null);
+        }
+    };
+
     /* ======================= JSX ======================= */
     return (
         <header
@@ -205,11 +226,12 @@ export function Topbar({ collapsed }) {
             {/* Right Section */}
             <div className="flex items-center gap-4">
 
-                {/* Notifications
+               
                 <div className="relative" ref={notificationRef}>
                     <button
                         onClick={() => setShowNotifications(!showNotifications)}
                         className="relative p-2 hover:bg-gray-100 rounded"
+                        aria-label="Open notifications"
                     >
                         <Bell />
                         {pendingCount > 0 && (
@@ -218,7 +240,83 @@ export function Topbar({ collapsed }) {
                             </span>
                         )}
                     </button>
-                </div> */}
+
+                    {showNotifications && (
+                        <div className="absolute right-0 mt-2 w-96 bg-white border rounded-lg shadow z-50 overflow-hidden">
+                            <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Mail className="w-4 h-4 text-indigo-600" />
+                                    <span className="font-semibold text-sm">Project Invites</span>
+                                </div>
+                                <Badge className="bg-indigo-600 text-white">
+                                    {pendingCount}
+                                </Badge>
+                            </div>
+
+                            <div className="max-h-80 overflow-y-auto">
+                                {loading ? (
+                                    <div className="p-4 flex items-center gap-2 text-sm text-gray-600">
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Loading invites...
+                                    </div>
+                                ) : invites.length === 0 ? (
+                                    <div className="p-4 text-sm text-gray-600">
+                                        No pending invites.
+                                    </div>
+                                ) : (
+                                    invites.map((invite) => (
+                                        <div key={invite.invite_id || invite.id || `${invite.project_id}-${invite.created_at}`} className="p-4 border-b last:border-b-0">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="space-y-1">
+                                                    <p className="text-sm font-semibold text-gray-900">
+                                                        {invite.project_name || "Project invite"}
+                                                    </p>
+                                                    <p className="text-xs text-gray-600">
+                                                        Role: <span className="font-medium">{invite.role || "viewer"}</span>
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        From {invite.inviter_name || invite.inviter_email || "Team member"}
+                                                    </p>
+                                                    {invite.created_at && (
+                                                        <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                            <Clock className="w-3 h-3" />
+                                                            {getTimeAgo(invite.created_at)}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="mt-3 flex items-center gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    className="h-8 px-3 bg-green-600 hover:bg-green-700 text-white"
+                                                    onClick={() => handleInviteAction(invite.invite_id, "accept")}
+                                                    disabled={!invite.invite_id || processingInvite === invite.invite_id}
+                                                >
+                                                    {processingInvite === invite.invite_id ? (
+                                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                                    ) : (
+                                                        <Check className="w-3 h-3" />
+                                                    )}
+                                                    Accept
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="h-8 px-3 border-red-200 text-red-600 hover:bg-red-50"
+                                                    onClick={() => handleInviteAction(invite.invite_id, "reject")}
+                                                    disabled={!invite.invite_id || processingInvite === invite.invite_id}
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                    Reject
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 {/* Live credits */}
                 {token && (
