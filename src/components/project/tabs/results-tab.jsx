@@ -744,6 +744,7 @@ export default function ResultsTab({ project }) {
                 </div>
             ) : hasResults ? (
                 <ProductImagesDisplay
+                    project={project}
                     collectionData={collectionData}
                     showRegenerate={true}
                     onRegenerateSuccess={loadData}

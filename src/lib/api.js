@@ -376,11 +376,58 @@ class ApiService {
         });
     }
 
-    async updateDescriptionComments(projectId, collectionId, descriptionComments, token) {
+    async updateBriefComments(projectId, collectionId, commentType, comments, token) {
+        const normalizedType = String(commentType || 'description').trim().toLowerCase();
+        const payloadFieldMap = {
+            description: 'description_comments',
+            target_audience: 'target_audience_comments',
+            campaign_season: 'campaign_season_comments',
+        };
+        const payloadField = payloadFieldMap[normalizedType] || 'description_comments';
+
         return this.request(`/probackendapp/api/projects/${projectId}/collections/${collectionId}/description-comments/`, {
             method: 'POST',
             body: JSON.stringify({
-                description_comments: Array.isArray(descriptionComments) ? descriptionComments : [],
+                comment_type: normalizedType,
+                [payloadField]: Array.isArray(comments) ? comments : [],
+            }),
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    async updateDescriptionComments(projectId, collectionId, descriptionComments, token) {
+        return this.updateBriefComments(
+            projectId,
+            collectionId,
+            'description',
+            descriptionComments,
+            token
+        );
+    }
+
+    async updateSelectionComments(projectId, collectionId, commentType, comments, token) {
+        const normalizedType = String(commentType || 'themes').trim().toLowerCase();
+        const payloadFieldMap = {
+            themes: 'themes_comments',
+            backgrounds: 'backgrounds_comments',
+            poses: 'poses_comments',
+            locations: 'locations_comments',
+            color_images: 'color_images_comments',
+            additional_instructions: 'additional_instructions_comments',
+            human_model_preview: 'human_model_preview_comments',
+            ai_model_preview: 'ai_model_preview_comments',
+            product_upload: 'product_upload_comments',
+            generated_product_images: 'generated_product_images_comments',
+        };
+        const payloadField = payloadFieldMap[normalizedType] || 'themes_comments';
+
+        return this.request(`/probackendapp/api/projects/${projectId}/collections/${collectionId}/selection-comments/`, {
+            method: 'POST',
+            body: JSON.stringify({
+                comment_type: normalizedType,
+                [payloadField]: Array.isArray(comments) ? comments : [],
             }),
             headers: {
                 'Authorization': `Bearer ${token || ''}`,

@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import toast from "react-hot-toast"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
+import { MdPhotoSizeSelectLarge } from "react-icons/md"
 const MAX_IMAGE_MB = 10;
 const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];

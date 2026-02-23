@@ -248,7 +248,7 @@ export function Topbar({ collapsed }) {
                                     <Mail className="w-4 h-4 text-indigo-600" />
                                     <span className="font-semibold text-sm">Project Invites</span>
                                 </div>
-                                <Badge className="bg-indigo-600 text-white">
+                                <Badge className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
                                     {pendingCount}
                                 </Badge>
                             </div>

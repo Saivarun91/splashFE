@@ -4,14 +4,43 @@ import { useState } from "react"
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Highlight from "@tiptap/extension-highlight"
-import { Comment } from "./CommentExtension"
+import { Mark, mergeAttributes } from "@tiptap/core"
 import { v4 as uuidv4 } from "uuid"
+
+const Comment = Mark.create({
+  name: "comment",
+  addAttributes() {
+    return {
+      id: {
+        default: null,
+      },
+    }
+  },
+  parseHTML() {
+    return [{ tag: "span[data-comment-id]" }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    const attrs = { ...HTMLAttributes }
+    if (attrs.id) {
+      attrs["data-comment-id"] = attrs.id
+      delete attrs.id
+    }
+    return [
+      "span",
+      mergeAttributes(attrs, {
+        class: "bg-yellow-200/70 rounded px-0.5",
+      }),
+      0,
+    ]
+  },
+})
 
 export default function CommentEditor() {
   const [comments, setComments] = useState([])
   const [contextMenu, setContextMenu] = useState(null)
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Highlight,
