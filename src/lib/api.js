@@ -40,6 +40,9 @@ function checkResponseAuth(response) {
 class ApiService {
     constructor() {
         this.baseURL = API_BASE_URL;
+        this.userProfileCache = new Map();
+        this.userProfileInFlight = new Map();
+        this.userProfileCacheTtlMs = 30000;
     }
 
     // Low-level request helper (uses fetch)
@@ -177,33 +180,65 @@ class ApiService {
         })
     }
 
-    async getUserProfile(token) {
-        return this.request('/api/profile/', {
+    async getUserProfile(token, options = {}) {
+        const authToken = token || '';
+        const cacheKey = authToken || 'anonymous';
+        const now = Date.now();
+        const forceRefresh = Boolean(options?.forceRefresh);
+
+        if (!forceRefresh) {
+            const cached = this.userProfileCache.get(cacheKey);
+            if (cached && (now - cached.timestamp) < this.userProfileCacheTtlMs) {
+                return cached.data;
+            }
+
+            const inFlight = this.userProfileInFlight.get(cacheKey);
+            if (inFlight) {
+                return inFlight;
+            }
+        }
+
+        const requestPromise = this.request('/api/profile/', {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${token || ''}`,
+                'Authorization': `Bearer ${authToken}`,
             },
+        }).then((response) => {
+            this.userProfileCache.set(cacheKey, {
+                data: response,
+                timestamp: Date.now(),
+            });
+            return response;
+        }).finally(() => {
+            this.userProfileInFlight.delete(cacheKey);
         });
+
+        this.userProfileInFlight.set(cacheKey, requestPromise);
+        return requestPromise;
     }
 
     async updateUserProfile(profileData, token) {
-        return this.request('/api/profile/update/', {
+        const response = await this.request('/api/profile/update/', {
             method: 'PUT',
             body: JSON.stringify(profileData),
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
             },
         });
+        this.userProfileCache.clear();
+        return response;
     }
 
     async completeProfile(profileData, token) {
-        return this.request('/api/profile/complete/', {
+        const response = await this.request('/api/profile/complete/', {
             method: 'POST',
             body: JSON.stringify(profileData),
             headers: {
                 'Authorization': `Bearer ${token || ''}`,
             },
         });
+        this.userProfileCache.clear();
+        return response;
     }
 
     async forgotPassword(email) {
@@ -338,6 +373,65 @@ class ApiService {
         return this.request(`/probackendapp/api/projects/${projectId}/setup/description/`, {
             method: 'POST',
             body: JSON.stringify(requestData),
+        });
+    }
+
+    async updateBriefComments(projectId, collectionId, commentType, comments, token) {
+        const normalizedType = String(commentType || 'description').trim().toLowerCase();
+        const payloadFieldMap = {
+            description: 'description_comments',
+            target_audience: 'target_audience_comments',
+            campaign_season: 'campaign_season_comments',
+        };
+        const payloadField = payloadFieldMap[normalizedType] || 'description_comments';
+
+        return this.request(`/probackendapp/api/projects/${projectId}/collections/${collectionId}/description-comments/`, {
+            method: 'POST',
+            body: JSON.stringify({
+                comment_type: normalizedType,
+                [payloadField]: Array.isArray(comments) ? comments : [],
+            }),
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    async updateDescriptionComments(projectId, collectionId, descriptionComments, token) {
+        return this.updateBriefComments(
+            projectId,
+            collectionId,
+            'description',
+            descriptionComments,
+            token
+        );
+    }
+
+    async updateSelectionComments(projectId, collectionId, commentType, comments, token) {
+        const normalizedType = String(commentType || 'themes').trim().toLowerCase();
+        const payloadFieldMap = {
+            themes: 'themes_comments',
+            backgrounds: 'backgrounds_comments',
+            poses: 'poses_comments',
+            locations: 'locations_comments',
+            color_images: 'color_images_comments',
+            additional_instructions: 'additional_instructions_comments',
+            human_model_preview: 'human_model_preview_comments',
+            ai_model_preview: 'ai_model_preview_comments',
+            product_upload: 'product_upload_comments',
+            generated_product_images: 'generated_product_images_comments',
+        };
+        const payloadField = payloadFieldMap[normalizedType] || 'themes_comments';
+
+        return this.request(`/probackendapp/api/projects/${projectId}/collections/${collectionId}/selection-comments/`, {
+            method: 'POST',
+            body: JSON.stringify({
+                comment_type: normalizedType,
+                [payloadField]: Array.isArray(comments) ? comments : [],
+            }),
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
         });
     }
 
@@ -750,6 +844,35 @@ class ApiService {
         });
     }
 
+    async removeProjectMember(projectId, userId, token) {
+        return this.request(`/probackendapp/api/${projectId}/remove-member`, {
+            method: 'POST',
+            body: JSON.stringify({ user_id: userId }),
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    async updateProjectInviteRole(projectId, inviteId, role, token) {
+        return this.request(`/probackendapp/api/${projectId}/invites/${inviteId}/update-role`, {
+            method: 'POST',
+            body: JSON.stringify({ role }),
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
+    async cancelProjectInvite(projectId, inviteId, token) {
+        return this.request(`/probackendapp/api/${projectId}/invites/${inviteId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+    }
+
     // Global invite endpoints (for dashboard)
     async getAllInvites(token) {
         return this.request(`/probackendapp/api/invites/all`, {
@@ -925,6 +1048,26 @@ class ApiService {
 
         // Backward-compatible: if the backend returns final result directly
         return data;
+    }
+
+    /**
+     * Analyze a reference image for themed / model / campaign context.
+     * Returns { success, analysis_text }.
+     * @param {File} imageFile - reference image file
+     * @param {string} context - 'themed' | 'model' | 'campaign'
+     * @param {string} token - auth token
+     */
+    async analyzeReferenceImage(imageFile, context, token) {
+        if (!imageFile) return { success: false, analysis_text: '' };
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        formData.append('context', context || 'themed');
+        const response = await axios.post(`${this.baseURL}/image/analyze-reference/`, formData, {
+            headers: {
+                'Authorization': `Bearer ${token || ''}`,
+            },
+        });
+        return response.data;
     }
 
     async changeBackground(formData, token) {

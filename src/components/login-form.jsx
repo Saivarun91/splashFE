@@ -40,9 +40,9 @@ export default function LoginForm() {
     // };
 
     return (
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md pt-15">
             {/* Header */}
-            <div className="mb-8">
+            <div className="mb-8 ">
                 <h1 className="text-4xl font-bold text-[#0c1421] mb-2">{t("auth.login")}</h1>
                 <p className="text-lg text-[#313957]">
                     {t("auth.stayConnected")}

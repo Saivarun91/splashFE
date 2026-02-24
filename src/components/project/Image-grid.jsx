@@ -70,6 +70,7 @@ export function ImageGrid({ project, collectionData: initialCollectionData, onDa
                 </div>
             )}
             <ProductImagesDisplay
+                project={project}
                 collectionData={collectionData}
                 showRegenerate={canEdit}
                 onRegenerateSuccess={handleRegenerateSuccess}

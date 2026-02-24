@@ -116,6 +116,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
     const [aiOrnamentMeasurements, setAiOrnamentMeasurements] = useState({})
     const [aiOrnamentPreview, setAiOrnamentPreview] = useState(null)
     const [aiPosePreview, setAiPosePreview] = useState(null)
+    const [aiReferenceAnalysis, setAiReferenceAnalysis] = useState("")
     const [aiResult, setAiResult] = useState(null)
     const [aiError, setAiError] = useState(null)
     const [aiIsLoading, setAiIsLoading] = useState(false)
@@ -141,6 +142,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
     const [realModelPreview, setRealModelPreview] = useState(null)
     const [realOrnamentPreview, setRealOrnamentPreview] = useState(null)
     const [realPosePreview, setRealPosePreview] = useState(null)
+    const [realReferenceAnalysis, setRealReferenceAnalysis] = useState("")
     const [realResult, setRealResult] = useState(null)
     const [realError, setRealError] = useState(null)
     const [realIsLoading, setRealIsLoading] = useState(false)
@@ -288,8 +290,31 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             : setAiPosePreview(reader.result);
         };
         reader.readAsDataURL(file);
+        if (type === "poseImage") {
+          setAiReferenceAnalysis("");
+          apiService.analyzeReferenceImage(file, "model", token).then((data) => {
+            if (data?.success && data.analysis_text) setAiReferenceAnalysis(data.analysis_text);
+          }).catch(() => {});
+        }
       };
-      
+
+    const removeAiOrnamentImage = (e) => {
+        e?.stopPropagation?.();
+        setAiFormData((prev) => ({ ...prev, ornamentImage: null }));
+        setAiOrnamentPreview(null);
+        setAiUploadErrors((p) => ({ ...p, ornamentImage: null }));
+        const input = document.getElementById("ai-ornament-input");
+        if (input) input.value = "";
+    };
+    const removeAiPoseImage = (e) => {
+        e?.stopPropagation?.();
+        setAiFormData((prev) => ({ ...prev, poseImage: null }));
+        setAiPosePreview(null);
+        setAiReferenceAnalysis("");
+        setAiUploadErrors((p) => ({ ...p, poseImage: null }));
+        const input = document.getElementById("ai-pose-input");
+        if (input) input.value = "";
+    };
 
     const handleAiRegenerate = () => {
         setAiRegenerateModal({
@@ -392,6 +417,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             if (aiFormData.poseImage) {
                 formDataToSend.append("pose_style", aiFormData.poseImage)
             }
+            if (aiReferenceAnalysis) formDataToSend.append("reference_analysis", aiReferenceAnalysis)
             formDataToSend.append("prompt", aiFormData.prompt || t("images.generateAIModelWearingOrnament"))
             formDataToSend.append("measurements", aiFormData.measurements || "")
             formDataToSend.append("ornament_type", aiOrnamentType || "")
@@ -449,8 +475,39 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
           else setRealPosePreview(reader.result);
         };
         reader.readAsDataURL(file);
+        if (type === "poseImage") {
+          setRealReferenceAnalysis("");
+          apiService.analyzeReferenceImage(file, "model", token).then((data) => {
+            if (data?.success && data.analysis_text) setRealReferenceAnalysis(data.analysis_text);
+          }).catch(() => {});
+        }
       };
-      
+
+    const removeRealModelImage = (e) => {
+        e?.stopPropagation?.();
+        setRealFormData((prev) => ({ ...prev, modelImage: null }));
+        setRealModelPreview(null);
+        setRealUploadErrors((p) => ({ ...p, modelImage: null }));
+        const input = document.getElementById("real-model-input");
+        if (input) input.value = "";
+    };
+    const removeRealOrnamentImage = (e) => {
+        e?.stopPropagation?.();
+        setRealFormData((prev) => ({ ...prev, ornamentImage: null }));
+        setRealOrnamentPreview(null);
+        setRealUploadErrors((p) => ({ ...p, ornamentImage: null }));
+        const input = document.getElementById("real-ornament-input");
+        if (input) input.value = "";
+    };
+    const removeRealPoseImage = (e) => {
+        e?.stopPropagation?.();
+        setRealFormData((prev) => ({ ...prev, poseImage: null }));
+        setRealPosePreview(null);
+        setRealReferenceAnalysis("");
+        setRealUploadErrors((p) => ({ ...p, poseImage: null }));
+        const input = document.getElementById("real-pose-input");
+        if (input) input.value = "";
+    };
 
     const handleRealRegenerate = () => {
         setRealRegenerateModal({
@@ -559,6 +616,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             if (realFormData.poseImage) {
                 formDataToSend.append("pose_style", realFormData.poseImage)
             }
+            if (realReferenceAnalysis) formDataToSend.append("reference_analysis", realReferenceAnalysis)
             formDataToSend.append("prompt", realFormData.prompt || t("images.generateRealisticImageWithModel"))
             formDataToSend.append("measurements", realFormData.measurements || "")
             formDataToSend.append("ornament_type", realOrnamentType || "")
@@ -667,6 +725,13 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                         {aiOrnamentPreview ? (
                                             <div className="relative w-full h-40">
                                                 <Image src={aiOrnamentPreview} alt="Ornament Preview" fill className="object-contain rounded-lg" />
+                                                <button
+                                                    type="button"
+                                                    onClick={removeAiOrnamentImage}
+                                                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                                >
+                                                    <X size={14} />
+                                                </button>
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
@@ -712,6 +777,13 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                         {aiPosePreview ? (
                                             <div className="relative w-full h-40">
                                                 <Image src={aiPosePreview} alt="Pose Preview" fill className="object-contain rounded-lg" />
+                                                <button
+                                                    type="button"
+                                                    onClick={removeAiPoseImage}
+                                                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                                >
+                                                    <X size={14} />
+                                                </button>
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
@@ -774,9 +846,18 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                 )}
 
                                 {/* Action Buttons */}
-                                <div ref={generateSectionRef} className="pt-8 border-t border-gray-200">
+                                <div className="flex items-center justify-between pt-8 border-t border-[#e6e6e6]">
+                                <button
+                                    type="button"
+                                    onClick={() => router.back()}
+                                    className="flex items-center gap-3 px-6 py-3 text-[#7753ff] font-semibold hover:bg-[#7753ff]/10 rounded-xl transition-all duration-300 hover:scale-105"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                    {t("common.back")}
+                                </button>
+                                <div ref={generateSectionRef} className="flex flex-col items-end gap-2">
                                     {showCostNote && numImages > 1 && (
-                                        <div className="mflex items-center gap-2 px-4 py-3 
+                                        <div className="flex items-center gap-2 px-4 py-3 
 bg-gray-100/80 
 border border-gray-200 
 rounded-xl 
@@ -786,20 +867,11 @@ text-gray-800 text-sm">
                                             <span>{t("images.creditsCost") || "Cost:"} {numImages * (creditSettings.credits_per_image_generation || 2)} {t("images.credits") || "credits"}. {t("images.clickGenerateAgainToConfirm") || "Click Generate again to confirm."}</span>
                                         </div>
                                     )}
-                                    <div className="flex items-center justify-between">
-                                        <button
-                                            type="button"
-                                            onClick={() => router.back()}
-                                            className="flex items-center gap-2 text-[#7753ff] font-semibold hover:text-[#6a47e6] transition-colors group"
-                                        >
-                                            <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-                                            {t("common.back")}
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={aiIsLoading}
-                                            className="bg-[#7753ff] hover:bg-[#6a47e6] text-white px-8 py-3 rounded-xl flex items-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
+                                    <button
+                                        type="submit"
+                                        disabled={aiIsLoading}
+                                        className="flex items-center gap-3 px-8 py-4 bg-[#7753ff] hover:bg-[#6a47e6] text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-[#7753ff]/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
                                         {aiIsLoading ? (
                                             <>
                                                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -807,8 +879,8 @@ text-gray-800 text-sm">
                                             </>
                                         ) : (
                                             <>
-                                                <Zap className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                                {t("images.generateAIModel")}
+                                                <Sparkles className="w-5 h-5" />
+                                                    {t("images.generateAIModel")}
                                             </>
                                         )}
                                     </button>
@@ -852,6 +924,13 @@ text-gray-800 text-sm">
                                         {realModelPreview ? (
                                             <div className="relative w-full h-40">
                                                 <Image src={realModelPreview} alt="Model Preview" fill className="object-contain rounded-lg" />
+                                                <button
+                                                    type="button"
+                                                    onClick={removeRealModelImage}
+                                                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                                >
+                                                    <X size={14} />
+                                                </button>
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
@@ -899,6 +978,13 @@ text-gray-800 text-sm">
                                         {realOrnamentPreview ? (
                                             <div className="relative w-full h-40">
                                                 <Image src={realOrnamentPreview} alt="Ornament Preview" fill className="object-contain rounded-lg" />
+                                                <button
+                                                    type="button"
+                                                    onClick={removeRealOrnamentImage}
+                                                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                                >
+                                                    <X size={14} />
+                                                </button>
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
@@ -944,6 +1030,13 @@ text-gray-800 text-sm">
                                         {realPosePreview ? (
                                             <div className="relative w-full h-40">
                                                 <Image src={realPosePreview} alt="Pose Preview" fill className="object-contain rounded-lg" />
+                                                <button
+                                                    type="button"
+                                                    onClick={removeRealPoseImage}
+                                                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                                >
+                                                    <X size={14} />
+                                                </button>
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
@@ -1021,7 +1114,16 @@ text-gray-800 text-sm">
                                 )}
 
                                 {/* Action Buttons */}
-                                <div ref={generateSectionRef} className="pt-8 border-t border-gray-200">
+                                <div className="flex items-center justify-between pt-8 border-t border-[#e6e6e6]">
+                                <button
+                                    type="button"
+                                    onClick={() => router.back()}
+                                    className="flex items-center gap-3 px-6 py-3 text-[#7753ff] font-semibold hover:bg-[#7753ff]/10 rounded-xl transition-all duration-300 hover:scale-105"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                    {t("common.back")}
+                                </button>
+                                <div ref={generateSectionRef} className="flex flex-col items-end gap-2">
                                     {showCostNote && numImages > 1 && (
                                         <div className="flex items-center gap-2 px-4 py-3 
 bg-gray-100/80 
@@ -1033,28 +1135,19 @@ text-gray-800 text-sm">
                                             <span>{t("images.creditsCost") || "Cost:"} {numImages * (creditSettings.credits_per_image_generation || 2)} {t("images.credits") || "credits"}. {t("images.clickGenerateAgainToConfirm") || "Click Generate again to confirm."}</span>
                                         </div>
                                     )}
-                                    <div className="flex items-center justify-between">
-                                        <button
-                                            type="button"
-                                            onClick={() => router.back()}
-                                            className="flex items-center gap-2 text-[#7753ff] font-semibold hover:text-[#6a47e6] transition-colors group"
-                                        >
-                                            <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-                                            Back
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={realIsLoading}
-                                            className="bg-[#7753ff] hover:bg-[#6a47e6] text-white px-8 py-3 rounded-xl flex items-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
+                                    <button
+                                        type="submit"
+                                        disabled={realIsLoading}
+                                        className="bg-[#7753ff] hover:bg-[#6a47e6] text-white px-8 py-3 rounded-xl flex items-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
                                         {realIsLoading ? (
                                             <>
                                                 <Loader2 className="w-5 h-5 animate-spin" />
-                                                Generating...
+                                                {t("images.generating")}
                                             </>
                                         ) : (
                                             <>
-                                                <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                                <Sparkles className="w-5 h-5" />
                                                 {t("images.generateImage")}
                                             </>
                                         )}

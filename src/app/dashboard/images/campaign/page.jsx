@@ -11,6 +11,7 @@ import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 import { ORNAMENT_TYPES } from "@/components/images/OrnamentSelection"
+import { OrnamentTypeSelect } from "@/components/images/OrnamentTypeSelect"
 import { ReferenceImagesModal } from "@/components/images/ReferenceImagesModal"
 import toast from "react-hot-toast"
 import { openImageViewer } from "@/lib/openImageViewer"
@@ -46,6 +47,7 @@ export default function CampaignForm() {
     const [modelPreview, setModelPreview] = useState(null)
     const [ornamentPreviews, setOrnamentPreviews] = useState([])
     const [themePreviews, setThemePreviews] = useState([])
+    const [themeReferenceAnalyses, setThemeReferenceAnalyses] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [showReferenceModal, setShowReferenceModal] = useState(false)
     const [result, setResult] = useState(null)
@@ -289,6 +291,12 @@ export default function CampaignForm() {
             setThemePreviews((prev) => [...prev, reader.result]);
           reader.readAsDataURL(file);
         });
+        // Analyze each theme image for campaign context (theme, style, mood, attire); preserve order
+        Promise.all(
+          fileArray.map((file) =>
+            apiService.analyzeReferenceImage(file, "campaign", token).then((data) => data?.analysis_text || "").catch(() => "")
+          )
+        ).then((texts) => setThemeReferenceAnalyses((prev) => [...prev, ...texts]));
       };
       
 
@@ -335,6 +343,7 @@ export default function CampaignForm() {
             themeImages: prev.themeImages.filter((_, i) => i !== index),
         }))
         setThemePreviews((prev) => prev.filter((_, i) => i !== index))
+        setThemeReferenceAnalyses((prev) => prev.filter((_, i) => i !== index))
     }
 
     const handleRegenerate = (imageItem = null) => {
@@ -463,6 +472,8 @@ export default function CampaignForm() {
             formData.themeImages.forEach((image) => {
                 formDataToSend.append("theme_images", image)
             })
+            const themeAnalysisCombined = themeReferenceAnalyses.filter(Boolean).join(" | ")
+            if (themeAnalysisCombined) formDataToSend.append("theme_reference_analysis", themeAnalysisCombined)
             formDataToSend.append("prompt", formData.prompt || t("images.createProfessionalCampaignShot"))
             formDataToSend.append("dimension", formData.dimension)
             formDataToSend.append("num_images", String(numImages))
@@ -651,29 +662,14 @@ export default function CampaignForm() {
                                                         <X size={14} />
                                                     </button>
                                                     <div className="mt-1 space-y-2">
-                                                        <div>
-                                                            <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                                Ornament type
-                                                            </label>
-                                                            <select
-                                                                value={selectedTypeId}
-                                                                onChange={(e) =>
-                                                                    handleOrnamentTypeChange(
-                                                                        index,
-                                                                        e.target.value
-                                                                    )
-                                                                }
-                                                                className="w-full px-2 py-1.5 border border-gray-200 rounded-lg bg-white text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#7753ff] focus:border-transparent"
-                                                                required
-                                                            >
-                                                                <option value="">Select type</option>
-                                                                {ORNAMENT_TYPES.map((type) => (
-                                                                    <option key={type.id} value={type.id}>
-                                                                        {type.name}
-                                                                    </option>
-                                                                ))}
-                                                            </select>
-                                                        </div>
+                                                        <OrnamentTypeSelect
+                                                            selectedType={selectedTypeId}
+                                                            onTypeChange={(typeId) => handleOrnamentTypeChange(index, typeId)}
+                                                            size="sm"
+                                                            placeholder="Select type"
+                                                            label="Ornament type"
+                                                            showLabel={true}
+                                                        />
 
                                                         {selectedType && selectedType.measurements?.length > 0 && (
   <div className="mt-2 border border-gray-200 rounded-xl bg-gray-50 overflow-hidden">
@@ -845,28 +841,27 @@ export default function CampaignForm() {
                             )}
 
                             {/* Action Buttons */}
-                            <div ref={generateSectionRef} className="pt-8 border-t border-gray-200">
-                                {showCostNote && numImages > 1 && (
-                                    <div className="flex items-center gap-2 px-4 py-3 
+                            <div className="flex items-center justify-between pt-8 border-t border-[#e6e6e6]">
+                                <button
+                                    type="button"
+                                    onClick={() => router.back()}
+                                    className="flex items-center gap-3 px-6 py-3 text-[#7753ff] font-semibold hover:bg-[#7753ff]/10 rounded-xl transition-all duration-300 hover:scale-105"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                    {t("common.back")}
+                                </button>
+                                <div ref={generateSectionRef} className="flex flex-col items-end gap-2">
+                                    {showCostNote && numImages > 1 && (
+                                        <div className="flex items-center gap-2 px-4 py-3 
 bg-gray-100/80 
 border border-gray-200 
 rounded-xl 
 text-gray-800 text-sm">
 
-
-                                        <Coins className="w-5 h-5 text-amber-600 shrink-0" />
-                                        <span>{t("images.creditsCost") || "Cost:"} {numImages * (creditSettings.credits_per_image_generation || 2)} {t("images.credits") || "credits"}. {t("images.clickGenerateAgainToConfirm") || "Click Generate again to confirm."}</span>
-                                    </div>
-                                )}
-                                <div className="flex items-center justify-between">
-                                    <button
-                                        type="button"
-                                        onClick={() => router.back()}
-                                        className="flex items-center gap-2 text-[#7753ff] font-semibold hover:text-[#6a47e6] transition-colors group"
-                                    >
-                                        <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-                                        {t("common.back")}
-                                    </button>
+                                            <Coins className="w-5 h-5 text-amber-600 shrink-0" />
+                                            <span>{t("images.creditsCost") || "Cost:"} {numImages * (creditSettings.credits_per_image_generation || 2)} {t("images.credits") || "credits"}. {t("images.clickGenerateAgainToConfirm") || "Click Generate again to confirm."}</span>
+                                        </div>
+                                    )}
                                     <Button
                                         type="submit"
                                         disabled={isLoading}
@@ -923,7 +918,7 @@ text-gray-800 text-sm">
                                                 </div>
                                             ))}
                                         </div>
-                                        <button type="button" onClick={() => { setResult(null); setFormData({ modelType: "ai_model", modelImage: null, ornamentImages: [], ornamentNames: [], ornamentTypes: [], ornamentMeasurements: [], themeImages: [], prompt: "", dimension: "1:1" }); setModelPreview(null); setOrnamentPreviews([]); setThemePreviews([]); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">{t("images.newCampaign")}</button>
+                                        <button type="button" onClick={() => { setResult(null); setFormData({ modelType: "ai_model", modelImage: null, ornamentImages: [], ornamentNames: [], ornamentTypes: [], ornamentMeasurements: [], themeImages: [], prompt: "", dimension: "1:1" }); setModelPreview(null); setOrnamentPreviews([]); setThemePreviews([]); setThemeReferenceAnalyses([]); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">{t("images.newCampaign")}</button>
                                     </>
                                 ) : (
                                     <>
@@ -939,7 +934,7 @@ text-gray-800 text-sm">
                                                 <button onClick={() => downloadImage(result.generated_image_url, "campaign-shot.png")} className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"><Download size={16} />{t("images.download")}</button>
                                                 <button onClick={handleRegenerate} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] hover:bg-[#7753ff]/10 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"><RefreshCw size={16} />{t("images.regenerate")}</button>
                                             </div>
-                                            <button onClick={() => { setResult(null); setFormData({ modelType: "ai_model", modelImage: null, ornamentImages: [], ornamentNames: [], ornamentTypes: [], ornamentMeasurements: [], themeImages: [], prompt: "", dimension: "1:1" }); setModelPreview(null); setOrnamentPreviews([]); setThemePreviews([]); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">{t("images.newCampaign")}</button>
+                                            <button onClick={() => { setResult(null); setFormData({ modelType: "ai_model", modelImage: null, ornamentImages: [], ornamentNames: [], ornamentTypes: [], ornamentMeasurements: [], themeImages: [], prompt: "", dimension: "1:1" }); setModelPreview(null); setOrnamentPreviews([]); setThemePreviews([]); setThemeReferenceAnalyses([]); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">{t("images.newCampaign")}</button>
                                             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                                 <p className="text-blue-700 text-sm flex items-center gap-2"><Sparkles className="w-4 h-4" />{t("images.clickRegenerateToModify")}</p>
                                             </div>

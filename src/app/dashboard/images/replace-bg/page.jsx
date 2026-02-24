@@ -41,6 +41,8 @@ const BackgroundReplaceForm = () => {
       });
     const [productPreview, setProductPreview] = useState(null)
     const [referencePreview, setReferencePreview] = useState(null)
+    const [referenceAnalysis, setReferenceAnalysis] = useState("")
+    const [referenceAnalysisLoading, setReferenceAnalysisLoading] = useState(false)
     const [isDragging, setIsDragging] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [result, setResult] = useState(null)
@@ -267,12 +269,33 @@ const BackgroundReplaceForm = () => {
             setProductPreview(reader.result);
           } else if (type === "referenceImage") {
             setReferencePreview(reader.result);
+            setReferenceAnalysis("");
+            setReferenceAnalysisLoading(true);
+            apiService.analyzeReferenceImage(file, "themed", token).then((data) => {
+              if (data?.success && data.analysis_text) setReferenceAnalysis(data.analysis_text);
+            }).catch(() => {}).finally(() => setReferenceAnalysisLoading(false));
           }
         };
         reader.readAsDataURL(file);
       };
-      
-      
+
+    const removeProductImage = (e) => {
+        e?.stopPropagation?.();
+        setFormData((prev) => ({ ...prev, productImage: null }));
+        setProductPreview(null);
+        setUploadErrors((prev) => ({ ...prev, productImage: null }));
+        const input = document.getElementById("product-image");
+        if (input) input.value = "";
+    };
+    const removeReferenceImage = (e) => {
+        e?.stopPropagation?.();
+        setFormData((prev) => ({ ...prev, referenceImage: null }));
+        setReferencePreview(null);
+        setReferenceAnalysis("");
+        setUploadErrors((prev) => ({ ...prev, referenceImage: null }));
+        const input = document.getElementById("reference-image");
+        if (input) input.value = "";
+    };
 
       
 
@@ -309,6 +332,7 @@ const BackgroundReplaceForm = () => {
             if (formData.referenceImage) {
                 formDataToSend.append("background_image", formData.referenceImage)
             }
+            if (referenceAnalysis) formDataToSend.append("reference_analysis", referenceAnalysis)
             formDataToSend.append("background_color", formData.backgroundColor)
             formDataToSend.append("prompt", formData.prompt || t("images.changeTheBackground"))
             formDataToSend.append("dimension", formData.dimension)
@@ -405,6 +429,13 @@ const BackgroundReplaceForm = () => {
                                     {productPreview ? (
                                         <div className="relative w-full h-40">
                                             <Image src={productPreview} alt="Product Preview" fill className="object-contain rounded-lg" />
+                                            <button
+                                                type="button"
+                                                onClick={removeProductImage}
+                                                className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                            >
+                                                <X size={14} />
+                                            </button>
                                         </div>
                                     ) : (
                                         <div className="text-center">
@@ -457,6 +488,13 @@ const BackgroundReplaceForm = () => {
                                     {referencePreview ? (
                                         <div className="relative w-full h-40">
                                             <Image src={referencePreview} alt="Reference Preview" fill className="object-contain rounded-lg" />
+                                            <button
+                                                type="button"
+                                                onClick={removeReferenceImage}
+                                                className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                            >
+                                                <X size={14} />
+                                            </button>
                                         </div>
                                     ) : (
                                         <div className="text-center">
@@ -566,7 +604,7 @@ text-gray-800 text-sm">
                                     <button
                                         type="submit"
                                         disabled={isLoading}
-                                        className="flex items-center gap-3 px-8 py-4 bg-[#7753ff] hover:bg-[#6a47e6] text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-[#7753ff]/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-[#7753ff] hover:bg-[#6a47e6] text-white px-8 py-3 rounded-xl flex items-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {isLoading ? (
                                             <>
@@ -619,7 +657,7 @@ text-gray-800 text-sm">
                                                 </div>
                                             ))}
                                         </div>
-                                        <button type="button" onClick={() => { setResult(null); setFormData({ productImage: null, referenceImage: null, backgroundColor: "#ffffff", prompt: "", dimension: "1:1" }); setProductPreview(null); setReferencePreview(null); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all">{t("images.newImage")}</button>
+                                        <button type="button" onClick={() => { setResult(null); setFormData({ productImage: null, referenceImage: null, backgroundColor: "#ffffff", prompt: "", dimension: "1:1" }); setProductPreview(null); setReferencePreview(null); setReferenceAnalysis(""); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all">{t("images.newImage")}</button>
                                     </>
                                 ) : (
                                     <>
@@ -635,7 +673,7 @@ text-gray-800 text-sm">
                                                 <button onClick={() => downloadImage(result.generated_image_url, "themed-image.png")} className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"><Download size={16} />{t("images.download")}</button>
                                                 <button onClick={handleRegenerate} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] rounded-xl font-semibold hover:bg-[#7753ff]/10 transition-all flex items-center justify-center gap-2"><RefreshCw size={18} />{t("images.regenerate")}</button>
                                             </div>
-                                            <button onClick={() => { setResult(null); setFormData({ productImage: null, referenceImage: null, backgroundColor: "#ffffff", prompt: "", dimension: "1:1" }); setProductPreview(null); setReferencePreview(null); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all">{t("images.newImage")}</button>
+                                            <button onClick={() => { setResult(null); setFormData({ productImage: null, referenceImage: null, backgroundColor: "#ffffff", prompt: "", dimension: "1:1" }); setProductPreview(null); setReferencePreview(null); setReferenceAnalysis(""); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all">{t("images.newImage")}</button>
                                         </div>
                                     </>
                                 )}
@@ -1051,6 +1089,7 @@ text-gray-800 text-sm">
                                             });
                                             setProductPreview(null);
                                             setReferencePreview(null);
+                                            setReferenceAnalysis("");
                                         }}
                                         className="w-full inline-flex items-center justify-center px-4 py-3 rounded-xl text-sm font-semibold border border-border hover:bg-muted smooth-transition"
                                     >
