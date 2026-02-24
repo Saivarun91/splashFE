@@ -6,6 +6,7 @@ import { ImageGenerationProvider } from "@/context/ImageGenerationContext";
 import { NavigationBlocker } from "@/components/NavigationBlocker";
 import { ProfileCompletionGuard } from "@/components/ProfileCompletionGuard";
 import { Topbar } from "@/components/Topbar";
+import { usePathname } from "next/navigation";
 
 /**
  * Dashboard Layout - Shell-first architecture
@@ -19,6 +20,7 @@ import { Topbar } from "@/components/Topbar";
  * This ensures instant UI appearance with progressive data loading.
  */
 export default function DashboardLayout({ children }) {
+    const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(true);
     const [hovered, setHovered] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
@@ -46,28 +48,33 @@ export default function DashboardLayout({ children }) {
 
     // Compute sidebar width dynamically - no blocking
     const sidebarWidth = isMobile ? 0 : collapsed && !hovered ? 80 : 256; // px
+    const isViewerRoute = pathname === "/dashboard/images/view";
 
     // Shell renders immediately - children handle their own data fetching
     return (
         <div className="flex h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/20">
             {/* Sidebar - renders instantly, no data dependencies */}
-            <Sidebar
-                collapsed={collapsed}
-                hovered={hovered}
-                setHovered={handleSetHovered}
-                setCollapsed={handleSetCollapsed}
-                isMobile={isMobile}
-            />
+            {!isViewerRoute && (
+                <Sidebar
+                    collapsed={collapsed}
+                    hovered={hovered}
+                    setHovered={handleSetHovered}
+                    setCollapsed={handleSetCollapsed}
+                    isMobile={isMobile}
+                />
+            )}
 
             <div className="flex-1 flex flex-col">
                 {/* Topbar - renders instantly */}
-                <Topbar collapsed={collapsed && !hovered} />
+                {!isViewerRoute && <Topbar collapsed={collapsed && !hovered} />}
 
                 {/* Main content - pages fetch data independently */}
                 <main
-                    className="flex-1 overflow-y-auto p-8 transition-all duration-300 mt-16"
+                    className={`flex-1 overflow-y-auto transition-all duration-300 ${
+                        isViewerRoute ? "p-0 mt-0" : "p-8 mt-16"
+                    }`}
                     style={{
-                        marginLeft: `${isMobile ? 0 : sidebarWidth}px`,
+                        marginLeft: isViewerRoute ? 0 : `${isMobile ? 0 : sidebarWidth}px`,
                     }}
                 >
                     {/* AuthProvider removed - already in root layout for global access */}

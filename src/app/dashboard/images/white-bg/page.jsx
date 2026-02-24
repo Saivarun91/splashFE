@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import toast from "react-hot-toast"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
+import { openImageViewer } from "@/lib/openImageViewer"
 const MAX_IMAGE_MB = 10;
 const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -96,8 +97,19 @@ const PlainBackgroundForm = () => {
         }
     }
 
-    const handleView = (url) => {
-        window.open(url, '_blank');
+    const handleView = (selectedImage = null) => {
+        const generatedImages =
+            result?.generated_image_url
+                ? [result]
+                : []
+
+        const viewerItems = generatedImages.map((img, idx) => ({
+            url: img.generated_image_url,
+            label: `Image ${idx + 1}`
+        }))
+
+        const activeIndex = selectedImage ? 0 : 0
+        openImageViewer(viewerItems, activeIndex)
     };
 
     const downloadImage = async (url, filename = "image.png") => {
@@ -475,7 +487,7 @@ const PlainBackgroundForm = () => {
                                     <div className="grid grid-cols-3 gap-3">
                                         <button
                                             type="button"
-                                            onClick={() => handleView(result.generated_image_url)}
+                                            onClick={() => handleView(result)}
                                             className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
                                         >
                                             <Eye size={16} />

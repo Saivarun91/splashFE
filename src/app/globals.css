@@ -273,6 +273,27 @@
       opacity: 1;
     }
   }
+  .thumbnail-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #c7c3ff transparent;
+  }
+
+  .thumbnail-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .thumbnail-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .thumbnail-scroll::-webkit-scrollbar-thumb {
+    background: #c7c3ff;
+    border-radius: 9999px;
+  }
+
+  .thumbnail-scroll::-webkit-scrollbar-thumb:hover {
+    background: #7753ff;
+  }
 }
 
 /* === Enhanced Dashboard Styling Layer === */

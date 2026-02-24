@@ -8,6 +8,7 @@ import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import toast from "react-hot-toast"
+import { openImageViewer } from "@/lib/openImageViewer"
 
 export default function GalleryPage() {
     const router = useRouter()
@@ -69,6 +70,7 @@ export default function GalleryPage() {
             const response = await apiService.getUserImages(filterType, page, 20)
 
             if (response.success) {
+                console.log("API Images:", response.images)
                 let filtered = response.images
                 // Client-side filter for "model" category (both model types)
                 if (filter === "model") {
@@ -163,8 +165,14 @@ export default function GalleryPage() {
     }
 
     const handleView = (image) => {
-        window.open(image.generated_image_url, '_blank')
+        const viewerItems = filteredImages.map((img, idx) => ({
+            url: img.generated_image_url,
+            label: `${getImageCategory(img.type)} ${idx + 1}`
+        }))
+        const activeIndex = filteredImages.findIndex((img) => img.id === image.id)
+        openImageViewer(viewerItems, activeIndex >= 0 ? activeIndex : 0)
     }
+      
 
     const handleRegenerate = (image) => {
         setRegenerateModal({
@@ -348,12 +356,12 @@ export default function GalleryPage() {
                                 >
                                     {/* Image */}
                                     <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden mb-2">
-    <Image
-        src={image.generated_image_url}
-        alt={image.prompt || "Generated image"}
-        fill
-        className="object-cover"
-    />
+                                    <Image
+  src={`${image.generated_image_url}?v=${image.id}`}
+  alt={image.prompt || "Generated image"}
+  fill
+  className="object-cover"
+            />
 
     {/* Dark hover overlay */}
     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />

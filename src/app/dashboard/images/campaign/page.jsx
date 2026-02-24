@@ -13,6 +13,7 @@ import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 import { ORNAMENT_TYPES } from "@/components/images/OrnamentSelection"
 import { ReferenceImagesModal } from "@/components/images/ReferenceImagesModal"
 import toast from "react-hot-toast"
+import { openImageViewer } from "@/lib/openImageViewer"
 import { SiGooglecampaignmanager360  } from "react-icons/si";
 const MAX_IMAGE_MB = 10;
 const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
@@ -85,8 +86,29 @@ export default function CampaignForm() {
         }
     }, [showCostNote])
 
-    const handleView = (url) => {
-        window.open(url, '_blank');
+    const handleView = (selectedImage = null) => {
+        const generatedImages =
+            result?.images && result.images.length > 0
+                ? result.images
+                : result?.generated_image_url
+                  ? [result]
+                  : []
+
+        const viewerItems = generatedImages.map((img, idx) => ({
+            url: img.generated_image_url,
+            label: `Image ${idx + 1}`
+        }))
+
+        const activeIndex = selectedImage
+            ? generatedImages.findIndex((img) => {
+                if (selectedImage.mongo_id && img.mongo_id) {
+                    return img.mongo_id === selectedImage.mongo_id
+                }
+                return img.generated_image_url === selectedImage.generated_image_url
+            })
+            : 0
+
+        openImageViewer(viewerItems, activeIndex >= 0 ? activeIndex : 0)
     };
     const toggleMeasurements = (index) => {
         setOpenMeasurements(prev => ({
@@ -894,7 +916,7 @@ text-gray-800 text-sm">
                                                     </div>
                                                     <div className="p-4 flex flex-wrap gap-3 justify-center border-t border-[#7753ff]/10 items-center">
                                                         <span className="text-sm font-medium text-[#7753ff] bg-white/90 px-2 py-1 rounded border border-[#7753ff]/20">Image {idx + 1}</span>
-                                                        <button type="button" onClick={() => handleView(img.generated_image_url)} className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 flex items-center gap-2"><Eye size={16} />{t("images.view")}</button>
+                                                        <button type="button" onClick={() => handleView(img)} className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 flex items-center gap-2"><Eye size={16} />{t("images.view")}</button>
                                                         <button type="button" onClick={() => downloadImage(img.generated_image_url, `campaign-${idx + 1}.png`)} className="px-4 py-3 bg-[#7753ff] text-white rounded-xl font-semibold flex items-center gap-2"><Download size={16} />{t("images.download")}</button>
                                                         <button type="button" onClick={() => handleRegenerate({ ...img, index: idx })} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] rounded-xl font-semibold hover:bg-[#7753ff]/10 flex items-center gap-2"><RefreshCw size={16} />{t("images.regenerate")}</button>
                                                     </div>
@@ -913,7 +935,7 @@ text-gray-800 text-sm">
                                                 <p className="text-green-700 font-semibold">✓ {t("images.campaignShotGeneratedSuccess")}</p>
                                             </div>
                                             <div className="grid grid-cols-3 gap-3">
-                                                <button onClick={() => handleView(result.generated_image_url)} className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"><Eye size={16} />{t("images.view")}</button>
+                                                <button onClick={() => handleView(result)} className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"><Eye size={16} />{t("images.view")}</button>
                                                 <button onClick={() => downloadImage(result.generated_image_url, "campaign-shot.png")} className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"><Download size={16} />{t("images.download")}</button>
                                                 <button onClick={handleRegenerate} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] hover:bg-[#7753ff]/10 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"><RefreshCw size={16} />{t("images.regenerate")}</button>
                                             </div>
