@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
-    Search,
     Bell,
     User,
     X,
@@ -212,16 +211,7 @@ export function Topbar({ collapsed }) {
                 </div>
             )}
 
-            {/* Search */}
-            <div className="flex-1 flex justify-center">
-                <div className="relative w-1/3">
-                    <input
-                        placeholder="Search..."
-                        className="w-full border-b px-4 py-2 focus:outline-none"
-                    />
-                    <Search className="absolute right-3 top-3 w-4 h-4" />
-                </div>
-            </div>
+            <div className="flex-1" />
 
             {/* Right Section */}
             <div className="flex items-center gap-4">

@@ -9,13 +9,21 @@ import { formatRelativeCommentTime } from "@/lib/comment-time"
 
 export function ColorPalette({ showSuggestions = false, collectionData, project, onSave, onSelectionsChange, onImagesChange, canEdit = true }) {
     const { token } = useAuth()
+    const [selectedOutfits, setSelectedOutfits] = useState([])
     const [selectedColors, setSelectedColors] = useState([])
     const [pickedColors, setPickedColors] = useState([])
     const [colorInstructions, setColorInstructions] = useState("")
-    const [uploadedImages, setUploadedImages] = useState([])
-    const [uploading, setUploading] = useState(false)
+    const [uploadedImages, setUploadedImages] = useState({
+        outfits: [],
+        colors: [],
+    })
+    const [uploading, setUploading] = useState({
+        outfits: false,
+        colors: false,
+    })
     const [activeCommentField, setActiveCommentField] = useState(null)
     const [commentsByField, setCommentsByField] = useState({
+        outfits: [],
         color_images: [],
     })
     const [draftComment, setDraftComment] = useState("")
@@ -25,10 +33,14 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
     const [commentMessage, setCommentMessage] = useState("")
     const [savingComments, setSavingComments] = useState(false)
     const [nowMs, setNowMs] = useState(Date.now())
-    const fileInputRef = useRef(null)
+    const fileInputRefs = {
+        outfits: useRef(null),
+        colors: useRef(null),
+    }
 
     // Get suggestions and selections from collection data
     const item = collectionData?.items?.[0]
+    const aiOutfitSuggestions = (item?.suggested_outfits || []).slice(0, 10)
     const aiColorSuggestions = (item?.suggested_colors || []).slice(0, 10)
 
     // Debug: Log suggestions to help troubleshoot
@@ -37,19 +49,20 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
             console.log('Color Palette - Collection item:', item)
             console.log('Color Palette - Suggested colors:', item.suggested_colors)
             console.log('Color Palette - AI Color Suggestions:', aiColorSuggestions)
+            console.log('Color Palette - AI Outfit Suggestions:', aiOutfitSuggestions)
             console.log('Color Palette - Show Suggestions prop:', showSuggestions)
         }
-    }, [item, aiColorSuggestions, showSuggestions])
+    }, [item, aiColorSuggestions, aiOutfitSuggestions, showSuggestions])
 
     // Load existing selections and uploaded images when collection data changes
     useEffect(() => {
         if (item) {
+            setSelectedOutfits(item.selected_outfits || [])
             setSelectedColors(item.selected_colors || [])
             setPickedColors(item.picked_colors || [])
             setColorInstructions(item.color_instructions || "")
 
-            // Load existing uploaded color images from server
-            const existingImages = (item.uploaded_color_images || []).map(img => ({
+            const existingOutfitImages = (item.uploaded_outfit_images || []).map(img => ({
                 id: img.id || Date.now() + Math.random(),
                 local_path: img.local_path,
                 cloud_url: img.cloud_url,
@@ -60,15 +73,34 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                 category: img.category,
                 url: img.cloud_url,
                 name: img.original_filename,
-                isFromServer: true // Flag to indicate this image was loaded from server
+                isFromServer: true
+            }))
+            const existingColorImages = (item.uploaded_color_images || []).map(img => ({
+                id: img.id || Date.now() + Math.random(),
+                local_path: img.local_path,
+                cloud_url: img.cloud_url,
+                original_filename: img.original_filename,
+                uploaded_by: img.uploaded_by,
+                uploaded_at: img.uploaded_at,
+                file_size: img.file_size,
+                category: img.category,
+                url: img.cloud_url,
+                name: img.original_filename,
+                isFromServer: true
             }))
 
-            setUploadedImages(existingImages)
-            console.log('Loaded existing color images from server:', existingImages)
+            setUploadedImages({
+                outfits: existingOutfitImages,
+                colors: existingColorImages,
+            })
         }
     }, [item])
 
     const commentFieldConfig = {
+        outfits: {
+            payloadKey: "outfits_comments",
+            title: "Outfits",
+        },
         color_images: {
             payloadKey: "color_images_comments",
             title: "Upload Color Images",
@@ -80,9 +112,10 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
 
     useEffect(() => {
         setCommentsByField({
+            outfits: Array.isArray(collectionData?.outfits_comments) ? collectionData.outfits_comments : [],
             color_images: Array.isArray(collectionData?.color_images_comments) ? collectionData.color_images_comments : [],
         })
-    }, [collectionData?.color_images_comments])
+    }, [collectionData?.outfits_comments, collectionData?.color_images_comments])
 
     const loadCommentsFromDb = async () => {
         if (!collectionData?.id || !token) return
@@ -91,6 +124,7 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                 cache: "no-store",
             })
             setCommentsByField({
+                outfits: Array.isArray(latestCollection?.outfits_comments) ? latestCollection.outfits_comments : [],
                 color_images: Array.isArray(latestCollection?.color_images_comments) ? latestCollection.color_images_comments : [],
             })
         } catch (error) {
@@ -273,385 +307,255 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
         )
     }
 
-    const toggleSelection = (color) => {
-        if (selectedColors.includes(color)) {
-            setSelectedColors(selectedColors.filter(item => item !== color))
-        } else {
-            setSelectedColors([...selectedColors, color])
-        }
-    }
-
-    // Handle file upload - now uploads immediately to server
-    const handleFileUpload = async (files) => {
+    const handleFileUpload = async (category, files) => {
         if (!files || files.length === 0) return
-        if (!project?.id || !collectionData?.id) {
-            console.error('Missing project or collection data')
-            return
-        }
+        if (!project?.id || !collectionData?.id) return
 
-        setUploading(true)
+        const uploadCategory = category === "outfits" ? "outfit" : "color"
+        setUploading((prev) => ({ ...prev, [category]: true }))
 
         try {
-            // Upload to server immediately
             const response = await apiService.uploadWorkflowImage(
                 project.id,
                 collectionData.id,
-                'color',
+                uploadCategory,
                 Array.from(files),
                 token
             )
+            if (!response?.success) return
 
-            if (response.success) {
-                // Add the uploaded images to local state
-                const newImages = response.uploaded_images.map(img => ({
-                    id: img.id || Date.now() + Math.random(),
-                    local_path: img.local_path,
-                    cloud_url: img.cloud_url,
-                    original_filename: img.original_filename,
-                    uploaded_by: img.uploaded_by,
-                    uploaded_at: img.uploaded_at,
-                    file_size: img.file_size,
-                    category: img.category,
-                    url: img.cloud_url, // Use cloud URL for display
-                    name: img.original_filename,
-                    isFromServer: false // Flag to indicate this image was just uploaded
-                }))
+            const newImages = (response.uploaded_images || []).map((img) => ({
+                id: img.id || Date.now() + Math.random(),
+                local_path: img.local_path,
+                cloud_url: img.cloud_url,
+                original_filename: img.original_filename,
+                uploaded_by: img.uploaded_by,
+                uploaded_at: img.uploaded_at,
+                file_size: img.file_size,
+                category: img.category,
+                url: img.cloud_url,
+                name: img.original_filename,
+                isFromServer: false,
+            }))
 
-                setUploadedImages(prev => [...prev, ...newImages])
-                console.log(`Successfully uploaded ${newImages.length} color images`)
-            } else {
-                console.error('Upload failed:', response.error)
-            }
-        } catch (error) {
-            console.error('Error uploading images:', error)
+            setUploadedImages((prev) => ({
+                ...prev,
+                [category]: [...prev[category], ...newImages],
+            }))
         } finally {
-            setUploading(false)
+            setUploading((prev) => ({ ...prev, [category]: false }))
         }
     }
 
-    // Remove uploaded image
-    const removeUploadedImage = async (imageId) => {
-        if (!project?.id || !collectionData?.id) {
-            console.error('Missing project or collection data')
-            return
-        }
+    const removeUploadedImage = async (category, imageId) => {
+        if (!project?.id || !collectionData?.id) return
+        const image = uploadedImages[category]?.find((img) => img.id === imageId)
+        if (!image) return
 
-        // Find the image to get its cloud_url
-        const image = uploadedImages.find(img => img.id === imageId)
-        if (!image) {
-            console.error('Image not found in local state')
-            return
-        }
+        const removeCategory = category === "outfits" ? "outfits" : "colors"
+        const response = await apiService.removeWorkflowImage(
+            project.id,
+            collectionData.id,
+            imageId,
+            removeCategory,
+            token,
+            image.cloud_url || image.url
+        )
+        if (!response?.success) return
 
-        try {
-            const response = await apiService.removeWorkflowImage(
-                project.id,
-                collectionData.id,
-                imageId,
-                'colors',
-                token,
-                image.cloud_url || image.url
-            )
-
-            if (response.success) {
-                // Remove from local state
-                setUploadedImages(prev => prev.filter(img => img.id !== imageId))
-
-                // Refresh collection data
-                const updatedData = await apiService.getCollection(collectionData.id, token)
-                if (updatedData && onSave) {
-                    await onSave({ imagesUpdated: true })
-                }
-            } else {
-                console.error('Failed to remove image:', response.error)
-            }
-        } catch (error) {
-            console.error('Error removing image:', error)
-        }
+        setUploadedImages((prev) => ({
+            ...prev,
+            [category]: prev[category].filter((img) => img.id !== imageId),
+        }))
     }
 
-    // Handle file input change
-    const handleFileInputChange = async (event) => {
+    const handleFileInputChange = async (category, event) => {
         const files = event.target.files
-        await handleFileUpload(files)
-        // Reset the input
-        event.target.value = ''
+        await handleFileUpload(category, files)
+        event.target.value = ""
     }
 
-    // Trigger file input
-    const triggerFileInput = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click()
-        }
+    const triggerFileInput = (category) => {
+        if (fileInputRefs[category]?.current) fileInputRefs[category].current.click()
     }
 
-    // Export selections through a getter function
-    const getSelections = () => ({
-        colors: selectedColors,
-        pickedColors: pickedColors,
-        colorInstructions: colorInstructions
-    })
-
-    // Notify parent of selection changes
     useEffect(() => {
-        if (onSelectionsChange) {
-            onSelectionsChange(getSelections())
-        }
-    }, [selectedColors, pickedColors, colorInstructions])
+        if (!onSelectionsChange) return
+        onSelectionsChange({
+            outfits: selectedOutfits,
+            colors: selectedColors,
+            pickedColors,
+            colorInstructions,
+        })
+    }, [selectedOutfits, selectedColors, pickedColors, colorInstructions])
 
-    // Notify parent of image changes
     useEffect(() => {
-        if (onImagesChange) {
-            onImagesChange(uploadedImages)
-        }
+        if (!onImagesChange) return
+        onImagesChange(uploadedImages)
     }, [uploadedImages])
-
-    const hasSuggestions = showSuggestions && aiColorSuggestions.length > 0
 
     return (
         <div className="space-y-4">
-            <h3 className="font-bold text-[#1a1a1a] text-lg">Color Palette</h3>
+            <div className="grid grid-cols-2 gap-6">
+                <div className="border-2 border-dashed border-[#b0bec5] rounded-lg p-6 space-y-4">
+                    <div className="flex items-center justify-between gap-2">
+                        <div>
+                            <h3 className="font-bold text-[#1a1a1a] text-lg mb-1">Outfits</h3>
+                            <p className="text-sm text-[#708090]">Select outfit direction and upload outfit references</p>
+                        </div>
+                        {renderCommentButton("outfits")}
+                    </div>
 
-            {hasSuggestions ? (
-                // Layout when suggestions are present: AI suggestions + color picker in row, upload section below
-                <>
-                    <div className="flex gap-6">
-                        {/* AI Suggested Color Palettes Section */}
-                        <div className="flex-1 w-2/3 space-y-3">
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
-                                <p className="text-blue-600 text-sm text-center font-medium">AI Suggested Color Palettes</p>
+                    {showSuggestions && aiOutfitSuggestions.length > 0 && (
+                        <div className="space-y-3">
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <p className="text-blue-600 text-sm font-medium">AI Suggested Outfits</p>
+                            </div>
+                            <MultiSelect
+                                options={aiOutfitSuggestions}
+                                selected={selectedOutfits}
+                                onChange={setSelectedOutfits}
+                                placeholder="Select outfits..."
+                                disabled={!canEdit}
+                            />
+                        </div>
+                    )}
+                    <div className="space-y-3">
+                    {showSuggestions && aiOutfitSuggestions.length > 0 && (
+                        <p className="text-sm text-[#708090] text-center">Or</p>
+                    )}
+                    </div>
+                    
+                    <input
+                        ref={fileInputRefs.outfits}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => handleFileInputChange("outfits", e)}
+                        className="hidden"
+                        disabled={!canEdit}
+                    />
+                     
+
+                    <Button
+                        variant="outline"
+                        className="w-full bg-transparent"
+                        disabled={!canEdit || uploading.outfits}
+                        onClick={() => triggerFileInput("outfits")}
+                    >
+
+                        <Upload className="w-4 h-4 mr-2" />
+                        {uploading.outfits ? "Uploading..." : "Choose files"}
+                    </Button>
+                    {uploadedImages.outfits.length > 0 && (
+                        <div className="space-y-2">
+                            <p className="text-xs text-[#708090]">{uploadedImages.outfits.length} file(s) selected</p>
+
+
+                            <div className="grid grid-cols-2 gap-2">
+                                {uploadedImages.outfits.map((image) => (
+                                    <div key={image.id} className="relative group">
+                                        <img src={image.url} alt={image.name} className="w-full h-16 object-cover rounded border" />
+                                        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); window.open(image.url || image.cloud_url, "_blank") }}
+                                                className="bg-blue-500 text-white rounded-full p-1 hover:bg-blue-600 transition-colors"
+                                                title="View image"
+                                            >
+                                                <Eye className="w-3 h-3" />
+                                            </button>
+                                            <button
+                                                onClick={() => removeUploadedImage("outfits", image.id)}
+                                                className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                                                disabled={!canEdit}
+                                                title="Remove image"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="border-2 border-dashed border-[#b0bec5] rounded-lg p-6 space-y-4">
+                    <div className="flex items-center justify-between gap-2">
+                        <div>
+                            <h3 className="font-bold text-[#1a1a1a] text-lg mb-1">Color Palette</h3>
+                            <p className="text-sm text-[#708090]">Select palette, pick colors, and upload color references</p>
+                        </div>
+                        {renderCommentButton("color_images")}
+                    </div>
+
+                    {showSuggestions && aiColorSuggestions.length > 0 && (
+                        <div className="space-y-3">
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <p className="text-blue-600 text-sm font-medium">AI Suggested Color Palettes</p>
                             </div>
                             <MultiSelect
                                 options={aiColorSuggestions}
                                 selected={selectedColors}
-                                onChange={(newSelection) => setSelectedColors(newSelection)}
+                                onChange={setSelectedColors}
                                 placeholder="Select color palettes..."
                                 disabled={!canEdit}
                             />
                         </div>
+                    )}
 
-                        {/* Color Picker Section */}
-                        <div className="flex-1 w-1/2 space-y-3">
-                            <p className="text-sm text-[#708090]">Or pick specific colors:</p>
-                            <ColorPicker
-                                selectedColors={pickedColors}
-                                onColorsChange={setPickedColors}
-                                disabled={!canEdit}
-                            />
+                    <ColorPicker selectedColors={pickedColors} onColorsChange={setPickedColors} disabled={!canEdit} />
 
-                            {/* Display picked colors */}
-                            {pickedColors.length > 0 && (
-                                <div className="space-y-2">
-                                    <p className="text-xs text-[#708090]">
-                                        {pickedColors.length} color(s) selected
-                                    </p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {pickedColors.map((color, index) => (
-                                            <div key={index} className="relative group">
-                                                <div
-                                                    className="w-8 h-8 rounded border border-gray-300"
-                                                    style={{
-                                                        background: color.includes('gradient') ? color : undefined,
-                                                        backgroundColor: color.includes('gradient') ? 'transparent' : color
-                                                    }}
-                                                    title={color}
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Upload Color Images Section */}
-                    <div className="border-2 border-dashed border-[#b0bec5] rounded-lg p-6 space-y-4">
-                        <div>
-                            <div className="flex items-center justify-between gap-2">
-                                <h4 className="font-bold text-[#1a1a1a] mb-1">Upload Color Images</h4>
-                                {renderCommentButton("color_images")}
-                            </div>
-                            <p className="text-sm text-[#708090]">Upload inspiration images for color palette</p>
-                        </div>
-
-                        <div className="space-y-3">
-                            {/* Hidden file input */}
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={handleFileInputChange}
-                                className="hidden"
-                                disabled={!canEdit}
-                            />
-
-                            <Button
-                                variant="outline"
-                                className="w-full bg-transparent"
-                                disabled={!canEdit || uploading}
-                                onClick={triggerFileInput}
-                            >
-                                <Upload className="w-4 h-4 mr-2" />
-                                {uploading ? 'Uploading...' : 'Choose files'}
-                            </Button>
-
-                            {/* Uploaded images preview */}
-                            {uploadedImages.length > 0 && (
-                                <div className="space-y-2">
-                                    <p className="text-xs text-[#708090]">
-                                        {uploadedImages.length} file(s) selected
-                                    </p>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {uploadedImages.map((image) => (
-                                            <div key={image.id} className="relative group">
-                                                <img
-                                                    src={image.url}
-                                                    alt={image.name}
-                                                    className="w-full h-16 object-cover rounded border"
-                                                />
-                                                <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            window.open(image.url || image.cloud_url, '_blank')
-                                                        }}
-                                                        className="bg-blue-500 text-white rounded-full p-1 hover:bg-blue-600 transition-colors"
-                                                        title="View image"
-                                                    >
-                                                        <Eye className="w-3 h-3" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => removeUploadedImage(image.id)}
-                                                        className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                                                        disabled={!canEdit}
-                                                        title="Remove image"
-                                                    >
-                                                        <X className="w-3 h-3" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </>
-            ) : (
-                // Layout when suggestions are NOT present: Color picker and upload section side by side in grid
-                <div className="grid grid-cols-2 gap-6">
-                    {/* Color Picker Section */}
-                    <div className="border-2 border-dashed border-[#b0bec5] rounded-lg p-6 space-y-4">
-                        <div>
-                            <h4 className="font-bold text-[#1a1a1a] mb-1">Pick Specific Colors</h4>
-                            <p className="text-sm text-[#708090]">Choose colors for your palette</p>
-                        </div>
-                        <ColorPicker
-                            selectedColors={pickedColors}
-                            onColorsChange={setPickedColors}
-                            disabled={!canEdit}
-                        />
-
-                        {/* Display picked colors */}
-                        {pickedColors.length > 0 && (
-                            <div className="space-y-2">
-                                <p className="text-xs text-[#708090]">
-                                    {pickedColors.length} color(s) selected
-                                </p>
-                                <div className="flex flex-wrap gap-2">
-                                    {pickedColors.map((color, index) => (
-                                        <div key={index} className="relative group">
-                                            <div
-                                                className="w-8 h-8 rounded border border-gray-300"
-                                                style={{
-                                                    background: color.includes('gradient') ? color : undefined,
-                                                    backgroundColor: color.includes('gradient') ? 'transparent' : color
-                                                }}
-                                                title={color}
-                                            />
+                    <p className="text-sm text-[#708090]">Upload inspiration images for color palette</p>
+                    <input
+                        ref={fileInputRefs.colors}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => handleFileInputChange("colors", e)}
+                        className="hidden"
+                        disabled={!canEdit}
+                    />
+                    <Button
+                        variant="outline"
+                        className="w-full bg-transparent"
+                        disabled={!canEdit || uploading.colors}
+                        onClick={() => triggerFileInput("colors")}
+                    >
+                        <Upload className="w-4 h-4 mr-2" />
+                        {uploading.colors ? "Uploading..." : "Choose files"}
+                    </Button>
+                    {uploadedImages.colors.length > 0 && (
+                        <div className="space-y-2">
+                            <p className="text-xs text-[#708090]">{uploadedImages.colors.length} file(s) selected</p>
+                            <div className="grid grid-cols-2 gap-2">
+                                {uploadedImages.colors.map((image) => (
+                                    <div key={image.id} className="relative group">
+                                        <img src={image.url} alt={image.name} className="w-full h-16 object-cover rounded border" />
+                                        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); window.open(image.url || image.cloud_url, "_blank") }}
+                                                className="bg-blue-500 text-white rounded-full p-1 hover:bg-blue-600 transition-colors"
+                                                title="View image"
+                                            >
+                                                <Eye className="w-3 h-3" />
+                                            </button>
+                                            <button
+                                                onClick={() => removeUploadedImage("colors", image.id)}
+                                                className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                                                disabled={!canEdit}
+                                                title="Remove image"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Upload Color Images Section */}
-                    <div className="border-2 border-dashed border-[#b0bec5] rounded-lg p-6 space-y-4">
-                        <div>
-                            <div className="flex items-center justify-between gap-2">
-                                <h4 className="font-bold text-[#1a1a1a] mb-1">Upload Color Images</h4>
-                                {renderCommentButton("color_images")}
-                            </div>
-                            <p className="text-sm text-[#708090]">Upload inspiration images for color palette</p>
-                        </div>
-
-                        <div className="space-y-3">
-                            {/* Hidden file input */}
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={handleFileInputChange}
-                                className="hidden"
-                                disabled={!canEdit}
-                            />
-
-                            <Button
-                                variant="outline"
-                                className="w-full bg-transparent"
-                                disabled={!canEdit || uploading}
-                                onClick={triggerFileInput}
-                            >
-                                <Upload className="w-4 h-4 mr-2" />
-                                {uploading ? 'Uploading...' : 'Choose files'}
-                            </Button>
-
-                            {/* Uploaded images preview */}
-                            {uploadedImages.length > 0 && (
-                                <div className="space-y-2">
-                                    <p className="text-xs text-[#708090]">
-                                        {uploadedImages.length} file(s) selected
-                                    </p>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {uploadedImages.map((image) => (
-                                            <div key={image.id} className="relative group">
-                                                <img
-                                                    src={image.url}
-                                                    alt={image.name}
-                                                    className="w-full h-16 object-cover rounded border"
-                                                />
-                                                <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            window.open(image.url || image.cloud_url, '_blank')
-                                                        }}
-                                                        className="bg-blue-500 text-white rounded-full p-1 hover:bg-blue-600 transition-colors"
-                                                        title="View image"
-                                                    >
-                                                        <Eye className="w-3 h-3" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => removeUploadedImage(image.id)}
-                                                        className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                                                        disabled={!canEdit}
-                                                        title="Remove image"
-                                                    >
-                                                        <X className="w-3 h-3" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
                                     </div>
-                                </div>
-                            )}
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
-            )}
+            </div>
             {activeCommentField && (
                 <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
                     <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-[#e6e6e6]">

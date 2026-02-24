@@ -411,6 +411,7 @@ class ApiService {
         const normalizedType = String(commentType || 'themes').trim().toLowerCase();
         const payloadFieldMap = {
             themes: 'themes_comments',
+            outfits: 'outfits_comments',
             backgrounds: 'backgrounds_comments',
             poses: 'poses_comments',
             locations: 'locations_comments',
@@ -1304,7 +1305,7 @@ class ApiService {
         });
     }
 
-    async getRecentImages(token, limit = 5) {
+    async getRecentImages(token, limit = 8) {
         return this.get('/probackendapp/api/recent/images/', {
             params: { limit },
             headers: {

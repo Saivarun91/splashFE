@@ -26,12 +26,16 @@ export default function Dashboard() {
     });
 
     const currentHour = new Date().getHours();
-    let greeting;
-    if (currentHour < 12) {
+
+    let greeting = "";
+    
+    if (currentHour >= 0 && currentHour < 12) {
         greeting = t("dashboard.goodMorning");
-    } else if (currentHour < 18) {
+    } 
+    else if (currentHour >= 12 && currentHour < 18) {
         greeting = t("dashboard.goodAfternoon");
-    } else {
+    } 
+    else {
         greeting = t("dashboard.goodEvening");
     }
 
@@ -65,8 +69,13 @@ export default function Dashboard() {
 
                     // Calculate stats
                     const activeProjects = projectsData.length;
-                    const inProgress = projectsData.filter(p => p.status === 'in_progress' || p.status === 'active').length;
-                    const completed = projectsData.filter(p => p.status === 'completed').length;
+                    const inProgressStatuses = new Set(["progress", "in_progress", "in-progress", "active"]);
+                    const inProgress = projectsData.filter((p) =>
+                        inProgressStatuses.has(String(p?.status || "").toLowerCase())
+                    ).length;
+                    const completed = projectsData.filter(
+                        (p) => String(p?.status || "").toLowerCase() === "completed"
+                    ).length;
                     const totalImages = projectsData.reduce((sum, p) => sum + (p.total_images || 0), 0);
                     const imagesGenerated = projectsData.reduce((sum, p) => sum + (p.images_generated || 0), 0);
 
@@ -81,7 +90,7 @@ export default function Dashboard() {
                 }
 
                 // Fetch recent images from ImageGenerationHistory
-                const imagesResponse = await apiService.getRecentImages(token, 5);
+                const imagesResponse = await apiService.getRecentImages(token);
                 if (imagesResponse?.success && imagesResponse?.images) {
                     setRecentImages(imagesResponse.images);
                 }
@@ -141,7 +150,7 @@ export default function Dashboard() {
                                     <div className="text-2xl font-bold text-gray-900">
                                         {userCredits.balance.toLocaleString()}
                                     </div>
-                                    <div className="w-full bg-gray-200 h-2 rounded-full mt-2">
+                                    {/* <div className="w-full bg-gray-200 h-2 rounded-full mt-2">
                                         <div 
                                             className="bg-indigo-500 h-2 rounded-full transition-all"
                                             style={{ 
@@ -150,7 +159,7 @@ export default function Dashboard() {
                                                     : '0%' 
                                             }}
                                         />
-                                    </div>
+                                    </div> */}
                                     <p className="text-xs text-gray-500 mt-1">
                                         {t("dashboard.individualCredits") || "Individual user credits"}
                                     </p>
@@ -276,7 +285,7 @@ export default function Dashboard() {
                     if (loading) {
                         return (
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                {[1, 2, 3, 4].map((i) => (
+                                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                                     <div
                                         key={i}
                                         className="aspect-square overflow-hidden rounded-xl bg-gray-200 border border-gray-200 animate-pulse"

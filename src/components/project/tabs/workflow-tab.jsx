@@ -53,6 +53,7 @@ export function WorkflowTab({ project }) {
     // State to hold current selections
     const [currentSelections, setCurrentSelections] = useState({
         themes: [],
+        outfits: [],
         backgrounds: [],
         poses: [],
         locations: [],
@@ -65,6 +66,7 @@ export function WorkflowTab({ project }) {
     // State to hold uploaded images
     const [uploadedImages, setUploadedImages] = useState({
         themes: [],
+        outfits: [],
         backgrounds: [],
         poses: [],
         locations: [],
@@ -183,6 +185,7 @@ export function WorkflowTab({ project }) {
                             const item = data.items[0]
                             const hasSuggestions = (
                                 (item.suggested_themes && item.suggested_themes.length > 0) ||
+                                (item.suggested_outfits && item.suggested_outfits.length > 0) ||
                                 (item.suggested_backgrounds && item.suggested_backgrounds.length > 0) ||
                                 (item.suggested_colors && item.suggested_colors.length > 0)
                             )
@@ -201,11 +204,13 @@ export function WorkflowTab({ project }) {
                         const item = data.items[0]
                         const hasSelections = (
                             (item.selected_themes && item.selected_themes.length > 0) ||
+                            (item.selected_outfits && item.selected_outfits.length > 0) ||
                             (item.selected_backgrounds && item.selected_backgrounds.length > 0) ||
                             (item.selected_colors && item.selected_colors.length > 0) ||
                             (item.selected_poses && item.selected_poses.length > 0) ||
                             (item.selected_locations && item.selected_locations.length > 0) ||
                             (item.uploaded_theme_images && item.uploaded_theme_images.length > 0) ||
+                            (item.uploaded_outfit_images && item.uploaded_outfit_images.length > 0) ||
                             (item.uploaded_background_images && item.uploaded_background_images.length > 0) ||
                             (item.uploaded_pose_images && item.uploaded_pose_images.length > 0) ||
                             (item.uploaded_location_images && item.uploaded_location_images.length > 0) ||
@@ -457,7 +462,7 @@ export function WorkflowTab({ project }) {
                             onSave={handleStepSave}
                             showSuggestions={shouldShowSuggestions}
                             onSelectionsChange={(selections) => setCurrentSelections(prev => ({ ...prev, ...selections }))}
-                            onImagesChange={(images) => setUploadedImages(prev => ({ ...prev, colors: images }))}
+                            onImagesChange={(images) => setUploadedImages(prev => ({ ...prev, ...images }))}
                             canEdit={canEdit}
                         />
 
