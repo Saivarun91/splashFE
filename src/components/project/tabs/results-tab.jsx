@@ -867,7 +867,7 @@ export default function ResultsTab({ project }) {
                                                 className="object-cover cursor-pointer"
                                                 onClick={() => window.open(image.image_url, "_blank")}
                                                 sizes="(max-width: 768px) 50vw, 25vw"
-                                                unoptimized={image.image_url?.includes('cloudinary') || image.image_url?.includes('imagekit')}
+                                                unoptimized={image.image_url?.includes('cloudinary') || image.image_url?.includes('imagekit') || image.image_url?.includes('localhost') || image.image_url?.includes('127.0.0.1') || image.image_url?.startsWith('/media')}
                                             />
                                             {/* Hover Overlay */}
                                             <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
