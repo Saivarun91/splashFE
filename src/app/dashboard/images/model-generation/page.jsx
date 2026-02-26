@@ -426,7 +426,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             formDataToSend.append("num_images", String(numImages))
 
             const response = await apiService.generateModelWithOrnament(formDataToSend, token)
-
+            console.log("response for ai model generation:", response)
             if (response && (response.images?.length || response.generated_image_url || response.status === "success")) {
                 setAiResult(response)
             } else {
@@ -625,6 +625,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
             formDataToSend.append("num_images", String(numImages))
 
             const response = await apiService.generateRealModelWithOrnament(formDataToSend, token)
+            console.log("response for real model generation:", response)
 
             if (response && (response.images?.length || response.generated_image_url || response.status === "success")) {
                 setRealResult(response)
@@ -819,13 +820,20 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
 
                                 {/* Number of images */}
                                 <div>
-                                    <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <MdPhotoSizeSelectLarge size={20} className="text-[#7753ff]" />
                                         {t("images.numberOfImages") || "Number of images"}
                                     </label>
-                                    <div className="flex flex-wrap items-center gap-4">
-                                        <input type="number" min={MIN_IMAGES} max={MAX_IMAGES} value={numImages} onChange={(e) => { const v = parseInt(e.target.value, 10); if (!isNaN(v)) setNumImages(Math.max(MIN_IMAGES, Math.min(MAX_IMAGES, v))); }} className="w-24 px-4 py-3 border border-[#e6e6e6] rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7753ff]" />
-                                        <span className="text-[#737373] text-sm">{MIN_IMAGES}–{MAX_IMAGES} {t("images.images") || "images"}</span>
+                                    <div className="flex items-center gap-3">
+                                        <input
+                                            type="number"
+                                            min={MIN_IMAGES}
+                                            max={MAX_IMAGES}
+                                            value={numImages}
+                                            onChange={(e) => { const v = parseInt(e.target.value, 10); if (!isNaN(v)) setNumImages(Math.max(MIN_IMAGES, Math.min(MAX_IMAGES, v))); }}
+                                            className="w-20 h-11 px-3 py-2 text-center border border-[#e6e6e6] rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7753ff]"
+                                        />
+                                        <span className="text-gray-500 text-sm leading-none">{MIN_IMAGES}–{MAX_IMAGES} {t("images.images") || "images"}</span>
                                     </div>
                                 </div>
                                 {/* Dimensions */}
@@ -846,22 +854,22 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                 )}
 
                                 {/* Action Buttons */}
-                                <div className="flex items-center justify-between pt-8 border-t border-[#e6e6e6]">
+                                <div className="pt-6 border-t border-[#e6e6e6] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                 <button
                                     type="button"
                                     onClick={() => router.back()}
-                                    className="flex items-center gap-3 px-6 py-3 text-[#7753ff] font-semibold hover:bg-[#7753ff]/10 rounded-xl transition-all duration-300 hover:scale-105"
+                                    className="flex items-center justify-center gap-3 px-6 py-3 text-[#7753ff] font-semibold hover:bg-[#7753ff]/10 rounded-xl transition-all duration-300 hover:scale-105 w-full sm:w-auto"
                                 >
                                     <ChevronLeft className="w-5 h-5" />
                                     {t("common.back")}
                                 </button>
-                                <div ref={generateSectionRef} className="flex flex-col items-end gap-2">
+                                <div ref={generateSectionRef} className="flex flex-col items-stretch sm:items-end gap-2 w-full sm:w-auto">
                                     {showCostNote && numImages > 1 && (
-                                        <div className="flex items-center gap-2 px-4 py-3 
+                                        <div className="flex items-start gap-2 px-4 py-3 w-full sm:max-w-md
 bg-gray-100/80 
 border border-gray-200 
 rounded-xl 
-text-gray-800 text-sm">
+text-gray-800 text-sm leading-snug">
 
                                             <Coins className="w-5 h-5 text-amber-600 shrink-0" />
                                             <span>{t("images.creditsCost") || "Cost:"} {numImages * (creditSettings.credits_per_image_generation || 2)} {t("images.credits") || "credits"}. {t("images.clickGenerateAgainToConfirm") || "Click Generate again to confirm."}</span>
@@ -870,7 +878,7 @@ text-gray-800 text-sm">
                                     <button
                                         type="submit"
                                         disabled={aiIsLoading}
-                                        className="flex items-center gap-3 px-8 py-4 bg-[#7753ff] hover:bg-[#6a47e6] text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-[#7753ff]/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex items-center justify-center gap-3 px-8 py-3.5 bg-[#7753ff] hover:bg-[#6a47e6] text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-[#7753ff]/25 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                                     >
                                         {aiIsLoading ? (
                                             <>
@@ -1087,13 +1095,20 @@ text-gray-800 text-sm">
 
                                 {/* Number of images */}
                                 <div>
-                                    <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                         <MdPhotoSizeSelectLarge size={20} className="text-[#7753ff]" />
                                         {t("images.numberOfImages") || "Number of images"}
                                     </label>
-                                    <div className="flex flex-wrap items-center gap-4">
-                                        <input type="number" min={MIN_IMAGES} max={MAX_IMAGES} value={numImages} onChange={(e) => { const v = parseInt(e.target.value, 10); if (!isNaN(v)) setNumImages(Math.max(MIN_IMAGES, Math.min(MAX_IMAGES, v))); }} className="w-24 px-4 py-3 border border-[#e6e6e6] rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7753ff]" />
-                                        <span className="text-[#737373] text-sm">{MIN_IMAGES}–{MAX_IMAGES} {t("images.images") || "images"}</span>
+                                    <div className="flex items-center gap-3">
+                                        <input
+                                            type="number"
+                                            min={MIN_IMAGES}
+                                            max={MAX_IMAGES}
+                                            value={numImages}
+                                            onChange={(e) => { const v = parseInt(e.target.value, 10); if (!isNaN(v)) setNumImages(Math.max(MIN_IMAGES, Math.min(MAX_IMAGES, v))); }}
+                                            className="w-20 h-11 px-3 py-2 text-center border border-[#e6e6e6] rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7753ff]"
+                                        />
+                                        <span className="text-gray-500 text-sm leading-none">{MIN_IMAGES}–{MAX_IMAGES} {t("images.images") || "images"}</span>
                                     </div>
                                 </div>
                                 {/* Dimensions */}
@@ -1114,22 +1129,22 @@ text-gray-800 text-sm">
                                 )}
 
                                 {/* Action Buttons */}
-                                <div className="flex items-center justify-between pt-8 border-t border-[#e6e6e6]">
+                                <div className="pt-6 border-t border-[#e6e6e6] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                 <button
                                     type="button"
                                     onClick={() => router.back()}
-                                    className="flex items-center gap-3 px-6 py-3 text-[#7753ff] font-semibold hover:bg-[#7753ff]/10 rounded-xl transition-all duration-300 hover:scale-105"
+                                    className="flex items-center justify-center gap-3 px-6 py-3 text-[#7753ff] font-semibold hover:bg-[#7753ff]/10 rounded-xl transition-all duration-300 hover:scale-105 w-full sm:w-auto"
                                 >
                                     <ChevronLeft className="w-5 h-5" />
                                     {t("common.back")}
                                 </button>
-                                <div ref={generateSectionRef} className="flex flex-col items-end gap-2">
+                                <div ref={generateSectionRef} className="flex flex-col items-stretch sm:items-end gap-2 w-full sm:w-auto">
                                     {showCostNote && numImages > 1 && (
-                                        <div className="flex items-center gap-2 px-4 py-3 
+                                        <div className="flex items-start gap-2 px-4 py-3 w-full sm:max-w-md
 bg-gray-100/80 
 border border-gray-200 
 rounded-xl 
-text-gray-800 text-sm">
+text-gray-800 text-sm leading-snug">
 
                                             <Coins className="w-5 h-5 text-amber-600 shrink-0" />
                                             <span>{t("images.creditsCost") || "Cost:"} {numImages * (creditSettings.credits_per_image_generation || 2)} {t("images.credits") || "credits"}. {t("images.clickGenerateAgainToConfirm") || "Click Generate again to confirm."}</span>
@@ -1138,7 +1153,7 @@ text-gray-800 text-sm">
                                     <button
                                         type="submit"
                                         disabled={realIsLoading}
-                                        className="bg-[#7753ff] hover:bg-[#6a47e6] text-white px-8 py-3 rounded-xl flex items-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-[#7753ff] hover:bg-[#6a47e6] text-white px-8 py-3.5 rounded-xl flex items-center justify-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                                     >
                                         {realIsLoading ? (
                                             <>
@@ -1183,7 +1198,14 @@ text-gray-800 text-sm">
                                             {currentState.result.images.map((img, idx) => (
                                                 <div key={img.mongo_id || idx} className="rounded-xl border-2 border-[#7753ff]/20 overflow-hidden bg-gray-50">
                                                     <div className="relative w-full h-[400px]">
-                                                        <Image src={img.generated_image_url} alt={`Generated ${idx + 1}`} fill className="object-contain" />
+                                                        <Image
+                                                            src={img.generated_image_url}
+                                                            alt={`Generated ${idx + 1}`}
+                                                            fill
+                                                            sizes="100vw"
+                                                            unoptimized
+                                                            className="object-contain"
+                                                        />
                                                     </div>
                                                     <div className="p-4 flex flex-wrap gap-3 justify-center border-t border-[#7753ff]/10 items-center">
                                                         <span className="text-sm font-medium text-[#7753ff] bg-white/90 px-2 py-1 rounded border border-[#7753ff]/20">Image {idx + 1}</span>
@@ -1199,7 +1221,14 @@ text-gray-800 text-sm">
                                 ) : (
                                     <>
                                         <div className="relative w-full h-[450px] rounded-2xl overflow-hidden border-2 border-[#7753ff]/20">
-                                            <Image src={currentState.result.generated_image_url} alt={activeTab === "ai_model" ? "Generated AI Model" : "Generated Real Model"} fill className="object-contain bg-gray-50" />
+                                            <Image
+                                                src={currentState.result.generated_image_url}
+                                                alt={activeTab === "ai_model" ? "Generated AI Model" : "Generated Real Model"}
+                                                fill
+                                                sizes="100vw"
+                                                unoptimized
+                                                className="object-contain bg-gray-50"
+                                            />
                                         </div>
                                         <div className="space-y-3">
                                             <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
@@ -1277,6 +1306,8 @@ text-gray-800 text-sm">
                                         src={aiResult?.generated_image_url}
                                         alt="Current image"
                                         fill
+                                        sizes="100vw"
+                                        unoptimized
                                         className="object-contain bg-gray-50"
                                     />
                                 </div>
@@ -1395,6 +1426,8 @@ text-gray-800 text-sm">
                                         src={realResult?.generated_image_url}
                                         alt="Current image"
                                         fill
+                                        sizes="100vw"
+                                        unoptimized
                                         className="object-contain bg-gray-50"
                                     />
                                 </div>
