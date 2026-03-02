@@ -17,6 +17,7 @@ const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MIN_IMAGES = 1;
 const MAX_IMAGES = 3;
+const MAX_PRODUCT_IMAGES = 5;
 const IMAGE_LABELS = {
     productImage: "Product image",
     referenceImage: "Reference image",
@@ -29,17 +30,17 @@ const BackgroundReplaceForm = () => {
     const { t } = useLanguage()
 
     const [formData, setFormData] = useState({
-        productImage: null,
+        productImages: [],
         referenceImage: null,
         backgroundColor: "#ffffff",
         prompt: "",
         dimension: "1:1",
     })
     const [uploadErrors, setUploadErrors] = useState({
-        productImage: null,
+        productImages: null,
         referenceImage: null,
       });
-    const [productPreview, setProductPreview] = useState(null)
+    const [productPreviews, setProductPreviews] = useState([])
     const [referencePreview, setReferencePreview] = useState(null)
     const [referenceAnalysis, setReferenceAnalysis] = useState("")
     const [referenceAnalysisLoading, setReferenceAnalysisLoading] = useState(false)
@@ -234,56 +235,81 @@ const BackgroundReplaceForm = () => {
             })
         }
     }
-    const handleFileChange = (type, file, inputEl) => {
-        if (!file) return;
-      
-        // Clear previous error for this field
-        setUploadErrors((prev) => ({ ...prev, [type]: null }));
-      
-        // ❌ Size validation
-        if (file.size > MAX_IMAGE_BYTES) {
-          setUploadErrors((prev) => ({
+    const handleFileChange = (type, fileOrFiles, inputEl) => {
+        if (type === "productImages") {
+          const files = fileOrFiles ? (Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles]) : [];
+          if (files.length === 0) return;
+          setUploadErrors((prev) => ({ ...prev, productImages: null }));
+          const toAdd = [];
+          for (const file of files) {
+            if (file.size > MAX_IMAGE_BYTES) {
+              setUploadErrors((prev) => ({ ...prev, productImages: "File size exceeded. Maximum allowed size is 10MB." }));
+              if (inputEl) inputEl.value = "";
+              return;
+            }
+            if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+              setUploadErrors((prev) => ({ ...prev, productImages: "Only JPG, PNG, or WEBP images are allowed." }));
+              if (inputEl) inputEl.value = "";
+              return;
+            }
+            toAdd.push(file);
+          }
+          const newTotal = (formData.productImages?.length || 0) + toAdd.length;
+          if (newTotal > MAX_PRODUCT_IMAGES) {
+            setUploadErrors((prev) => ({ ...prev, productImages: `Maximum ${MAX_PRODUCT_IMAGES} product images allowed.` }));
+            if (inputEl) inputEl.value = "";
+            return;
+          }
+          setFormData((prev) => ({
             ...prev,
-            [type]: "File size exceeded. Maximum allowed size is 10MB.",
+            productImages: [...(prev.productImages || []), ...toAdd],
           }));
-          inputEl.value = ""; // critical for reselect
+          toAdd.forEach((file) => {
+            const reader = new FileReader();
+            reader.onloadend = () => setProductPreviews((prev) => [...prev, reader.result]);
+            reader.readAsDataURL(file);
+          });
+          if (inputEl) inputEl.value = "";
           return;
         }
-      
-        // ❌ Type validation (optional but recommended)
-        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-          setUploadErrors((prev) => ({
-            ...prev,
-            [type]: "Only JPG, PNG, or WEBP images are allowed.",
-          }));
-          inputEl.value = "";
-          return;
-        }
-      
-        // ✅ Valid file
-        setFormData((prev) => ({ ...prev, [type]: file }));
-      
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          if (type === "productImage") {
-            setProductPreview(reader.result);
-          } else if (type === "referenceImage") {
+
+        if (type === "referenceImage") {
+          const file = fileOrFiles;
+          if (!file) return;
+          setUploadErrors((prev) => ({ ...prev, referenceImage: null }));
+          if (file.size > MAX_IMAGE_BYTES) {
+            setUploadErrors((prev) => ({ ...prev, referenceImage: "File size exceeded. Maximum allowed size is 10MB." }));
+            if (inputEl) inputEl.value = "";
+            return;
+          }
+          if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+            setUploadErrors((prev) => ({ ...prev, referenceImage: "Only JPG, PNG, or WEBP images are allowed." }));
+            if (inputEl) inputEl.value = "";
+            return;
+          }
+          setFormData((prev) => ({ ...prev, referenceImage: file }));
+          const reader = new FileReader();
+          reader.onloadend = () => {
             setReferencePreview(reader.result);
             setReferenceAnalysis("");
             setReferenceAnalysisLoading(true);
             apiService.analyzeReferenceImage(file, "themed", token).then((data) => {
               if (data?.success && data.analysis_text) setReferenceAnalysis(data.analysis_text);
             }).catch(() => {}).finally(() => setReferenceAnalysisLoading(false));
-          }
-        };
-        reader.readAsDataURL(file);
+          };
+          reader.readAsDataURL(file);
+          if (inputEl) inputEl.value = "";
+        }
       };
 
-    const removeProductImage = (e) => {
+    const removeProductImage = (e, index) => {
         e?.stopPropagation?.();
-        setFormData((prev) => ({ ...prev, productImage: null }));
-        setProductPreview(null);
-        setUploadErrors((prev) => ({ ...prev, productImage: null }));
+        setFormData((prev) => ({
+          ...prev,
+          productImages: prev.productImages.filter((_, i) => i !== index),
+        }));
+        setProductPreviews((prev) => prev.filter((_, i) => i !== index));
+        setUploadErrors((prev) => ({ ...prev, productImages: null }));
         const input = document.getElementById("product-image");
         if (input) input.value = "";
     };
@@ -313,12 +339,14 @@ const BackgroundReplaceForm = () => {
         setError(null)
         setResult(null)
 
-        if (!formData.productImage) {
+        const productImages = formData.productImages || []
+        if (productImages.length === 0) {
             setError(t("images.pleaseUploadProductImage"))
             return
         }
 
-        if (numImages > 1 && !showCostNote) {
+        // For single image, optional extra cost note when generating multiple variations
+        if (productImages.length === 1 && numImages > 1 && !showCostNote) {
             setShowCostNote(true)
             return
         }
@@ -328,7 +356,7 @@ const BackgroundReplaceForm = () => {
 
         try {
             const formDataToSend = new FormData()
-            formDataToSend.append("ornament_image", formData.productImage)
+            productImages.forEach((file) => formDataToSend.append("ornament_images", file))
             if (formData.referenceImage) {
                 formDataToSend.append("background_image", formData.referenceImage)
             }
@@ -336,7 +364,7 @@ const BackgroundReplaceForm = () => {
             formDataToSend.append("background_color", formData.backgroundColor)
             formDataToSend.append("prompt", formData.prompt || t("images.changeTheBackground"))
             formDataToSend.append("dimension", formData.dimension)
-            formDataToSend.append("num_images", String(numImages))
+            formDataToSend.append("num_images", String(productImages.length === 1 ? numImages : 1))
 
             const response = await apiService.changeBackground(formDataToSend, token)
 
@@ -386,62 +414,74 @@ const BackgroundReplaceForm = () => {
                     {/* Form Container */}
                     <div className="space-y-8 bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            {/* Product Image */}
+                            {/* Product Images (multiple allowed; combined output when 2+) */}
                             <div>
                                 <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
                                     <Upload className="w-5 h-5 text-[#7753ff]" />
                                     {t("images.productImage")}<span className="text-red-500 ml-1">*</span>
-                                    {uploadErrors.productImage && (
-  <p className="mt-2 text-sm text-red-600 flex items-center gap-0=">
-    <AlertCircle className="w-4 h-4" />
-    {uploadErrors.productImage}
-  </p>
-)}
-
+                                    <span className="text-sm font-normal text-[#737373]">(1–{MAX_PRODUCT_IMAGES} images; multiple = one combined result)</span>
                                 </label>
+                                {uploadErrors.productImages && (
+                                    <p className="mb-2 text-sm text-red-600 flex items-center gap-1">
+                                        <AlertCircle className="w-4 h-4" />
+                                        {uploadErrors.productImages}
+                                    </p>
+                                )}
                                 <div
-  className={`border-2 border-dashed rounded-2xl p-6 transition-all duration-300 cursor-pointer ${
-    uploadErrors?.productImage
-      ? "border-red-500 bg-red-50"
-      : isDragging
-      ? "border-[#7753ff] bg-[#7753ff]/5"
-      : "border-[#e6e6e6] hover:border-[#7753ff] hover:bg-[#7753ff]/5"
-  }`}
-  onDragOver={handleDragOver}
-  onDragLeave={handleDragLeave}
-  onClick={() => document.getElementById("product-image").click()}
->
-
+                                    className={`border-2 border-dashed rounded-2xl p-6 transition-all duration-300 cursor-pointer ${
+                                        uploadErrors?.productImages
+                                            ? "border-red-500 bg-red-50"
+                                            : isDragging
+                                            ? "border-[#7753ff] bg-[#7753ff]/5"
+                                            : "border-[#e6e6e6] hover:border-[#7753ff] hover:bg-[#7753ff]/5"
+                                    }`}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onClick={() => document.getElementById("product-image").click()}
+                                >
                                     <input
-  type="file"
-  id="product-image"
-  className="hidden"
-  accept="image/*"
-  onChange={(e) =>
-    handleFileChange(
-      "productImage",
-      e.target.files?.[0] || null,
-      e.target
-    )
-  }
-/>
-
-                                    {productPreview ? (
-                                        <div className="relative w-full h-40">
-                                            <Image src={productPreview} alt="Product Preview" fill className="object-contain rounded-lg" />
-                                            <button
-                                                type="button"
-                                                onClick={removeProductImage}
-                                                className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
-                                            >
-                                                <X size={14} />
-                                            </button>
+                                        type="file"
+                                        id="product-image"
+                                        className="hidden"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={(e) =>
+                                            handleFileChange(
+                                                "productImages",
+                                                e.target.files ? Array.from(e.target.files) : [],
+                                                e.target
+                                            )
+                                        }
+                                    />
+                                    {productPreviews.length > 0 ? (
+                                        <div className="space-y-3">
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                                {productPreviews.map((preview, idx) => (
+                                                    <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-[#e6e6e6]">
+                                                        <Image src={preview} alt={`Product ${idx + 1}`} fill className="object-contain" />
+                                                        <button
+                                                            type="button"
+                                                            onClick={(ev) => removeProductImage(ev, idx)}
+                                                            className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                                        >
+                                                            <X size={14} />
+                                                        </button>
+                                                        <span className="absolute bottom-1 left-1 text-xs font-medium bg-black/60 text-white px-1.5 py-0.5 rounded">
+                                                            {idx + 1}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <p className="text-[#737373] text-sm">
+                                                {productPreviews.length} image(s). {productPreviews.length >= 2 ? "Result will be one combined image with new background." : "Add more or generate."}
+                                            </p>
                                         </div>
                                     ) : (
                                         <div className="text-center">
                                             <Upload className="w-12 h-12 text-[#7753ff] mx-auto mb-3" />
                                             <p className="text-[#1a1a1a] font-medium mb-1">{t("images.uploadProductImage")}</p>
                                             <p className="text-[#737373] text-sm">{t("images.pngJpgUpTo10MB")}</p>
+                                            <p className="text-[#737373] text-xs mt-1">Upload multiple for one combined themed image</p>
                                         </div>
                                     )}
                                 </div>
@@ -543,28 +583,29 @@ const BackgroundReplaceForm = () => {
                                 />
                             </div>
 
-                            {/* Dimensions */}
-                            {/* Number of images */}
-                            <div>
-                                <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
-                                    <MdPhotoSizeSelectLarge size={20} className="text-[#7753ff]" />
-                                    {t("images.numberOfImages") || "Number of images"}
-                                </label>
-                                <div className="flex flex-wrap items-center gap-4">
-                                    <input
-                                        type="number"
-                                        min={MIN_IMAGES}
-                                        max={MAX_IMAGES}
-                                        value={numImages}
-                                        onChange={(e) => {
-                                            const v = parseInt(e.target.value, 10)
-                                            if (!isNaN(v)) setNumImages(Math.max(MIN_IMAGES, Math.min(MAX_IMAGES, v)))
-                                        }}
-                                        className="w-24 px-4 py-3 border border-[#e6e6e6] rounded-xl bg-white text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent"
-                                    />
-                                    <span className="text-[#737373] text-sm">{MIN_IMAGES}–{MAX_IMAGES} {t("images.images") || "images"}</span>
+                            {/* Number of variations (only when single product image) */}
+                            {(formData.productImages?.length || 0) <= 1 && (
+                                <div>
+                                    <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
+                                        <MdPhotoSizeSelectLarge size={20} className="text-[#7753ff]" />
+                                        {t("images.numberOfImages") || "Number of images"}
+                                    </label>
+                                    <div className="flex flex-wrap items-center gap-4">
+                                        <input
+                                            type="number"
+                                            min={MIN_IMAGES}
+                                            max={MAX_IMAGES}
+                                            value={numImages}
+                                            onChange={(e) => {
+                                                const v = parseInt(e.target.value, 10)
+                                                if (!isNaN(v)) setNumImages(Math.max(MIN_IMAGES, Math.min(MAX_IMAGES, v)))
+                                            }}
+                                            className="w-24 px-4 py-3 border border-[#e6e6e6] rounded-xl bg-white text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent"
+                                        />
+                                        <span className="text-[#737373] text-sm">{MIN_IMAGES}–{MAX_IMAGES} {t("images.images") || "images"}</span>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                             <DimensionsSelector
                                 selectedDimension={formData.dimension}
                                 onDimensionChange={(dimension) => setFormData((prev) => ({ ...prev, dimension }))}
@@ -590,7 +631,7 @@ const BackgroundReplaceForm = () => {
                                     {t("common.back")}
                                 </button>
                                 <div ref={generateSectionRef} className="flex flex-col items-end gap-2">
-                                    {showCostNote && numImages > 1 && (
+                                    {showCostNote && (formData.productImages?.length || 0) <= 1 && numImages > 1 && (
                                         <div className="flex items-center gap-2 px-4 py-3 
 bg-gray-100/80 
 border border-gray-200 
@@ -657,7 +698,7 @@ text-gray-800 text-sm">
                                                 </div>
                                             ))}
                                         </div>
-                                        <button type="button" onClick={() => { setResult(null); setFormData({ productImage: null, referenceImage: null, backgroundColor: "#ffffff", prompt: "", dimension: "1:1" }); setProductPreview(null); setReferencePreview(null); setReferenceAnalysis(""); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all">{t("images.newImage")}</button>
+                                        <button type="button" onClick={() => { setResult(null); setFormData({ productImages: [], referenceImage: null, backgroundColor: "#ffffff", prompt: "", dimension: "1:1" }); setProductPreviews([]); setReferencePreview(null); setReferenceAnalysis(""); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all">{t("images.newImage")}</button>
                                     </>
                                 ) : (
                                     <>
@@ -673,7 +714,7 @@ text-gray-800 text-sm">
                                                 <button onClick={() => downloadImage(result.generated_image_url, "themed-image.png")} className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"><Download size={16} />{t("images.download")}</button>
                                                 <button onClick={handleRegenerate} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] rounded-xl font-semibold hover:bg-[#7753ff]/10 transition-all flex items-center justify-center gap-2"><RefreshCw size={18} />{t("images.regenerate")}</button>
                                             </div>
-                                            <button onClick={() => { setResult(null); setFormData({ productImage: null, referenceImage: null, backgroundColor: "#ffffff", prompt: "", dimension: "1:1" }); setProductPreview(null); setReferencePreview(null); setReferenceAnalysis(""); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all">{t("images.newImage")}</button>
+                                            <button onClick={() => { setResult(null); setFormData({ productImages: [], referenceImage: null, backgroundColor: "#ffffff", prompt: "", dimension: "1:1" }); setProductPreviews([]); setReferencePreview(null); setReferenceAnalysis(""); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all">{t("images.newImage")}</button>
                                         </div>
                                     </>
                                 )}
@@ -850,26 +891,27 @@ text-gray-800 text-sm">
                                         }`}
                                     onDragOver={handleDragOver}
                                     onDragLeave={handleDragLeave}
-                                    onClick={() => document.getElementById("product-image")?.click()}
+                                    onClick={() => document.getElementById("product-image-alt")?.click()}
                                 >
                                     <input
                                         type="file"
-                                        id="product-image"
+                                        id="product-image-alt"
                                         className="hidden"
                                         accept="image/*"
+                                        multiple
                                         onChange={(e) =>
-                                            handleFileChange("productImage", e.target.files?.[0] || null)
+                                            handleFileChange("productImages", e.target.files ? Array.from(e.target.files) : [], e.target)
                                         }
                                     />
 
-                                    {productPreview ? (
+                                    {productPreviews.length > 0 ? (
                                         <div className="relative w-full h-40 lg:h-48">
-                                            <Image
-                                                src={productPreview}
-                                                alt="Product Preview"
-                                                fill
-                                                className="object-contain rounded-lg"
-                                            />
+                                            <Image src={productPreviews[0]} alt="Product Preview" fill className="object-contain rounded-lg" />
+                                            {productPreviews.length > 1 && (
+                                                <span className="absolute bottom-1 right-1 text-xs font-medium bg-black/60 text-white px-1.5 py-0.5 rounded">
+                                                    +{productPreviews.length - 1} more
+                                                </span>
+                                            )}
                                         </div>
                                     ) : (
                                         <div>
@@ -1082,12 +1124,12 @@ text-gray-800 text-sm">
                                         onClick={() => {
                                             setResult(null);
                                             setFormData({
-                                                productImage: null,
+                                                productImages: [],
                                                 referenceImage: null,
                                                 backgroundColor: "#ffffff",
                                                 prompt: "",
                                             });
-                                            setProductPreview(null);
+                                            setProductPreviews([]);
                                             setReferencePreview(null);
                                             setReferenceAnalysis("");
                                         }}
