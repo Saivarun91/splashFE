@@ -47,7 +47,7 @@ export default function CampaignForm() {
     const [modelPreview, setModelPreview] = useState(null)
     const [ornamentPreviews, setOrnamentPreviews] = useState([])
     const [themePreviews, setThemePreviews] = useState([])
-    const [themeReferenceAnalyses, setThemeReferenceAnalyses] = useState([])
+    const [themeReferenceAnalyses, setThemeReferenceAnalyses] = useState([]) // kept for backward-compat; backend now analyzes theme images
     const [modelReferenceAnalysis, setModelReferenceAnalysis] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [showReferenceModal, setShowReferenceModal] = useState(false)
@@ -299,12 +299,7 @@ export default function CampaignForm() {
             setThemePreviews((prev) => [...prev, reader.result]);
           reader.readAsDataURL(file);
         });
-        // Analyze each theme image for campaign context (theme, style, mood, attire); preserve order
-        Promise.all(
-          fileArray.map((file) =>
-            apiService.analyzeReferenceImage(file, "campaign", token).then((data) => data?.analysis_text || "").catch(() => "")
-          )
-        ).then((texts) => setThemeReferenceAnalyses((prev) => [...prev, ...texts]));
+        // Theme/Style images are analyzed on the backend (Celery) to keep logic centralized.
       };
       
 
@@ -486,11 +481,10 @@ const submitRegenerate = async () => {
                 "ornament_measurements",
                 JSON.stringify(formData.ornamentMeasurements || [])
             )
+            // Send theme images; backend will analyze them and use analysis text for generation.
             formData.themeImages.forEach((image) => {
                 formDataToSend.append("theme_images", image)
             })
-            const themeAnalysisCombined = themeReferenceAnalyses.filter(Boolean).join(" | ")
-            if (themeAnalysisCombined) formDataToSend.append("theme_reference_analysis", themeAnalysisCombined)
             if (formData.modelType === "real_model" && modelReferenceAnalysis) {
                 formDataToSend.append("reference_analysis", modelReferenceAnalysis)
             }
