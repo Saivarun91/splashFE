@@ -48,6 +48,7 @@ export default function CampaignForm() {
     const [ornamentPreviews, setOrnamentPreviews] = useState([])
     const [themePreviews, setThemePreviews] = useState([])
     const [themeReferenceAnalyses, setThemeReferenceAnalyses] = useState([])
+    const [modelReferenceAnalysis, setModelReferenceAnalysis] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [showReferenceModal, setShowReferenceModal] = useState(false)
     const [result, setResult] = useState(null)
@@ -179,6 +180,7 @@ export default function CampaignForm() {
         if (!file) return;
       
         setUploadErrors((p) => ({ ...p, modelImage: null }));
+        setModelReferenceAnalysis("");
       
         if (file.size > MAX_IMAGE_BYTES) {
           setUploadErrors((p) => ({
@@ -203,6 +205,12 @@ export default function CampaignForm() {
         const reader = new FileReader();
         reader.onloadend = () => setModelPreview(reader.result);
         reader.readAsDataURL(file);
+
+        // Analyze model reference for real-model campaign: pose, attire, styling
+        apiService
+            .analyzeReferenceImage(file, "model", token)
+            .then((data) => setModelReferenceAnalysis(data?.analysis_text || ""))
+            .catch(() => setModelReferenceAnalysis(""));
       };
       
 
@@ -474,6 +482,9 @@ export default function CampaignForm() {
             })
             const themeAnalysisCombined = themeReferenceAnalyses.filter(Boolean).join(" | ")
             if (themeAnalysisCombined) formDataToSend.append("theme_reference_analysis", themeAnalysisCombined)
+            if (formData.modelType === "real_model" && modelReferenceAnalysis) {
+                formDataToSend.append("reference_analysis", modelReferenceAnalysis)
+            }
             formDataToSend.append("prompt", formData.prompt || t("images.createProfessionalCampaignShot"))
             formDataToSend.append("dimension", formData.dimension)
             formDataToSend.append("num_images", String(numImages))
@@ -907,7 +918,14 @@ text-gray-800 text-sm">
                                             {result.images.map((img, idx) => (
                                                 <div key={img.mongo_id || idx} className="rounded-xl border-2 border-[#7753ff]/20 overflow-hidden bg-gray-50">
                                                     <div className="relative w-full h-[450px]">
-                                                        <Image src={img.generated_image_url} alt={`Campaign ${idx + 1}`} fill className="object-contain" />
+                                                        <Image
+                                                            src={img.generated_image_url}
+                                                            alt={`Campaign ${idx + 1}`}
+                                                            fill
+                                                            sizes="100vw"
+                                                            unoptimized
+                                                            className="object-contain"
+                                                        />
                                                     </div>
                                                     <div className="p-4 flex flex-wrap gap-3 justify-center border-t border-[#7753ff]/10 items-center">
                                                         <span className="text-sm font-medium text-[#7753ff] bg-white/90 px-2 py-1 rounded border border-[#7753ff]/20">Image {idx + 1}</span>
@@ -923,7 +941,14 @@ text-gray-800 text-sm">
                                 ) : (
                                     <>
                                         <div className="relative w-full h-[550px] rounded-2xl overflow-hidden border-2 border-[#7753ff]/20">
-                                            <Image src={result.generated_image_url} alt="Campaign Shot" fill className="object-contain bg-gray-50" />
+                                            <Image
+                                                src={result.generated_image_url}
+                                                alt="Campaign Shot"
+                                                fill
+                                                sizes="100vw"
+                                                unoptimized
+                                                className="object-contain bg-gray-50"
+                                            />
                                         </div>
                                         <div className="space-y-3">
                                             <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
