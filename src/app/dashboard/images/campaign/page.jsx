@@ -354,38 +354,47 @@ export default function CampaignForm() {
         setThemeReferenceAnalyses((prev) => prev.filter((_, i) => i !== index))
     }
 
-    const handleRegenerate = (imageItem = null) => {
+    const handleRegenerate = (imageItem) => {
+        // console.log("HANDLE REGENERATE RECEIVED:", imageItem)
+    
         setRegenerateModal({
             isOpen: true,
             prompt: '',
             loading: false,
             error: null,
-            image: imageItem ?? (result?.generated_image_url ? result : null)
+            image: imageItem
         })
     }
 
-    const submitRegenerate = async () => {
-        if (!regenerateModal.prompt.trim()) {
+const submitRegenerate = async () => {
+    // console.log("regenerateModal.image", regenerateModal.image)
+    if (!regenerateModal.prompt.trim()) {
+        setRegenerateModal(prev => ({
+            ...prev,
+            error: 'Please enter a prompt for regeneration'
+        }))
+        return
+    }
+
+    setRegenerateModal(prev => ({ ...prev, loading: true, error: null }))
+
+    try {
+        const target = regenerateModal.image
+
+        if (!target || !target.mongo_id) {
             setRegenerateModal(prev => ({
                 ...prev,
-                error: 'Please enter a prompt for regeneration'
+                loading: false,
+                error: 'Cannot regenerate: image ID missing.'
             }))
             return
         }
 
-        setRegenerateModal(prev => ({ ...prev, loading: true, error: null }))
-
-        try {
-            const target = regenerateModal.image || result
-            if (!target?.mongo_id) {
-                setRegenerateModal(prev => ({ ...prev, loading: false, error: 'Cannot regenerate: missing image ID.' }))
-                return
-            }
-            const response = await apiService.regenerateImage(
-                target.mongo_id,
-                regenerateModal.prompt,
-                token
-            )
+        const response = await apiService.regenerateImage(
+            target.mongo_id,
+            regenerateModal.prompt,
+            token
+        )
 
             if (response.success) {
                 const updated = { generated_image_url: response.generated_image_url, mongo_id: response.mongo_id, prompt: response.combined_prompt }
@@ -957,7 +966,7 @@ text-gray-800 text-sm">
                                             <div className="grid grid-cols-3 gap-3">
                                                 <button onClick={() => handleView(result)} className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"><Eye size={16} />{t("images.view")}</button>
                                                 <button onClick={() => downloadImage(result.generated_image_url, "campaign-shot.png")} className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"><Download size={16} />{t("images.download")}</button>
-                                                <button onClick={handleRegenerate} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] hover:bg-[#7753ff]/10 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"><RefreshCw size={16} />{t("images.regenerate")}</button>
+                                                <button onClick={() => handleRegenerate(result)} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] hover:bg-[#7753ff]/10 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"><RefreshCw size={16} />{t("images.regenerate")}</button>
                                             </div>
                                             <button onClick={() => { setResult(null); setFormData({ modelType: "ai_model", modelImage: null, ornamentImages: [], ornamentNames: [], ornamentTypes: [], ornamentMeasurements: [], themeImages: [], prompt: "", dimension: "1:1" }); setModelPreview(null); setOrnamentPreviews([]); setThemePreviews([]); setThemeReferenceAnalyses([]); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">{t("images.newCampaign")}</button>
                                             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
@@ -1054,7 +1063,7 @@ text-gray-800 text-sm">
                             {regenerateModal.error && (
                                 <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                    <p className="text-red-700 text-sm">{error}</p>
+                                    <p className="text-red-700 text-sm">{regenerateModal.error}</p>
                                 </div>
                             )}
 
