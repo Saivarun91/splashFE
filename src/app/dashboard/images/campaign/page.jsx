@@ -47,7 +47,8 @@ export default function CampaignForm() {
     const [modelPreview, setModelPreview] = useState(null)
     const [ornamentPreviews, setOrnamentPreviews] = useState([])
     const [themePreviews, setThemePreviews] = useState([])
-    const [themeReferenceAnalyses, setThemeReferenceAnalyses] = useState([])
+    const [themeReferenceAnalyses, setThemeReferenceAnalyses] = useState([]) // kept for backward-compat; backend now analyzes theme images
+    const [modelReferenceAnalysis, setModelReferenceAnalysis] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [showReferenceModal, setShowReferenceModal] = useState(false)
     const [result, setResult] = useState(null)
@@ -179,6 +180,7 @@ export default function CampaignForm() {
         if (!file) return;
       
         setUploadErrors((p) => ({ ...p, modelImage: null }));
+        setModelReferenceAnalysis("");
       
         if (file.size > MAX_IMAGE_BYTES) {
           setUploadErrors((p) => ({
@@ -203,6 +205,12 @@ export default function CampaignForm() {
         const reader = new FileReader();
         reader.onloadend = () => setModelPreview(reader.result);
         reader.readAsDataURL(file);
+
+        // Analyze model reference for real-model campaign: pose, attire, styling
+        apiService
+            .analyzeReferenceImage(file, "model", token)
+            .then((data) => setModelReferenceAnalysis(data?.analysis_text || ""))
+            .catch(() => setModelReferenceAnalysis(""));
       };
       
 
@@ -291,12 +299,7 @@ export default function CampaignForm() {
             setThemePreviews((prev) => [...prev, reader.result]);
           reader.readAsDataURL(file);
         });
-        // Analyze each theme image for campaign context (theme, style, mood, attire); preserve order
-        Promise.all(
-          fileArray.map((file) =>
-            apiService.analyzeReferenceImage(file, "campaign", token).then((data) => data?.analysis_text || "").catch(() => "")
-          )
-        ).then((texts) => setThemeReferenceAnalyses((prev) => [...prev, ...texts]));
+        // Theme/Style images are analyzed on the backend (Celery) to keep logic centralized.
       };
       
 
@@ -346,38 +349,47 @@ export default function CampaignForm() {
         setThemeReferenceAnalyses((prev) => prev.filter((_, i) => i !== index))
     }
 
-    const handleRegenerate = (imageItem = null) => {
+    const handleRegenerate = (imageItem) => {
+        // console.log("HANDLE REGENERATE RECEIVED:", imageItem)
+    
         setRegenerateModal({
             isOpen: true,
             prompt: '',
             loading: false,
             error: null,
-            image: imageItem ?? (result?.generated_image_url ? result : null)
+            image: imageItem
         })
     }
 
-    const submitRegenerate = async () => {
-        if (!regenerateModal.prompt.trim()) {
+const submitRegenerate = async () => {
+    // console.log("regenerateModal.image", regenerateModal.image)
+    if (!regenerateModal.prompt.trim()) {
+        setRegenerateModal(prev => ({
+            ...prev,
+            error: 'Please enter a prompt for regeneration'
+        }))
+        return
+    }
+
+    setRegenerateModal(prev => ({ ...prev, loading: true, error: null }))
+
+    try {
+        const target = regenerateModal.image
+
+        if (!target || !target.mongo_id) {
             setRegenerateModal(prev => ({
                 ...prev,
-                error: 'Please enter a prompt for regeneration'
+                loading: false,
+                error: 'Cannot regenerate: image ID missing.'
             }))
             return
         }
 
-        setRegenerateModal(prev => ({ ...prev, loading: true, error: null }))
-
-        try {
-            const target = regenerateModal.image || result
-            if (!target?.mongo_id) {
-                setRegenerateModal(prev => ({ ...prev, loading: false, error: 'Cannot regenerate: missing image ID.' }))
-                return
-            }
-            const response = await apiService.regenerateImage(
-                target.mongo_id,
-                regenerateModal.prompt,
-                token
-            )
+        const response = await apiService.regenerateImage(
+            target.mongo_id,
+            regenerateModal.prompt,
+            token
+        )
 
             if (response.success) {
                 const updated = { generated_image_url: response.generated_image_url, mongo_id: response.mongo_id, prompt: response.combined_prompt }
@@ -469,11 +481,13 @@ export default function CampaignForm() {
                 "ornament_measurements",
                 JSON.stringify(formData.ornamentMeasurements || [])
             )
+            // Send theme images; backend will analyze them and use analysis text for generation.
             formData.themeImages.forEach((image) => {
                 formDataToSend.append("theme_images", image)
             })
-            const themeAnalysisCombined = themeReferenceAnalyses.filter(Boolean).join(" | ")
-            if (themeAnalysisCombined) formDataToSend.append("theme_reference_analysis", themeAnalysisCombined)
+            if (formData.modelType === "real_model" && modelReferenceAnalysis) {
+                formDataToSend.append("reference_analysis", modelReferenceAnalysis)
+            }
             formDataToSend.append("prompt", formData.prompt || t("images.createProfessionalCampaignShot"))
             formDataToSend.append("dimension", formData.dimension)
             formDataToSend.append("num_images", String(numImages))
@@ -907,7 +921,14 @@ text-gray-800 text-sm">
                                             {result.images.map((img, idx) => (
                                                 <div key={img.mongo_id || idx} className="rounded-xl border-2 border-[#7753ff]/20 overflow-hidden bg-gray-50">
                                                     <div className="relative w-full h-[450px]">
-                                                        <Image src={img.generated_image_url} alt={`Campaign ${idx + 1}`} fill className="object-contain" />
+                                                        <Image
+                                                            src={img.generated_image_url}
+                                                            alt={`Campaign ${idx + 1}`}
+                                                            fill
+                                                            sizes="100vw"
+                                                            unoptimized
+                                                            className="object-contain"
+                                                        />
                                                     </div>
                                                     <div className="p-4 flex flex-wrap gap-3 justify-center border-t border-[#7753ff]/10 items-center">
                                                         <span className="text-sm font-medium text-[#7753ff] bg-white/90 px-2 py-1 rounded border border-[#7753ff]/20">Image {idx + 1}</span>
@@ -923,7 +944,14 @@ text-gray-800 text-sm">
                                 ) : (
                                     <>
                                         <div className="relative w-full h-[550px] rounded-2xl overflow-hidden border-2 border-[#7753ff]/20">
-                                            <Image src={result.generated_image_url} alt="Campaign Shot" fill className="object-contain bg-gray-50" />
+                                            <Image
+                                                src={result.generated_image_url}
+                                                alt="Campaign Shot"
+                                                fill
+                                                sizes="100vw"
+                                                unoptimized
+                                                className="object-contain bg-gray-50"
+                                            />
                                         </div>
                                         <div className="space-y-3">
                                             <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
@@ -932,7 +960,7 @@ text-gray-800 text-sm">
                                             <div className="grid grid-cols-3 gap-3">
                                                 <button onClick={() => handleView(result)} className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"><Eye size={16} />{t("images.view")}</button>
                                                 <button onClick={() => downloadImage(result.generated_image_url, "campaign-shot.png")} className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"><Download size={16} />{t("images.download")}</button>
-                                                <button onClick={handleRegenerate} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] hover:bg-[#7753ff]/10 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"><RefreshCw size={16} />{t("images.regenerate")}</button>
+                                                <button onClick={() => handleRegenerate(result)} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] hover:bg-[#7753ff]/10 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"><RefreshCw size={16} />{t("images.regenerate")}</button>
                                             </div>
                                             <button onClick={() => { setResult(null); setFormData({ modelType: "ai_model", modelImage: null, ornamentImages: [], ornamentNames: [], ornamentTypes: [], ornamentMeasurements: [], themeImages: [], prompt: "", dimension: "1:1" }); setModelPreview(null); setOrnamentPreviews([]); setThemePreviews([]); setThemeReferenceAnalyses([]); }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">{t("images.newCampaign")}</button>
                                             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
@@ -1029,7 +1057,7 @@ text-gray-800 text-sm">
                             {regenerateModal.error && (
                                 <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                    <p className="text-red-700 text-sm">{error}</p>
+                                    <p className="text-red-700 text-sm">{regenerateModal.error}</p>
                                 </div>
                             )}
 

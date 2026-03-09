@@ -232,7 +232,7 @@ const PricingSection = () => {
               </div>
 
               <a
-                href="mailto:sales@example.com"
+                href="/contact"
                 className="w-full inline-block text-center py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base bg-primary text-white hover:bg-white hover:text-primary border-2 border-primary transition-colors mb-3 sm:mb-4"
               >
                 {enterpriseCta}

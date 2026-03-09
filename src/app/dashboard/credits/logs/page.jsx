@@ -20,8 +20,12 @@ export default function CreditLogsPage() {
       }
       try {
         const data = await apiService.getUserCreditUsage(token);
-        if (data?.entries) {
-          setLogs(data.entries);
+        // Backend returns usage_data; support entries/logs as fallback
+        const entries = data?.usage_data ?? data?.entries ?? data?.logs;
+        if (Array.isArray(entries)) {
+          setLogs(entries);
+        } else if (data?.error) {
+          console.error("Credit logs API error:", data.error);
         }
       } catch (e) {
         console.error("Failed to fetch credit logs:", e);
@@ -86,8 +90,8 @@ export default function CreditLogsPage() {
                         <div className="flex items-center gap-2 text-gray-700">
                           <Calendar className="w-4 h-4 text-gray-400" />
                           <span>
-                            {entry.created_at
-                              ? new Date(entry.created_at).toLocaleString()
+                            {(entry.date ?? entry.created_at)
+                              ? new Date(entry.date ?? entry.created_at).toLocaleString()
                               : "-"}
                           </span>
                         </div>
