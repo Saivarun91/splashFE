@@ -491,7 +491,8 @@ export const SubscriptionBilling = () => {
                                 ctaText
                               )}
                             </button>
-                          )}
+                          )
+                          }
                         </div>
                       );
                     })}
