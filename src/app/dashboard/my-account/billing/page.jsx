@@ -638,10 +638,11 @@ export const SubscriptionBilling = () => {
                 <div className="flex justify-between text-gray-700">
                   <span>Plan amount</span>
                   <span className="font-semibold">
-                    ₹{(() => {
+                    ${(() => {
                       if ((selectedPlan.name || "").toLowerCase() === "pro") {
                         const creditOptions = selectedPlan.credit_options || selectedPlan.custom_settings?.credit_options || [];
                         const selectedOption = creditOptions[selectedCreditOption] || creditOptions[0];
+                        console.log(selectedOption);  
                         return (selectedOption?.amount || selectedPlan.price).toFixed(2);
                       }
                       return selectedPlan.price.toFixed(2);
@@ -653,7 +654,7 @@ export const SubscriptionBilling = () => {
                     GST ({invoiceConfig?.tax_rate ?? 18}%)
                   </span>
                   <span className="font-semibold">
-                    ₹{(() => {
+                    ${(() => {
                       let baseAmount = selectedPlan.price;
                       if ((selectedPlan.name || "").toLowerCase() === "pro") {
                         const creditOptions = selectedPlan.credit_options || selectedPlan.custom_settings?.credit_options || [];
@@ -667,7 +668,7 @@ export const SubscriptionBilling = () => {
                 <div className="flex justify-between text-gray-900 font-semibold mt-2 border-t border-gray-200 pt-2">
                   <span>Total payable</span>
                   <span>
-                    ₹
+                    $
                     {(() => {
                       let baseAmount = selectedPlan.price;
                       if ((selectedPlan.name || "").toLowerCase() === "pro") {

@@ -117,8 +117,8 @@ export default function Dashboard() {
             {/* Credits & Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Credits */}
-                <Link href="/my-account/billing">
-                    <div className="p-4 bg-white border border-indigo-100 rounded-xl shadow-sm hover:shadow-lg hover:border-indigo-300 transition-all duration-300 cursor-pointer">
+                {/* <Link href="/my-account/billing"> */}
+                    <div className="p-4 bg-white border border-indigo-100 rounded-xl shadow-sm transition-all duration-300">
                         <div className="flex justify-between items-center pb-2">
                             <span className="text-sm font-medium text-gray-500">{t("dashboard.remainingCredits")}</span>
                             <FaCoins className="w-6 h-6 text-yellow-500" />
@@ -177,7 +177,7 @@ export default function Dashboard() {
                             )}
                         </div>
                     </div>
-                </Link>
+                {/* </Link> */}
 
                 {/* Images Generated */}
                 <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
