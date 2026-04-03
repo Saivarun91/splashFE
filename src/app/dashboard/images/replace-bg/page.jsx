@@ -634,7 +634,6 @@ const BackgroundReplaceForm = () => {
                                             max={MAX_IMAGES}
                                             primaryColor="#7753ff"
                                         />
-                                        <span className="text-[#737373] text-sm">{MIN_IMAGES}–{MAX_IMAGES} {t("images.images") || "images"}</span>
                                     </div>
                                 </div>
                             )}

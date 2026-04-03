@@ -844,7 +844,6 @@ const submitRegenerate = async () => {
                                         max={MAX_IMAGES}
                                         primaryColor="#7753ff"
                                     />
-                                    <span className="text-gray-500 text-sm">{MIN_IMAGES}–{MAX_IMAGES} {t("images.images") || "images"}</span>
                                 </div>
                             </div>
                             <DimensionsSelector
