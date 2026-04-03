@@ -37,6 +37,9 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --scrollbar-thumb: rgba(210, 210, 220, 0.65);
+  --scrollbar-thumb-hover: rgba(190, 190, 205, 0.85);
+  --scrollbar-track: transparent;
 }
 
 .dark {
@@ -72,6 +75,9 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --scrollbar-thumb: rgba(100, 100, 115, 0.35);
+  --scrollbar-thumb-hover: rgba(130, 130, 145, 0.5);
+  --scrollbar-track: transparent;
 }
 
 @theme inline {
@@ -116,12 +122,41 @@
 }
 
 @layer base {
+  /**
+   * Global minimal scrollbars (Firefox + WebKit): thin, very light thumb on all scrollers.
+   */
   * {
     @apply border-border outline-ring/50;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   }
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  *::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
   }
 }
 
@@ -275,11 +310,11 @@
   }
   .thumbnail-scroll {
     scrollbar-width: thin;
-    scrollbar-color: #c7c3ff transparent;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   }
 
   .thumbnail-scroll::-webkit-scrollbar {
-    height: 6px;
+    height: 5px;
   }
 
   .thumbnail-scroll::-webkit-scrollbar-track {
@@ -287,12 +322,12 @@
   }
 
   .thumbnail-scroll::-webkit-scrollbar-thumb {
-    background: #c7c3ff;
+    background: var(--scrollbar-thumb);
     border-radius: 9999px;
   }
 
   .thumbnail-scroll::-webkit-scrollbar-thumb:hover {
-    background: #7753ff;
+    background: var(--scrollbar-thumb-hover);
   }
 }
 

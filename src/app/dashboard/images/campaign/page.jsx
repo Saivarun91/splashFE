@@ -10,6 +10,7 @@ import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
+import { NumberOfImagesSelector } from "@/components/images/NumberOfImagesSelector"
 import { ORNAMENT_TYPES } from "@/components/images/OrnamentSelection"
 import { OrnamentTypeSelect } from "@/components/images/OrnamentTypeSelect"
 import { ReferenceImagesModal } from "@/components/images/ReferenceImagesModal"
@@ -836,7 +837,13 @@ const submitRegenerate = async () => {
                                     {t("images.numberOfImages") || "Number of images"}
                                 </label>
                                 <div className="flex flex-wrap items-center gap-4">
-                                    <input type="number" min={MIN_IMAGES} max={MAX_IMAGES} value={numImages} onChange={(e) => { const v = parseInt(e.target.value, 10); if (!isNaN(v)) setNumImages(Math.max(MIN_IMAGES, Math.min(MAX_IMAGES, v))); }} className="w-24 px-4 py-3 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7753ff]" />
+                                    <NumberOfImagesSelector
+                                        value={numImages}
+                                        onChange={setNumImages}
+                                        min={MIN_IMAGES}
+                                        max={MAX_IMAGES}
+                                        primaryColor="#7753ff"
+                                    />
                                     <span className="text-gray-500 text-sm">{MIN_IMAGES}–{MAX_IMAGES} {t("images.images") || "images"}</span>
                                 </div>
                             </div>
@@ -988,9 +995,9 @@ text-gray-800 text-sm">
             {/* Regenerate Modal */}
             {regenerateModal.isOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
                         {/* Modal Header */}
-                        <div className="sticky top-0 bg-white border-b border-gray-200 p-6 rounded-t-3xl">
+                        <div className="flex-shrink-0 border-b border-gray-200 bg-white p-6 rounded-t-3xl z-10 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-[#7753ff] rounded-xl">
@@ -1012,7 +1019,7 @@ text-gray-800 text-sm">
                         </div>
 
                         {/* Modal Content */}
-                        <div className="p-6 space-y-6">
+                        <div className="flex-1 overflow-y-auto min-h-0 p-6 space-y-6">
                             {/* Current Image */}
                             <div>
                                 <p className="text-sm font-semibold text-gray-700 mb-3">{t("images.currentImage")}:</p>
