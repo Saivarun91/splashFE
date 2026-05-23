@@ -392,7 +392,9 @@ const BackgroundReplaceForm = () => {
 
         try {
             const formDataToSend = new FormData()
-            productImages.forEach((file) => formDataToSend.append("ornament_images", file))
+            // Backend currently accepts a single "ornament_image" file for replace background.
+            // If multiple product images are selected, use the first one to keep request valid.
+            formDataToSend.append("ornament_image", productImages[0])
             if (formData.referenceImage) {
                 formDataToSend.append("background_image", formData.referenceImage)
             }
@@ -401,6 +403,13 @@ const BackgroundReplaceForm = () => {
             formDataToSend.append("prompt", formData.prompt || t("images.changeTheBackground"))
             formDataToSend.append("dimension", formData.dimension)
             formDataToSend.append("num_images", String(productImages.length === 1 ? numImages : 1))
+
+            if (productImages.length > 1) {
+                toast(
+                    "Multiple product images are not supported yet for this tool. Using the first image.",
+                    { icon: "ℹ️" }
+                )
+            }
 
             const response = await apiService.changeBackground(formDataToSend, token)
 
