@@ -42,9 +42,12 @@ export const uploadOrnament = async (imageFile, prompt = '', backgroundColor = '
  * @param {string} backgroundColor - Optional background color
  * @returns {Promise} Response with generated image URLs
  */
-export const changeBackground = async (ornamentImage, prompt, backgroundImage = null, backgroundColor = null) => {
+export const changeBackground = async (ornamentImages, prompt, backgroundImage = null, backgroundColor = null) => {
   const formData = new FormData();
-  formData.append('ornament_image', ornamentImage);
+  const images = Array.isArray(ornamentImages) ? ornamentImages : [ornamentImages];
+  images.forEach((image) => {
+    formData.append('ornament_images', image);
+  });
   formData.append('prompt', prompt);
 
   if (backgroundImage) {
