@@ -137,12 +137,12 @@ export default function Dashboard() {
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md text-center">
-                    <h2 className="text-xl font-bold text-red-700 mb-2">
+            <div className="min-h-[50vh] flex items-center justify-center">
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6 max-w-md text-center">
+                    <h2 className="text-xl font-bold text-red-400 mb-2">
                         Error Loading Projects
                     </h2>
-                    <p className="text-red-600 mb-4">{error}</p>
+                    <p className="text-red-400 mb-4">{error}</p>
                     <button
                         onClick={() => window.location.reload()}
                         className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
@@ -155,44 +155,43 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 text-gray-900">
-            <div className="max-w-7xl mx-auto p-6 space-y-8 animate-fade-in">
+        <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
 
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-4xl font-bold bg-linear-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">{t("dashboard.projects")}</h1>
-                        <p className="text-gray-600">{t("dashboard.organizeCampaigns")}</p>
+                        <h1 className="text-4xl font-bold text-foreground">{t("dashboard.projects")}</h1>
+                        <p className="text-muted-foreground">{t("dashboard.organizeCampaigns")}</p>
                     </div>
                     <Link href="/dashboard/projects/create">
-                        <button className="bg-[linear-gradient(135deg,hsl(250,70%,60%),hsl(260,75%,65%))] text-white font-medium px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2">
+                        <Button variant="brand" className="font-medium px-6 py-3 h-auto rounded-xl shadow-md hover:shadow-lg flex items-center gap-2">
                             <Plus className="w-4 h-4" /> {t("dashboard.createNewProject")}
-                        </button>
+                        </Button>
                     </Link>
                 </div>
 
                 {/* Search */}
                 <div className="relative max-w-md">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                         type="text"
                         placeholder={t("dashboard.searchProjects")}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-white border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-gray-900 placeholder-gray-500 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                        className="w-full bg-input border border-input rounded-lg pl-10 pr-4 py-2.5 text-foreground placeholder:text-muted-foreground shadow-sm focus:ring-2 focus:ring-ring focus:border-ring transition"
                     />
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-3 border-b border-gray-200">
+                <div className="flex gap-3 border-b border-border">
                     {[t("dashboard.all"), t("dashboard.inProgressTab"), t("dashboard.completed")].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-4 py-2.5 text-sm font-medium rounded-t-md transition-all duration-200
                     ${activeTab === tab
-                                    ? "text-indigo-600 border-b-2 border-indigo-600 bg-white shadow-sm"
-                                    : "text-gray-500 hover:text-indigo-500 hover:bg-white/60"
+                                    ? "text-gold-solid border-b-2 border-gold-solid bg-card shadow-sm"
+                                    : "text-muted-foreground hover:text-gold-solid hover:bg-card/60"
                                 }`}
                         >
                             {tab}
@@ -220,10 +219,10 @@ export default function Dashboard() {
                                 : t("dashboard.draft");
 
                         const statusBgColor = project.status === "progress"
-                            ? "bg-orange-100 text-yellow-500"
+                            ? "bg-amber-500/15 text-amber-400"
                             : project.status === "completed"
-                                ? "bg-[#884cff] text-white"
-                                : "bg-gray-100 text-gray-800";
+                                ? "bg-gold-solid/20 text-gold-solid"
+                                : "bg-muted text-muted-foreground";
 
                         const updatedAt = project.updated_at || project.created_at;
                         const imageCount = project.total_images || project.collection?.items?.[0]?.product_images?.length || 0;
@@ -234,7 +233,7 @@ export default function Dashboard() {
                                 key={project.id}
                                 href={`/dashboard/projects/${project.slug ? project.slug : project.id}`}
                                 prefetch={true}
-                                className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 relative block cursor-pointer"
+                                className="bg-card rounded-2xl p-6 border border-border hover:shadow-lg hover:border-gold-muted transition-all duration-300 relative block cursor-pointer"
                             >
                                 {/* Top Right Menu */}
                                 <button
@@ -243,19 +242,19 @@ export default function Dashboard() {
                                         e.stopPropagation();
                                         handleDeleteProject(project.id);
                                     }}
-                                    className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition z-10"
+                                    className="absolute top-6 right-6 text-muted-foreground hover:text-foreground transition z-10"
                                     aria-label="Delete project"
                                 >
                                     <MoreVertical className="w-5 h-5" />
                                 </button>
 
                                 {/* Folder Icon */}
-                                <div className="w-12 h-12 rounded-xl bg-[#884cff] flex items-center justify-center mb-4">
-                                    <BarChart3 className="w-6 h-6 text-white" />
+                                <div className="w-12 h-12 rounded-xl bg-gold-gradient flex items-center justify-center mb-4">
+                                    <BarChart3 className="w-6 h-6 text-primary-foreground" />
                                 </div>
 
                                 {/* Project Title */}
-                                <h3 className="text-lg font-bold text-[#1a1a1a] mb-3">
+                                <h3 className="text-lg font-bold text-foreground mb-3">
                                     {project.name}
                                 </h3>
 
@@ -268,41 +267,41 @@ export default function Dashboard() {
 
                                 {/* Images and Updated Time */}
                                 <div className="flex items-center justify-between mb-4">
-                                    <span className="text-sm text-[#333333]">
+                                    <span className="text-sm text-muted-foreground">
                                         {imageCount} {imageCount === 1 ? 'image' : 'images'}
                                     </span>
-                                    <span className="text-sm text-[#666666]">
+                                    <span className="text-sm text-muted-foreground">
                                         Updated {getTimeAgo(updatedAt)}
                                     </span>
                                 </div>
 
                                 {/* Collaborators and Open Button */}
-                                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div className="flex items-center justify-between pt-4 border-t border-border">
                                     <div className="flex items-center gap-1.5">
                                         {collaborators.length > 0 ? (
                                             <>
                                                 {collaborators.slice(0, 3).map((member, i) => (
                                                     <div
                                                         key={i}
-                                                        className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-xs font-medium text-purple-700 border-2 border-white"
+                                                        className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-medium text-gold-solid border-2 border-card"
                                                     >
                                                         {member.full_name?.[0]?.toUpperCase() || 'A'}
                                                     </div>
                                                 ))}
                                                 {collaborators.length > 3 && (
-                                                    <span className="text-xs text-gray-500 ml-1">
+                                                    <span className="text-xs text-muted-foreground ml-1">
                                                         +{collaborators.length - 3}
                                                     </span>
                                                 )}
                                             </>
                                         ) : (
-                                            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-xs font-medium text-purple-700 border-2 border-white">
+                                            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-medium text-gold-solid border-2 border-card">
                                                 A
                                             </div>
                                         )}
                                     </div>
                                     <span
-                                        className="text-sm font-medium text-[#884cff] hover:text-[#6d3dd1] transition"
+                                        className="text-sm font-medium text-gold-solid hover:brightness-110 transition"
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         Open
@@ -315,13 +314,13 @@ export default function Dashboard() {
                     {/* Create New Card */}
                     <Link
                         href="/dashboard/projects/create"
-                        className="border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center text-center p-8 bg-purple-50/30 hover:border-purple-400 hover:bg-purple-50/50 transition"
+                        className="border-2 border-dashed border-gold-muted rounded-2xl flex flex-col items-center justify-center text-center p-8 bg-gold-solid/5 hover:border-gold-solid hover:bg-gold-solid/10 transition"
                     >
-                        <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mb-4">
-                            <Plus className="w-8 h-8 text-[#884cff]" />
+                        <div className="w-16 h-16 rounded-full bg-gold-solid/15 flex items-center justify-center mb-4">
+                            <Plus className="w-8 h-8 text-gold-solid" />
                         </div>
-                        <h3 className="font-bold text-[#1a1a1a] mb-2">Create New Project</h3>
-                        <p className="text-sm text-gray-600 max-w-[240px] leading-relaxed">
+                        <h3 className="font-bold text-foreground mb-2">Create New Project</h3>
+                        <p className="text-sm text-muted-foreground max-w-[240px] leading-relaxed">
                             Start a new campaign photoshoot with multiple products and themes
                         </p>
                     </Link>
@@ -330,27 +329,26 @@ export default function Dashboard() {
                 {/* Empty State */}
                 {filteredProjects.length === 0 && (
                     <div className="text-center py-12">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Search size={24} className="text-gray-400" />
+                        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Search size={24} className="text-muted-foreground" />
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-foreground mb-2">
                             {searchQuery ? t("dashboard.noProjects") : t("dashboard.noProjects")}
                         </h3>
-                        <p className="text-gray-600 mb-4">
+                        <p className="text-muted-foreground mb-4">
                             {searchQuery
                                 ? "Try adjusting your search terms."
                                 : "Create your first project to get started."}
                         </p>
                         {!searchQuery && (
                             <Link href="/dashboard/projects/create">
-                                <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition">
+                                <Button variant="brand" className="px-6 py-3 h-auto rounded-lg">
                                     Create Project
-                                </button>
+                                </Button>
                             </Link>
                         )}
                     </div>
                 )}
-            </div>
         </div>
     );
 

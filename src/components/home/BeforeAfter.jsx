@@ -108,9 +108,9 @@ const BeforeAfter = () => {
   /* ---------------- States ---------------- */
   if (loading) {
     return (
-      <section className="py-20 bg-gray-50 text-center">
-        <div className="animate-spin h-10 w-10 mx-auto mb-4 rounded-full border-b-2 border-blue-600" />
-        <p className="text-gray-600">Loading images…</p>
+      <section className="py-20 text-center">
+        <div className="animate-spin h-10 w-10 mx-auto mb-4 rounded-full border-b-2 border-gold-solid" />
+        <p className="text-muted-foreground">Loading images…</p>
       </section>
     );
   }
@@ -122,15 +122,15 @@ const BeforeAfter = () => {
 
   /* ---------------- Render ---------------- */
   return (
-    <section className="py-16 lg:py-20 bg-gray-50">
+    <section className="py-16 lg:py-20">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
 
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-4">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-4 text-foreground">
             From packshot to editorial
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Transform basic product photos into stunning campaign visuals.
           </p>
         </div>
@@ -186,7 +186,7 @@ const BeforeAfter = () => {
 
 
   {/* CENTER – Before / After Slider */}
-  <div className="relative h-[450px] overflow-hidden rounded-2xl shadow-2xl bg-gradient-to-b from-indigo-600 to-purple-500">
+  <div className="relative h-[450px] overflow-hidden rounded-2xl shadow-2xl border border-border bg-card">
 
 {/* AFTER Image (only when slider < 100) */}
 {slider < 100 && (
@@ -214,12 +214,12 @@ const BeforeAfter = () => {
 {/* Divider (hide at edges) */}
 {slider > 0 && slider < 100 && (
   <div
-    className="absolute top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-600 to-purple-500 z-20"
+    className="absolute top-0 bottom-0 w-1 bg-gold-solid z-20"
     style={{ left: `${slider}%` }}
   >
     <div
       className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                 w-12 h-12 bg-gradient-to-b from-indigo-600 to-purple-500 rounded-full shadow-xl
+                 w-12 h-12 bg-gold-gradient rounded-full shadow-xl
                  flex items-center justify-center"
     >
 <ArrowRight
@@ -244,13 +244,13 @@ const BeforeAfter = () => {
 
 {/* Labels */}
 {showLabels && slider > 0 && (
-  <div className="absolute top-4 left-4 bg-gradient-to-b from-indigo-600 to-purple-500 text-white px-4 py-1 rounded-full shadow text-sm font-semibold">
+  <div className="absolute top-4 left-4 bg-gold-gradient text-primary-foreground px-4 py-1 rounded-full shadow text-sm font-semibold">
     Before
   </div>
 )}
 
 {showLabels && slider < 100 && (
-  <div className="absolute top-4 right-4 bg-gradient-to-b from-indigo-600 to-purple-500 text-white px-4 py-1 rounded-full shadow text-sm font-semibold">
+  <div className="absolute top-4 right-4 bg-gold-gradient text-primary-foreground px-4 py-1 rounded-full shadow text-sm font-semibold">
     After
   </div>
 )}

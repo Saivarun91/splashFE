@@ -30,29 +30,29 @@ function StatsGrid({ projects }) {
             label: "Total Projects",
             value: projects.length.toString(),
             icon: FileText,
-            bgColor: "bg-purple-100",
-            iconColor: "text-primary",
+            bgColor: "bg-gold-solid/15",
+            iconColor: "text-gold-solid",
         },
         {
             label: "Completed",
             value: completedProjects.length.toString(),
             icon: CheckCircle,
-            bgColor: "bg-purple-100",
-            iconColor: "text-primary",
+            bgColor: "bg-gold-solid/15",
+            iconColor: "text-gold-solid",
         },
         {
             label: "Processing",
             value: projects.filter(p => p.status === 'progress').length.toString(),
             icon: Clock,
-            bgColor: "bg-purple-100",
-            iconColor: "text-primary",
+            bgColor: "bg-gold-solid/15",
+            iconColor: "text-gold-solid",
         },
         {
             label: "Total Images",
             value: totalImages.toString(),
             icon: ImageIcon,
-            bgColor: "bg-purple-100",
-            iconColor: "text-primary",
+            bgColor: "bg-gold-solid/15",
+            iconColor: "text-gold-solid",
         },
     ]
 
@@ -66,7 +66,7 @@ function StatsGrid({ projects }) {
                             <stat.icon size={20} className={stat.iconColor} />
                         </div>
                     </div>
-                    <p className="text-4xl font-bold text-primary">{stat.value}</p>
+                    <p className="text-4xl font-bold text-gold-solid">{stat.value}</p>
                 </div>
             ))}
         </div>
@@ -83,7 +83,7 @@ function SearchBar({ searchQuery, setSearchQuery }) {
                     placeholder="Search projects"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 />
             </div>
             <button className="px-6 py-3 bg-card border border-border rounded-xl text-foreground hover:bg-secondary transition-colors flex items-center gap-2 font-medium">
@@ -103,13 +103,13 @@ function ProjectsGrid({ projects, searchQuery }) {
     if (filteredProjects.length === 0) {
         return (
             <div className="text-center py-12">
-                <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Search size={24} className="text-gray-400" />
+                <div className="bg-muted w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search size={24} className="text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                     {searchQuery ? 'No completed projects found' : 'No completed projects yet'}
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                     {searchQuery ? 'Try adjusting your search terms.' : 'Complete some projects to see them here.'}
                 </p>
             </div>
@@ -124,7 +124,7 @@ function ProjectsGrid({ projects, searchQuery }) {
                     className="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-shadow"
                 >
                     {/* Project Image */}
-                    <div className="relative h-48 bg-gray-200 overflow-hidden">
+                    <div className="relative h-48 bg-muted overflow-hidden">
                         <div className="w-full h-full bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
                             <CheckCircle size={48} className="text-green-500" />
                         </div>
@@ -140,15 +140,15 @@ function ProjectsGrid({ projects, searchQuery }) {
                         {/* Project Meta */}
                         <div className="flex gap-6 mb-6 text-sm">
                             <div>
-                                <p className="text-primary font-semibold">Images</p>
+                                <p className="text-gold-solid font-semibold">Images</p>
                                 <p className="text-foreground">{project.collection?.items?.[0]?.product_images?.length || 0}</p>
                             </div>
                             <div>
-                                <p className="text-primary font-semibold">Date</p>
+                                <p className="text-gold-solid font-semibold">Date</p>
                                 <p className="text-foreground">{new Date(project.created_at).toLocaleDateString()}</p>
                             </div>
                             <div>
-                                <p className="text-primary font-semibold">Status</p>
+                                <p className="text-gold-solid font-semibold">Status</p>
                                 <p className="text-green-500 font-semibold">{project.status === 'completed' ? 'Completed' : 'In Progress'}</p>
                             </div>
                         </div>
@@ -157,7 +157,7 @@ function ProjectsGrid({ projects, searchQuery }) {
                         <div className="flex gap-3">
                             <Link
                                 href={`/dashboard/projects/${project.id}`}
-                                className="flex-1 bg-primary text-primary-foreground py-2 px-4 rounded-lg hover:bg-accent transition-colors flex items-center justify-center gap-2 font-medium"
+                                className="flex-1 bg-gold-gradient text-primary-foreground py-2 px-4 rounded-lg hover:brightness-110 transition-colors flex items-center justify-center gap-2 font-medium"
                             >
                                 <Eye size={18} />
                                 View
@@ -200,9 +200,9 @@ export default function CompletedProjectsPage() {
 
     if (loading) {
         return (
-            <div className="flex min-h-screen bg-background items-center justify-center">
+            <div className="flex min-h-[50vh] items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-solid mx-auto mb-4"></div>
                     <p className="text-lg text-muted-foreground">Loading completed projects...</p>
                 </div>
             </div>
@@ -211,7 +211,7 @@ export default function CompletedProjectsPage() {
 
     if (error) {
         return (
-            <div className="flex min-h-screen bg-background items-center justify-center">
+            <div className="flex min-h-[50vh] items-center justify-center">
                 <div className="text-center">
                     <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
                         <h2 className="text-xl font-bold text-red-800 mb-2">Error Loading Projects</h2>
@@ -229,10 +229,9 @@ export default function CompletedProjectsPage() {
     }
 
     return (
-        <div className="flex min-h-screen bg-background">
-            <main className="flex-1">
+        <div className="max-w-7xl mx-auto space-y-8">
                 <Header />
-                <div className="p-8">
+                <div>
                     <StatsGrid projects={projects} />
                     <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
                     <ProjectsGrid projects={projects} searchQuery={searchQuery} />
@@ -247,7 +246,6 @@ export default function CompletedProjectsPage() {
                         </Link>
                     </div>
                 </div>
-            </main>
         </div>
     )
 }

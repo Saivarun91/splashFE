@@ -23,6 +23,9 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
+const inputClassName =
+    "w-full px-4 py-3 bg-input border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
+
 export default function SignupForm() {
     const { language, changeLanguage, t } = useLanguage();
     const [formData, setFormData] = useState({
@@ -207,17 +210,17 @@ export default function SignupForm() {
     return (
         <div className="w-full max-w-md">
             <div className="mb-8">
-                <h1 className="text-4xl font-bold text-[#0c1421] mb-2">{t("auth.signup")}</h1>
-                <p className="text-lg text-[#313957]">{t("auth.createAccount")}</p>
+                <h1 className="text-4xl font-bold text-foreground mb-2">{t("auth.signup")}</h1>
+                <p className="text-lg text-muted-foreground">{t("auth.createAccount")}</p>
             </div>
 
             {/* Language Selector */}
             {/* <div className="mb-6">
-                <Label className="block text-sm font-semibold text-[#0c1421] mb-2">
+                <Label className="block text-sm font-semibold text-foreground mb-2">
                     {t("signup.selectLanguage")}
                 </Label>
                 <Select value={language} onValueChange={changeLanguage}>
-                    <SelectTrigger className="w-full bg-[#f3f9fa] border border-[#e6e6e6]">
+                    <SelectTrigger className="w-full bg-input border border-input">
                         <SelectValue placeholder={t("signup.selectLanguage")} />
                     </SelectTrigger>
                     <SelectContent>
@@ -229,7 +232,7 @@ export default function SignupForm() {
             {step === "signup" ? (
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                        <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.fullName")}</label>
+                        <label className="block text-sm font-semibold text-foreground">{t("auth.fullName")}</label>
                         <Input
                             type="text"
                             name="full_name"
@@ -237,12 +240,12 @@ export default function SignupForm() {
                             onChange={handleChange}
                             placeholder={t("auth.johnDoe")}
                             required
-                            className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
+                            className={inputClassName}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.username")}</label>
+                        <label className="block text-sm font-semibold text-foreground">{t("auth.username")}</label>
                         <Input
                             type="text"
                             name="username"
@@ -250,12 +253,12 @@ export default function SignupForm() {
                             onChange={handleChange}
                             placeholder={t("auth.johndoe123")}
                             required
-                            className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
+                            className={inputClassName}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.email")}</label>
+                        <label className="block text-sm font-semibold text-foreground">{t("auth.email")}</label>
                         <Input
                             type="email"
                             name="email"
@@ -263,12 +266,12 @@ export default function SignupForm() {
                             onChange={handleChange}
                             placeholder={t("auth.exampleEmail")}
                             required
-                            className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
+                            className={inputClassName}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.password")}</label>
+                        <label className="block text-sm font-semibold text-foreground">{t("auth.password")}</label>
                         <Input
                             type="password"
                             name="password"
@@ -276,11 +279,11 @@ export default function SignupForm() {
                             onChange={handleChange}
                             placeholder={t("auth.atLeast8Chars")}
                             required
-                            className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
+                            className={inputClassName}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold text-[#0c1421]">{t("auth.confirmPassword")}</label>
+                        <label className="block text-sm font-semibold text-foreground">{t("auth.confirmPassword")}</label>
                         <Input
                             type="password"
                             name="confirm_password"
@@ -288,7 +291,7 @@ export default function SignupForm() {
                             onChange={handleChange}
                             placeholder={t("auth.confirmYourPassword")}
                             required
-                            className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg"
+                            className={inputClassName}
                         />
                     </div>
 
@@ -302,14 +305,14 @@ export default function SignupForm() {
                                 checked={formData.acceptTerms}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 h-4 w-4 text-[#5533ff] border-gray-300 rounded focus:ring-[#5533ff]"
+                                className="mt-1 h-4 w-4 accent-[#cd9639] border-border rounded focus:ring-ring"
                             />
-                            <label htmlFor="acceptTerms" className="text-sm text-[#313957]">
+                            <label htmlFor="acceptTerms" className="text-sm text-muted-foreground">
                                 {t("signup.agreeTo")}{" "}
                                 <button
                                     type="button"
                                     onClick={() => handleViewContent('terms')}
-                                    className="text-[#5533ff] hover:underline font-semibold"
+                                    className="text-gold-solid hover:underline font-semibold"
                                 >
                                     {t("signup.termsAndConditions")} {" "}
                                 </button>
@@ -317,7 +320,7 @@ export default function SignupForm() {
                                 <button
                                     type="button"
                                     onClick={() => handleViewContent('privacy')}
-                                    className="text-[#5533ff] hover:underline font-semibold"
+                                    className="text-gold-solid hover:underline font-semibold"
                                 >
                                     {t("signup.privacyPolicy")}
                                 </button>
@@ -331,19 +334,20 @@ export default function SignupForm() {
 
                     <Button
                         type="submit"
+                        variant="brand"
                         disabled={loading}
-                        className="w-full py-3 bg-[#5533ff] hover:bg-[#4422dd] text-white font-semibold rounded-full"
+                        className="w-full py-3 h-auto font-semibold rounded-full"
                     >
                         {loading ? t("auth.signingUp") : t("auth.signup")}
                     </Button>
                 </form>
             ) : (
                 <form onSubmit={handleVerifyOtp} className="space-y-5">
-                    <h2 className="text-3xl font-bold text-[#0c1421]">
+                    <h2 className="text-3xl font-bold text-foreground">
                         {t("auth.verifyEmail")}
                     </h2>
 
-                    <p className="text-sm text-[#313957]">
+                    <p className="text-sm text-muted-foreground">
                         {t("auth.otpSentTo")} <strong>{formData.email}</strong>
                     </p>
 
@@ -353,14 +357,15 @@ export default function SignupForm() {
                         onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                         maxLength={6}
                         placeholder={t("auth.enterOtp")}
-                        className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg text-center tracking-widest text-lg"
+                        className={`${inputClassName} text-center tracking-widest text-lg`}
                         required
                     />
 
                     <Button
                         type="submit"
+                        variant="brand"
                         disabled={otpLoading || otp.length !== 6}
-                        className="w-full py-3 bg-[#5533ff] hover:bg-[#4422dd] text-white font-semibold rounded-full"
+                        className="w-full py-3 h-auto font-semibold rounded-full"
                     >
                         {otpLoading ? t("auth.verifying") : t("auth.verifyOtp")}
                     </Button>
@@ -369,7 +374,7 @@ export default function SignupForm() {
                         type="button"
                         onClick={handleResendOtp}
                         disabled={otpLoading}
-                        className="text-sm text-[#5533ff] hover:underline block mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="text-sm text-gold-solid hover:underline block mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {otpLoading ? t("auth.sending") || "Sending..." : t("auth.resendOtp") || "Resend OTP"}
                     </button>
@@ -378,17 +383,17 @@ export default function SignupForm() {
 
             {message && (
                 <p className={`mt-4 text-center text-sm ${message.includes("successfully") || message.includes("sent") || message.includes("verified")
-                        ? "text-green-600"
-                        : "text-red-600"
+                        ? "text-green-400"
+                        : "text-red-400"
                     }`}>
                     {message}
                 </p>
             )}
 
             <div className="mt-8 text-center">
-                <p className="text-sm text-[#313957]">
+                <p className="text-sm text-muted-foreground">
                     {t("auth.alreadyHaveAccount")}{" "}
-                    <Link href="/login" className="font-semibold text-[#5533ff] hover:opacity-80">
+                    <Link href="/login" className="font-semibold text-gold-solid hover:opacity-80">
                         {t("auth.login")}
                     </Link>
                 </p>
@@ -396,7 +401,7 @@ export default function SignupForm() {
 
             {/* Legal Content Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-card border-border">
                     <DialogHeader>
                         <DialogTitle>
                             {selectedContent?.title || t("legal.legalDocument")}
@@ -408,13 +413,13 @@ export default function SignupForm() {
                     <div className="mt-4">
                         {selectedContent?.content ? (
                             <div
-                                className="prose prose-sm max-w-none text-[#313957]"
+                                className="prose prose-sm max-w-none text-muted-foreground prose-invert"
                                 dangerouslySetInnerHTML={{
                                     __html: formatContent(selectedContent.content)
                                 }}
                             />
                         ) : (
-                            <p className="text-[#313957]">{t("legal.loadingContent")}</p>
+                            <p className="text-muted-foreground">{t("legal.loadingContent")}</p>
                         )}
                     </div>
                 </DialogContent>

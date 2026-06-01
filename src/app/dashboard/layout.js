@@ -52,7 +52,7 @@ export default function DashboardLayout({ children }) {
 
     // Shell renders immediately - children handle their own data fetching
     return (
-        <div className="flex h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/20">
+        <div className="dark flex h-screen min-h-screen bg-surface-gradient">
             {/* Sidebar - renders instantly, no data dependencies */}
             {!isViewerRoute && (
                 <Sidebar

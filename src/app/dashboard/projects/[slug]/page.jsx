@@ -118,15 +118,15 @@ export default function ProjectPageBySlug({ params }) {
 
     if (error || !project) {
         return (
-            <div className="flex h-screen bg-[#fcfcfc] items-center justify-center">
+            <div className="flex min-h-[50vh] items-center justify-center">
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold text-[#1a1a1a] mb-4">
+                    <h1 className="text-2xl font-bold text-foreground mb-4">
                         {error ? 'Error loading project' : 'Project not found'}
                     </h1>
                     {error && (
-                        <p className="text-red-600 mb-4">{error}</p>
+                        <p className="text-red-400 mb-4">{error}</p>
                     )}
-                    <Link href="/dashboard/projects" className="text-[#7753ff] hover:underline">
+                    <Link href="/dashboard/projects" className="text-gold-solid hover:underline">
                         Back to Projects
                     </Link>
                 </div>
@@ -155,7 +155,7 @@ export default function ProjectPageBySlug({ params }) {
     }
 
     return (
-        <div className="flex h-screen bg-[#fcfcfc]">
+        <div className="flex flex-col overflow-hidden -m-8 min-h-[calc(100vh-4rem)]">
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header project={transformedProject} onProjectUpdate={handleProjectUpdate} />
                 <WorkflowContent project={transformedProject} />

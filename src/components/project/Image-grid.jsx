@@ -33,7 +33,7 @@ export function ImageGrid({ project, collectionData: initialCollectionData, onDa
     if (!collectionData?.items?.[0]?.product_images || collectionData.items[0].product_images.length === 0) {
         return (
             <div className="mb-12">
-                <div className="text-center py-12 border-2 border-dashed border-[#e6e6e6] rounded-lg">
+                <div className="text-center py-12 border-2 border-dashed border-gold-muted rounded-lg">
                     <p className="text-[#708090] mb-2">No images generated yet</p>
                     <p className="text-sm text-[#708090]">
                         Click "Generate Product Images" above to create your final images
@@ -50,7 +50,7 @@ export function ImageGrid({ project, collectionData: initialCollectionData, onDa
     if (!hasAnyGeneratedImages) {
         return (
             <div className="mb-12">
-                <div className="text-center py-12 border-2 border-dashed border-[#e6e6e6] rounded-lg">
+                <div className="text-center py-12 border-2 border-dashed border-gold-muted rounded-lg">
                     <p className="text-[#708090] mb-2">No images generated yet</p>
                     <p className="text-sm text-[#708090]">
                         Click "Generate Product Images" above to create your final images
@@ -63,8 +63,8 @@ export function ImageGrid({ project, collectionData: initialCollectionData, onDa
     return (
         <div>
             {refreshing && (
-                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-blue-800 text-sm">
+                <div className="mb-4 p-3 bg-gold-solid/10 border border-gold-muted rounded-lg">
+                    <p className="text-gold-solid text-sm">
                         ✨ Refreshing images...
                     </p>
                 </div>

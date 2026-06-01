@@ -233,7 +233,7 @@ export function GlobalInstructions({
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors ${
                     commentsCount > 0
                         ? "text-red-600 hover:bg-red-50"
-                        : "text-[#884cff] hover:bg-[#f3efff]"
+                        : "text-gold-solid hover:bg-gold-solid/10"
                 }`}
                 aria-label="Open comments"
                 title="Open comments"
@@ -254,28 +254,28 @@ export function GlobalInstructions({
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#884cff]" />
-                <h3 className="font-bold text-[#1a1a1a] text-lg">{t("images.additionalInstructions")}</h3>
+                <FileText className="w-5 h-5 text-gold-solid" />
+                <h3 className="font-bold text-foreground text-lg">{t("images.additionalInstructions")}</h3>
                 {renderCommentButton("additional_instructions")}
             </div>
 
             <div className="space-y-3">
-                <p className="text-sm text-[#708090]">
+                <p className="text-sm text-muted-foreground">
                     Provide specific instructions for how the uploaded content and selections should be used in the generated images:
                 </p>
                 <textarea
                     placeholder="e.g., 'Use the uploaded theme images as primary inspiration', 'Apply the selected colors as accent colors', 'Make sure the model poses match the uploaded reference images', 'Use the background images to create similar atmospheres'"
                     value={instructions}
                     onChange={(e) => setInstructions(e.target.value)}
-                    className="w-full h-24 px-4 py-3 border border-[#e6e6e6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent resize-none disabled:bg-gray-50 disabled:cursor-not-allowed"
+                    className="w-full h-24 px-4 py-3 bg-input border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={!canEdit}
                 />
             </div>
             {activeCommentField && (
                 <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-                    <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-[#e6e6e6]">
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-[#e6e6e6]">
-                            <h4 className="text-sm font-semibold text-[#1a1a1a]">{activeCommentConfig?.title} Comments</h4>
+                    <div className="w-full max-w-md bg-card rounded-xl shadow-2xl border border-border">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                            <h4 className="text-sm font-semibold text-foreground">{activeCommentConfig?.title} Comments</h4>
                             <button
                                 type="button"
                                 onClick={closeComments}
@@ -289,24 +289,24 @@ export function GlobalInstructions({
                         <div className="p-4 space-y-3">
                             <div className="max-h-48 overflow-y-auto space-y-2">
                                 {currentComments.length === 0 ? (
-                                    <p className="text-xs text-[#708090]">No comments yet.</p>
+                                    <p className="text-xs text-muted-foreground">No comments yet.</p>
                                 ) : (
                                     currentComments.map((comment) => (
-                                        <div key={comment.id} className="border border-[#e6e6e6] rounded-md p-2 bg-[#fafafa]">
+                                        <div key={comment.id} className="border border-border rounded-md p-2 bg-[#fafafa]">
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="min-w-0">
                                                     <p className="text-xs font-medium text-[#444]">
                                                         {(comment.authorName || "Member")} • {formatRelativeCommentTime(comment.createdAt, nowMs)}
                                                     </p>
-                                                    <p className="text-sm text-[#1a1a1a] break-words">{comment.comment}</p>
+                                                    <p className="text-sm text-foreground break-words">{comment.comment}</p>
                                                     {Array.isArray(comment.replies) && comment.replies.length > 0 && (
-                                                        <div className="mt-2 pl-3 border-l border-[#e6e6e6] space-y-2">
+                                                        <div className="mt-2 pl-3 border-l border-border space-y-2">
                                                             {comment.replies.map((reply) => (
-                                                                <div key={reply.id} className="bg-white border border-[#f0f0f0] rounded p-2">
+                                                                <div key={reply.id} className="bg-card border border-[#f0f0f0] rounded p-2">
                                                                     <p className="text-xs font-medium text-[#555]">
                                                                         {(reply.authorName || "Member")} • {formatRelativeCommentTime(reply.createdAt, nowMs)}
                                                                     </p>
-                                                                    <p className="text-sm text-[#1a1a1a] break-words">{reply.comment}</p>
+                                                                    <p className="text-sm text-foreground break-words">{reply.comment}</p>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -316,7 +316,7 @@ export function GlobalInstructions({
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleStartReply(comment.id)}
-                                                                className="text-xs text-[#884cff] hover:text-[#7a3ff0]"
+                                                                className="text-xs text-gold-solid hover:text-[#7a3ff0]"
                                                             >
                                                                 {replyingToCommentId === comment.id ? "Replying..." : "Reply"}
                                                             </button>
@@ -328,7 +328,7 @@ export function GlobalInstructions({
                                                                 value={replyDraftByCommentId[comment.id] || ""}
                                                                 onChange={(e) => handleReplyDraftChange(comment.id, e.target.value)}
                                                                 placeholder="Write a reply..."
-                                                                className="w-full h-16 px-2 py-1.5 border border-[#e6e6e6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#884cff] resize-none text-sm"
+                                                                className="w-full h-16 px-2 py-1.5 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm"
                                                             />
                                                             <div className="flex items-center justify-end gap-2">
                                                                 <button
@@ -342,7 +342,7 @@ export function GlobalInstructions({
                                                                     type="button"
                                                                     onClick={() => handleAddReply(comment.id)}
                                                                     disabled={savingComments || !(replyDraftByCommentId[comment.id] || "").trim()}
-                                                                    className="px-2 py-1 text-xs rounded-md bg-[#884cff] text-white hover:bg-[#7a3ff0] disabled:opacity-60"
+                                                                    className="px-2 py-1 text-xs rounded-md bg-gold-gradient text-white hover:brightness-110 disabled:opacity-60"
                                                                 >
                                                                     {savingComments ? "Submitting..." : "Submit reply"}
                                                                 </button>
@@ -372,7 +372,7 @@ export function GlobalInstructions({
                                         value={draftComment}
                                         onChange={(e) => setDraftComment(e.target.value)}
                                         placeholder="Write a comment..."
-                                        className="w-full h-20 px-3 py-2 border border-[#e6e6e6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#884cff] resize-none text-sm"
+                                        className="w-full h-20 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm"
                                     />
 
                                     <div className="flex items-center justify-end gap-2">
@@ -380,7 +380,7 @@ export function GlobalInstructions({
                                             type="button"
                                             onClick={handleAddComment}
                                             disabled={savingComments || !draftComment.trim()}
-                                            className="px-3 py-1.5 text-sm rounded-md bg-[#884cff] text-white hover:bg-[#7a3ff0] disabled:opacity-60"
+                                            className="px-3 py-1.5 text-sm rounded-md bg-gold-gradient text-white hover:brightness-110 disabled:opacity-60"
                                         >
                                             {savingComments ? "Submitting..." : "Submit"}
                                         </button>

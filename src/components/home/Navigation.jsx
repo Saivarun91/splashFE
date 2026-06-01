@@ -283,8 +283,8 @@ const isHomePage = pathname === "/";
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
-        ? "bg-white/80 backdrop-blur-xl shadow-sm border-b border-gray-200"
-        : "bg-white/70 backdrop-blur-xl shadow-sm border-b border-gray-200"
+        ? "bg-card/90 backdrop-blur-xl shadow-sm border-b border-border"
+        : "bg-card/70 backdrop-blur-xl shadow-sm border-b border-border"
         }`}
     >
       <div className="max-w-screen-2xl mx-auto px-3 sm:px-4 lg:px-8">
@@ -305,7 +305,7 @@ const isHomePage = pathname === "/";
                 <a
                   key={link.name}
                   href={link.href}
-                  className="text-sm lg:text-base text-gray-800 hover:text-[#A64DFF] transition-colors font-medium"
+                  className="text-sm lg:text-base text-foreground hover:text-gold-solid transition-colors font-medium"
                 >
                   {link.name}
                 </a>
@@ -317,7 +317,7 @@ const isHomePage = pathname === "/";
           <div className="hidden md:block">
             <Link
               href={isAuthPage ? "/" : "/login "}
-              className="inline-block px-4 py-2 text-sm lg:text-base font-medium text-white bg-gradient-to-br from-indigo-600 to-purple-500 rounded-lg hover:bg-indigo-700 transition-colors"
+              className="inline-block px-4 py-2 text-sm lg:text-base font-medium text-primary-foreground bg-gold-gradient rounded-lg hover:brightness-110 transition-all"
             >
               {isAuthPage ? "Back to Home" : "Get Started for free"}
             </Link>
@@ -336,13 +336,13 @@ const isHomePage = pathname === "/";
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200">
+        <div className="md:hidden bg-card border-t border-border">
           <div className="px-4 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
             {!isAuthPage && navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
-                className="block text-sm sm:text-base text-gray-800 hover:text-[#A64DFF] transition-colors font-medium py-1"
+                className="block text-sm sm:text-base text-foreground hover:text-gold-solid transition-colors font-medium py-1"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.name}
@@ -350,7 +350,7 @@ const isHomePage = pathname === "/";
             ))}
             <Link
               href={isAuthPage ? "/" : "/login"}
-              className="block w-full px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white bg-gradient-to-br from-indigo-600 to-purple-500 rounded-lg hover:bg-indigo-700 transition-colors text-center"
+              className="block w-full px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-primary-foreground bg-gold-gradient rounded-lg hover:brightness-110 transition-all text-center"
               onClick={() => setMobileMenuOpen(false)}
             >
               {isAuthPage ? "Back to Home" : "Get Started for free"}

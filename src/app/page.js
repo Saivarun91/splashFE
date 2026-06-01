@@ -51,10 +51,10 @@ const Home = () => {
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-white flex items-center justify-center p-4">
+      <main className="dark min-h-screen bg-surface-gradient flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-solid mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </main>
     );
@@ -73,7 +73,7 @@ const Home = () => {
   const footer = homeContent?.footer || null;
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="dark min-h-screen bg-surface-gradient overflow-x-hidden">
       <Navigation />
       <HeroSection hero={hero} />
 

@@ -34,7 +34,7 @@ const Footer = ({ footer: footerContent }) => {
   const copyrightText = footerContent?.copyright ?? "© 2026 Splash AI Studio. All rights reserved.";
 
   return (
-    <footer id="site-footer" className="border-t border-gray-300 bg-white">
+    <footer id="site-footer" className="border-t border-border bg-card/50">
       <FooterContactModal
         open={isContactModalOpen}
         onOpenChange={setIsContactModalOpen}
@@ -51,38 +51,34 @@ const Footer = ({ footer: footerContent }) => {
               />
             </Link>
 
-            <p className="text-sm text-black max-w-xs mb-6">
+            <p className="text-sm text-muted-foreground max-w-xs mb-6">
               {tagline}
             </p>
 
-            {/* Social Icons */}
             <div className="flex gap-4">
               {[Instagram, Twitter, Linkedin].map((Icon, idx) => (
                 <a
                   key={idx}
                   href="#"
-                  className="w-10 h-10 bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] rounded-full border border-gray-300 flex items-center justify-center hover:opacity-90 transition"
+                  className="w-10 h-10 bg-gold-gradient rounded-full border border-gold-muted flex items-center justify-center hover:brightness-110 transition"
                 >
-                  <Icon className="w-[18px] h-[18px] text-white" />
+                  <Icon className="w-[18px] h-[18px] text-primary-foreground" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Link Columns */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h3 className="font-semibold text-sm sm:text-base mb-4">
-                <span className="bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] bg-clip-text text-transparent">
-                  {category}
-                </span>
+              <h3 className="font-semibold text-sm sm:text-base mb-4 text-gold-solid">
+                {category}
               </h3>
               <ul className="space-y-4">
                 {links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm sm:text-base text-black hover:text-[#5533FF] transition-colors"
+                      className="text-sm sm:text-base text-muted-foreground hover:text-gold-solid transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -93,8 +89,8 @@ const Footer = ({ footer: footerContent }) => {
           ))}
         </div>
 
-        <div className="border-t border-gray-300 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-black text-center sm:text-left">
+        <div className="border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground text-center sm:text-left">
             {copyrightText}
           </p>
         </div>

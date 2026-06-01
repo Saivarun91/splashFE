@@ -7,6 +7,9 @@ import { apiService } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
 import { formatRelativeCommentTime } from "@/lib/comment-time"
 
+const INPUT_CLASS =
+    "w-full px-4 py-3 bg-input border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+
 const DEFAULT_COMMENTS_BY_FIELD = {
     description: [],
     target_audience: [],
@@ -267,8 +270,8 @@ export function BriefAndConcept({ project, collectionData, canEdit = true, onFor
                 onClick={() => (isActive ? closeComments() : openComments(fieldKey))}
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors ${
                     commentsCount > 0
-                        ? "text-red-600 hover:bg-red-50"
-                        : "text-[#884cff] hover:bg-[#f3efff]"
+                        ? "text-red-400 hover:bg-red-500/10"
+                        : "text-gold-solid hover:bg-gold-solid/10"
                 }`}
                 aria-label="Open comments"
                 title="Open comments"
@@ -282,19 +285,19 @@ export function BriefAndConcept({ project, collectionData, canEdit = true, onFor
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-gold-gradient rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
-                    <h3 className="font-bold text-[#1a1a1a] text-2xl">{t("images.briefAndConcept")}</h3>
-                    <p className="text-sm text-[#708090]">{t("images.defineProjectVision")}</p>
+                    <h3 className="font-bold text-foreground text-2xl">{t("images.briefAndConcept")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("images.defineProjectVision")}</p>
                 </div>
             </div>
 
             <div className="space-y-4">
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                        <label htmlFor="project-description" className="font-bold text-[#1a1a1a] text-base mb-1">
+                        <label htmlFor="project-description" className="font-bold text-foreground text-base mb-1">
                             {t("images.projectDescriptionOptional")}
                         </label>
                         {renderCommentButton("description")}
@@ -304,45 +307,45 @@ export function BriefAndConcept({ project, collectionData, canEdit = true, onFor
                         value={description}
                         onChange={handleDescriptionChange}
                         placeholder={t("images.enterProjectDescription")}
-                        className="w-full h-32 px-4 py-3 border border-[#e6e6e6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent resize-none disabled:bg-gray-50 disabled:cursor-not-allowed"
+                        className={`${INPUT_CLASS} h-32`}
                         disabled={!canEdit}
                     />
                     {activeCommentField && (
                         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-                            <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-[#e6e6e6]">
-                                <div className="flex items-center justify-between px-4 py-3 border-b border-[#e6e6e6]">
-                                    <h4 className="text-sm font-semibold text-[#1a1a1a] text-lg">{activeCommentConfig?.title} Comments</h4>
+                            <div className="w-full max-w-md bg-card rounded-xl shadow-2xl border border-border">
+                                <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                                    <h4 className="text-sm font-semibold text-foreground text-lg">{activeCommentConfig?.title} Comments</h4>
                                     <button
                                         type="button"
                                         onClick={closeComments}
-                                        className="p-1 rounded hover:bg-gray-100"
+                                        className="p-1 rounded hover:bg-secondary"
                                         aria-label="Close comments"
                                     >
-                                        <X className="w-4 h-4 text-[#666]" />
+                                        <X className="w-4 h-4 text-muted-foreground" />
                                     </button>
                                 </div>
 
                                 <div className="p-4 space-y-3">
                                     <div className="max-h-48 overflow-y-auto space-y-2">
                                         {currentComments.length === 0 ? (
-                                            <p className="text-xs text-[#708090]">No comments yet.</p>
+                                            <p className="text-xs text-muted-foreground">No comments yet.</p>
                                         ) : (
                                             currentComments.map((comment) => (
-                                                <div key={comment.id} className="border border-[#e6e6e6] rounded-md p-2 bg-[#fafafa]">
+                                                <div key={comment.id} className="border border-border rounded-md p-2 bg-muted">
                                                     <div className="flex items-start justify-between gap-2">
                                                         <div className="min-w-0">
-                                                            <p className="text-xs font-medium text-[#444]">
+                                                            <p className="text-xs font-medium text-muted-foreground">
                                                                 {(comment.authorName || "Member")} • {formatRelativeCommentTime(comment.createdAt, nowMs)}
                                                             </p>
-                                                            <p className="text-sm text-[#1a1a1a] break-words">{comment.comment}</p>
+                                                            <p className="text-sm text-foreground break-words">{comment.comment}</p>
                                                             {Array.isArray(comment.replies) && comment.replies.length > 0 && (
-                                                                <div className="mt-2 pl-3 border-l border-[#e6e6e6] space-y-2">
+                                                                <div className="mt-2 pl-3 border-l border-border space-y-2">
                                                                     {comment.replies.map((reply) => (
-                                                                        <div key={reply.id} className="bg-white border border-[#f0f0f0] rounded p-2">
-                                                                            <p className="text-xs font-medium text-[#555]">
+                                                                        <div key={reply.id} className="bg-card border border-border rounded p-2">
+                                                                            <p className="text-xs font-medium text-muted-foreground">
                                                                                 {(reply.authorName || "Member")} • {formatRelativeCommentTime(reply.createdAt, nowMs)}
                                                                             </p>
-                                                                            <p className="text-sm text-[#1a1a1a] break-words">{reply.comment}</p>
+                                                                            <p className="text-sm text-foreground break-words">{reply.comment}</p>
                                                                         </div>
                                                                     ))}
                                                                 </div>
@@ -352,7 +355,7 @@ export function BriefAndConcept({ project, collectionData, canEdit = true, onFor
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => handleStartReply(comment.id)}
-                                                                        className="text-xs text-[#884cff] hover:text-[#7a3ff0]"
+                                                                        className="text-xs text-gold-solid hover:brightness-110"
                                                                     >
                                                                         {replyingToCommentId === comment.id ? "Replying..." : "Reply"}
                                                                     </button>
@@ -364,13 +367,13 @@ export function BriefAndConcept({ project, collectionData, canEdit = true, onFor
                                                                         value={replyDraftByCommentId[comment.id] || ""}
                                                                         onChange={(e) => handleReplyDraftChange(comment.id, e.target.value)}
                                                                         placeholder="Write a reply..."
-                                                                        className="w-full h-16 px-2 py-1.5 border border-[#e6e6e6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#884cff] resize-none text-sm"
+                                                                        className="w-full h-16 px-2 py-1.5 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm"
                                                                     />
                                                                     <div className="flex items-center justify-end gap-2">
                                                                         <button
                                                                             type="button"
                                                                             onClick={() => setReplyingToCommentId(null)}
-                                                                            className="px-2 py-1 text-xs rounded-md border border-[#dcdcdc] text-[#555] hover:bg-gray-50"
+                                                                            className="px-2 py-1 text-xs rounded-md border border-border text-muted-foreground hover:bg-secondary"
                                                                         >
                                                                             Cancel
                                                                         </button>
@@ -378,7 +381,7 @@ export function BriefAndConcept({ project, collectionData, canEdit = true, onFor
                                                                             type="button"
                                                                             onClick={() => handleAddReply(comment.id)}
                                                                             disabled={savingComments || !(replyDraftByCommentId[comment.id] || "").trim()}
-                                                                            className="px-2 py-1 text-xs rounded-md bg-[#884cff] text-white hover:bg-[#7a3ff0] disabled:opacity-60"
+                                                                            className="px-2 py-1 text-xs rounded-md bg-gold-gradient text-white hover:brightness-110 disabled:opacity-60"
                                                                         >
                                                                             {savingComments ? "Submitting..." : "Submit reply"}
                                                                         </button>
@@ -408,7 +411,7 @@ export function BriefAndConcept({ project, collectionData, canEdit = true, onFor
                                                 value={draftComment}
                                                 onChange={(e) => setDraftComment(e.target.value)}
                                                 placeholder="Write a comment..."
-                                                className="w-full h-20 px-3 py-2 border border-[#e6e6e6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#884cff] resize-none text-sm"
+                                                className="w-full h-20 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm"
                                             />
 
                                             <div className="flex items-center justify-end gap-2">
@@ -416,7 +419,7 @@ export function BriefAndConcept({ project, collectionData, canEdit = true, onFor
                                                     type="button"
                                                     onClick={handleAddComment}
                                                     disabled={savingComments || !draftComment.trim()}
-                                                    className="px-3 py-1.5 text-sm rounded-md bg-[#884cff] text-white hover:bg-[#7a3ff0] disabled:opacity-60"
+                                                    className="px-3 py-1.5 text-sm rounded-md bg-gold-gradient text-white hover:brightness-110 disabled:opacity-60"
                                                 >
                                                     {savingComments ? "Submitting..." : "Submit"}
                                                 </button>
@@ -425,7 +428,7 @@ export function BriefAndConcept({ project, collectionData, canEdit = true, onFor
                                     )}
 
                                     {commentError && <p className="text-xs text-red-600">{commentError}</p>}
-                                    {commentMessage && <p className="text-xs text-green-600">{commentMessage}</p>}
+                                    {commentMessage && <p className="text-xs text-green-400">{commentMessage}</p>}
                                 </div>
                             </div>
                         </div>
@@ -435,7 +438,7 @@ export function BriefAndConcept({ project, collectionData, canEdit = true, onFor
                 <div className="flex justify-center w-full items-center gap-3">
                     <div className="space-y-3 w-1/2">
                         <div className="flex items-center justify-between">
-                            <label htmlFor="target-audience" className="font-bold text-[#1a1a1a] text-base mb-1">{t("images.targetAudience")}</label>
+                            <label htmlFor="target-audience" className="font-bold text-foreground text-base mb-1">{t("images.targetAudience")}</label>
                             {renderCommentButton("target_audience")}
                         </div>
                         <input
@@ -444,14 +447,14 @@ export function BriefAndConcept({ project, collectionData, canEdit = true, onFor
                             value={targetAudience}
                             onChange={(e) => setTargetAudience(e.target.value)}
                             placeholder={t("images.enterTargetAudience")}
-                            className="w-full px-4 py-3 border border-[#e6e6e6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
+                            className={INPUT_CLASS}
                             disabled={!canEdit}
                         />
                     </div>
 
                     <div className="space-y-3 w-1/2">
                         <div className="flex items-center justify-between">
-                            <label htmlFor="campaign-season" className="font-bold text-[#1a1a1a] text-base mb-1">{t("images.campaignSeason")}</label>
+                            <label htmlFor="campaign-season" className="font-bold text-foreground text-base mb-1">{t("images.campaignSeason")}</label>
                             {renderCommentButton("campaign_season")}
                         </div>
                         <input
@@ -460,7 +463,7 @@ export function BriefAndConcept({ project, collectionData, canEdit = true, onFor
                             value={campaignSeason}
                             onChange={(e) => setCampaignSeason(e.target.value)}
                             placeholder={t("images.enterCampaignSeason")}
-                            className="w-full px-4 py-3 border border-[#e6e6e6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
+                            className={INPUT_CLASS}
                             disabled={!canEdit}
                         />
                     </div>

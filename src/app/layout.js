@@ -32,7 +32,16 @@ export default function RootLayout({ children }) {
           <AuthProvider>
             <CreditsProvider>
               {children}
-              <Toaster position="top-right" />
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  style: {
+                    background: "#1e1c19",
+                    color: "#f5f2eb",
+                    border: "1px solid rgba(205, 150, 57, 0.12)",
+                  },
+                }}
+              />
             </CreditsProvider>
           </AuthProvider>
         </LanguageProvider>

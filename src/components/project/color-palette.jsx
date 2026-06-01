@@ -296,7 +296,7 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors ${
                     commentsCount > 0
                         ? "text-red-600 hover:bg-red-50"
-                        : "text-[#884cff] hover:bg-[#f3efff]"
+                        : "text-gold-solid hover:bg-gold-solid/10"
                 }`}
                 aria-label="Open comments"
                 title="Open comments"
@@ -397,19 +397,19 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
     return (
         <div className="space-y-4">
             <div className="grid grid-cols-2 gap-6">
-                <div className="border-2 border-dashed border-[#b0bec5] rounded-lg p-6 space-y-4">
+                <div className="border-2 border-dashed border-gold-muted bg-card/40 rounded-lg p-6 space-y-4">
                     <div className="flex items-center justify-between gap-2">
                         <div>
-                            <h3 className="font-bold text-[#1a1a1a] text-lg mb-1">Outfits</h3>
-                            <p className="text-sm text-[#708090]">Select outfit direction and upload outfit references</p>
+                            <h3 className="font-bold text-foreground text-lg mb-1">Outfits</h3>
+                            <p className="text-sm text-muted-foreground">Select outfit direction and upload outfit references</p>
                         </div>
                         {renderCommentButton("outfits")}
                     </div>
 
                     {showSuggestions && aiOutfitSuggestions.length > 0 && (
                         <div className="space-y-3">
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                <p className="text-blue-600 text-sm font-medium">AI Suggested Outfits</p>
+                            <div className="bg-gold-solid/10 border border-gold-muted rounded-lg p-3">
+                                <p className="text-gold-solid text-sm font-medium">AI Suggested Outfits</p>
                             </div>
                             <MultiSelect
                                 options={aiOutfitSuggestions}
@@ -422,7 +422,7 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                     )}
                     <div className="space-y-3">
                     {showSuggestions && aiOutfitSuggestions.length > 0 && (
-                        <p className="text-sm text-[#708090] text-center">Or</p>
+                        <p className="text-sm text-muted-foreground text-center">Or</p>
                     )}
                     </div>
                     
@@ -439,7 +439,7 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
 
                     <Button
                         variant="outline"
-                        className="w-full bg-transparent"
+                        className="w-full border-border text-foreground hover:bg-secondary hover:text-foreground"
                         disabled={!canEdit || uploading.outfits}
                         onClick={() => triggerFileInput("outfits")}
                     >
@@ -449,7 +449,7 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                     </Button>
                     {uploadedImages.outfits.length > 0 && (
                         <div className="space-y-2">
-                            <p className="text-xs text-[#708090]">{uploadedImages.outfits.length} file(s) selected</p>
+                            <p className="text-xs text-muted-foreground">{uploadedImages.outfits.length} file(s) selected</p>
 
 
                             <div className="grid grid-cols-2 gap-2">
@@ -480,19 +480,19 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                     )}
                 </div>
 
-                <div className="border-2 border-dashed border-[#b0bec5] rounded-lg p-6 space-y-4">
+                <div className="border-2 border-dashed border-gold-muted bg-card/40 rounded-lg p-6 space-y-4">
                     <div className="flex items-center justify-between gap-2">
                         <div>
-                            <h3 className="font-bold text-[#1a1a1a] text-lg mb-1">Color Palette</h3>
-                            <p className="text-sm text-[#708090]">Select palette, pick colors, and upload color references</p>
+                            <h3 className="font-bold text-foreground text-lg mb-1">Color Palette</h3>
+                            <p className="text-sm text-muted-foreground">Select palette, pick colors, and upload color references</p>
                         </div>
                         {renderCommentButton("color_images")}
                     </div>
 
                     {showSuggestions && aiColorSuggestions.length > 0 && (
                         <div className="space-y-3">
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                <p className="text-blue-600 text-sm font-medium">AI Suggested Color Palettes</p>
+                            <div className="bg-gold-solid/10 border border-gold-muted rounded-lg p-3">
+                                <p className="text-gold-solid text-sm font-medium">AI Suggested Color Palettes</p>
                             </div>
                             <MultiSelect
                                 options={aiColorSuggestions}
@@ -506,7 +506,7 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
 
                     <ColorPicker selectedColors={pickedColors} onColorsChange={setPickedColors} disabled={!canEdit} />
 
-                    <p className="text-sm text-[#708090]">Upload inspiration images for color palette</p>
+                    <p className="text-sm text-muted-foreground">Upload inspiration images for color palette</p>
                     <input
                         ref={fileInputRefs.colors}
                         type="file"
@@ -518,7 +518,7 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                     />
                     <Button
                         variant="outline"
-                        className="w-full bg-transparent"
+                        className="w-full border-border text-foreground hover:bg-secondary hover:text-foreground"
                         disabled={!canEdit || uploading.colors}
                         onClick={() => triggerFileInput("colors")}
                     >
@@ -527,7 +527,7 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                     </Button>
                     {uploadedImages.colors.length > 0 && (
                         <div className="space-y-2">
-                            <p className="text-xs text-[#708090]">{uploadedImages.colors.length} file(s) selected</p>
+                            <p className="text-xs text-muted-foreground">{uploadedImages.colors.length} file(s) selected</p>
                             <div className="grid grid-cols-2 gap-2">
                                 {uploadedImages.colors.map((image) => (
                                     <div key={image.id} className="relative group">
@@ -558,9 +558,9 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
             </div>
             {activeCommentField && (
                 <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-                    <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-[#e6e6e6]">
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-[#e6e6e6]">
-                            <h4 className="text-sm font-semibold text-[#1a1a1a]">{activeCommentConfig?.title} Comments</h4>
+                    <div className="w-full max-w-md bg-card rounded-xl shadow-2xl border border-border">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                            <h4 className="text-sm font-semibold text-foreground">{activeCommentConfig?.title} Comments</h4>
                             <button
                                 type="button"
                                 onClick={closeComments}
@@ -574,24 +574,24 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                         <div className="p-4 space-y-3">
                             <div className="max-h-48 overflow-y-auto space-y-2">
                                 {currentComments.length === 0 ? (
-                                    <p className="text-xs text-[#708090]">No comments yet.</p>
+                                    <p className="text-xs text-muted-foreground">No comments yet.</p>
                                 ) : (
                                     currentComments.map((comment) => (
-                                        <div key={comment.id} className="border border-[#e6e6e6] rounded-md p-2 bg-[#fafafa]">
+                                        <div key={comment.id} className="border border-border rounded-md p-2 bg-[#fafafa]">
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="min-w-0">
                                                     <p className="text-xs font-medium text-[#444]">
                                                         {(comment.authorName || "Member")} • {formatRelativeCommentTime(comment.createdAt, nowMs)}
                                                     </p>
-                                                    <p className="text-sm text-[#1a1a1a] break-words">{comment.comment}</p>
+                                                    <p className="text-sm text-foreground break-words">{comment.comment}</p>
                                                     {Array.isArray(comment.replies) && comment.replies.length > 0 && (
-                                                        <div className="mt-2 pl-3 border-l border-[#e6e6e6] space-y-2">
+                                                        <div className="mt-2 pl-3 border-l border-border space-y-2">
                                                             {comment.replies.map((reply) => (
-                                                                <div key={reply.id} className="bg-white border border-[#f0f0f0] rounded p-2">
+                                                                <div key={reply.id} className="bg-card border border-[#f0f0f0] rounded p-2">
                                                                     <p className="text-xs font-medium text-[#555]">
                                                                         {(reply.authorName || "Member")} • {formatRelativeCommentTime(reply.createdAt, nowMs)}
                                                                     </p>
-                                                                    <p className="text-sm text-[#1a1a1a] break-words">{reply.comment}</p>
+                                                                    <p className="text-sm text-foreground break-words">{reply.comment}</p>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -601,7 +601,7 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleStartReply(comment.id)}
-                                                                className="text-xs text-[#884cff] hover:text-[#7a3ff0]"
+                                                                className="text-xs text-gold-solid hover:brightness-110"
                                                             >
                                                                 {replyingToCommentId === comment.id ? "Replying..." : "Reply"}
                                                             </button>
@@ -613,13 +613,13 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                                                                 value={replyDraftByCommentId[comment.id] || ""}
                                                                 onChange={(e) => handleReplyDraftChange(comment.id, e.target.value)}
                                                                 placeholder="Write a reply..."
-                                                                className="w-full h-16 px-2 py-1.5 border border-[#e6e6e6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#884cff] resize-none text-sm"
+                                                                className="w-full h-16 px-2 py-1.5 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm"
                                                             />
                                                             <div className="flex items-center justify-end gap-2">
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => setReplyingToCommentId(null)}
-                                                                    className="px-2 py-1 text-xs rounded-md border border-[#dcdcdc] text-[#555] hover:bg-gray-50"
+                                                                    className="px-2 py-1 text-xs rounded-md border border-border text-[#555] hover:bg-secondary"
                                                                 >
                                                                     Cancel
                                                                 </button>
@@ -627,7 +627,7 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                                                                     type="button"
                                                                     onClick={() => handleAddReply(comment.id)}
                                                                     disabled={savingComments || !(replyDraftByCommentId[comment.id] || "").trim()}
-                                                                    className="px-2 py-1 text-xs rounded-md bg-[#884cff] text-white hover:bg-[#7a3ff0] disabled:opacity-60"
+                                                                    className="px-2 py-1 text-xs rounded-md bg-gold-gradient text-white hover:brightness-110 disabled:opacity-60"
                                                                 >
                                                                     {savingComments ? "Submitting..." : "Submit reply"}
                                                                 </button>
@@ -657,7 +657,7 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                                         value={draftComment}
                                         onChange={(e) => setDraftComment(e.target.value)}
                                         placeholder="Write a comment..."
-                                        className="w-full h-20 px-3 py-2 border border-[#e6e6e6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#884cff] resize-none text-sm"
+                                        className="w-full h-20 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm"
                                     />
 
                                     <div className="flex items-center justify-end gap-2">
@@ -665,7 +665,7 @@ export function ColorPalette({ showSuggestions = false, collectionData, project,
                                             type="button"
                                             onClick={handleAddComment}
                                             disabled={savingComments || !draftComment.trim()}
-                                            className="px-3 py-1.5 text-sm rounded-md bg-[#884cff] text-white hover:bg-[#7a3ff0] disabled:opacity-60"
+                                            className="px-3 py-1.5 text-sm rounded-md bg-gold-gradient text-white hover:brightness-110 disabled:opacity-60"
                                         >
                                             {savingComments ? "Submitting..." : "Submit"}
                                         </button>

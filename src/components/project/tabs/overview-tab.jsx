@@ -63,8 +63,8 @@
 //         return (
 //             <div className="flex items-center justify-center py-12">
 //                 <div className="text-center">
-//                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#884cff] mx-auto mb-4"></div>
-//                     <p className="text-[#708090]">Loading overview...</p>
+//                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-solid mx-auto mb-4"></div>
+//                     <p className="text-muted-foreground">Loading overview...</p>
 //                 </div>
 //             </div>
 //         )
@@ -73,52 +73,52 @@
 //     return (
 //         <div className="space-y-8">
 //             {/* Project Details Card */}
-//             <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-8">
-//                 <h2 className="text-2xl font-bold text-[#1a1a1a] mb-6">Project Overview</h2>
+//             <div className="bg-card border-2 border-border rounded-lg p-8">
+//                 <h2 className="text-2xl font-bold text-foreground mb-6">Project Overview</h2>
 
 //                 <div className="grid grid-cols-2 gap-6">
 //                     <div className="flex items-start gap-4">
-//                         <div className="w-12 h-12 bg-[#884cff]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-//                             <FileText className="w-6 h-6 text-[#884cff]" />
+//                         <div className="w-12 h-12 bg-gold-solid/10 rounded-lg flex items-center justify-center flex-shrink-0">
+//                             <FileText className="w-6 h-6 text-gold-solid" />
 //                         </div>
 //                         <div>
-//                             <p className="text-sm text-[#708090] mb-1">Project Name</p>
-//                             <p className="text-lg font-semibold text-[#1a1a1a]">{project?.title || 'Untitled Project'}</p>
+//                             <p className="text-sm text-muted-foreground mb-1">Project Name</p>
+//                             <p className="text-lg font-semibold text-foreground">{project?.title || 'Untitled Project'}</p>
 //                         </div>
 //                     </div>
 
 //                     <div className="flex items-start gap-4">
-//                         <div className="w-12 h-12 bg-[#884cff]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-//                             <CircleDot className="w-6 h-6 text-[#884cff]" />
+//                         <div className="w-12 h-12 bg-gold-solid/10 rounded-lg flex items-center justify-center flex-shrink-0">
+//                             <CircleDot className="w-6 h-6 text-gold-solid" />
 //                         </div>
 //                         <div>
-//                             <p className="text-sm text-[#708090] mb-1">Status</p>
+//                             <p className="text-sm text-muted-foreground mb-1">Status</p>
 //                             <div className="flex items-center gap-2">
 //                                 <div className={`w-2 h-2 rounded-full ${project?.status === 'Completed' ? 'bg-green-500' : 'bg-yellow-500'}`} />
-//                                 <p className="text-lg font-semibold text-[#1a1a1a]">{project?.status || 'In Progress'}</p>
+//                                 <p className="text-lg font-semibold text-foreground">{project?.status || 'In Progress'}</p>
 //                             </div>
 //                         </div>
 //                     </div>
 
 //                     <div className="flex items-start gap-4">
-//                         <div className="w-12 h-12 bg-[#884cff]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-//                             <Calendar className="w-6 h-6 text-[#884cff]" />
+//                         <div className="w-12 h-12 bg-gold-solid/10 rounded-lg flex items-center justify-center flex-shrink-0">
+//                             <Calendar className="w-6 h-6 text-gold-solid" />
 //                         </div>
 //                         <div>
-//                             <p className="text-sm text-[#708090] mb-1">Created Date</p>
-//                             <p className="text-lg font-semibold text-[#1a1a1a]">
+//                             <p className="text-sm text-muted-foreground mb-1">Created Date</p>
+//                             <p className="text-lg font-semibold text-foreground">
 //                                 {project?.created_at ? new Date(project.created_at).toLocaleDateString() : 'N/A'}
 //                             </p>
 //                         </div>
 //                     </div>
 
 //                     <div className="flex items-start gap-4">
-//                         <div className="w-12 h-12 bg-[#884cff]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-//                             <Clock className="w-6 h-6 text-[#884cff]" />
+//                         <div className="w-12 h-12 bg-gold-solid/10 rounded-lg flex items-center justify-center flex-shrink-0">
+//                             <Clock className="w-6 h-6 text-gold-solid" />
 //                         </div>
 //                         <div>
-//                             <p className="text-sm text-[#708090] mb-1">Last Modified</p>
-//                             <p className="text-lg font-semibold text-[#1a1a1a]">
+//                             <p className="text-sm text-muted-foreground mb-1">Last Modified</p>
+//                             <p className="text-lg font-semibold text-foreground">
 //                                 {project?.created_at ? new Date(project.created_at).toLocaleDateString() : 'N/A'}
 //                             </p>
 //                         </div>
@@ -126,93 +126,93 @@
 //                 </div>
 
 //                 {project?.description && (
-//                     <div className="mt-6 pt-6 border-t border-[#e6e6e6]">
-//                         <p className="text-sm text-[#708090] mb-2">Description</p>
-//                         <p className="text-[#1a1a1a]">{project.description}</p>
+//                     <div className="mt-6 pt-6 border-t border-border">
+//                         <p className="text-sm text-muted-foreground mb-2">Description</p>
+//                         <p className="text-foreground">{project.description}</p>
 //                     </div>
 //                 )}
 
 //                 {collectionData?.description && (
-//                     <div className="mt-6 pt-6 border-t border-[#e6e6e6]">
-//                         <p className="text-sm text-[#708090] mb-2">Collection Description</p>
-//                         <p className="text-[#1a1a1a]">{collectionData.description}</p>
+//                     <div className="mt-6 pt-6 border-t border-border">
+//                         <p className="text-sm text-muted-foreground mb-2">Collection Description</p>
+//                         <p className="text-foreground">{collectionData.description}</p>
 //                     </div>
 //                 )}
 //             </div>
 
 //             {/* Quick Stats */}
 //             <div className="grid grid-cols-4 gap-6">
-//                 <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+//                 <div className="bg-card border-2 border-border rounded-lg p-6">
 //                     <div className="flex items-center gap-3 mb-3">
-//                         <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-//                             <ImageIcon className="w-5 h-5 text-[#884cff]" />
+//                         <div className="w-10 h-10 bg-gold-solid/10 rounded-lg flex items-center justify-center">
+//                             <ImageIcon className="w-5 h-5 text-gold-solid" />
 //                         </div>
-//                         <p className="text-sm text-[#708090]">Total Images</p>
+//                         <p className="text-sm text-muted-foreground">Total Images</p>
 //                     </div>
-//                     <p className="text-3xl font-bold text-[#884cff]">{stats.totalImages}</p>
+//                     <p className="text-3xl font-bold text-gold-solid">{stats.totalImages}</p>
 //                 </div>
 
-//                 <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+//                 <div className="bg-card border-2 border-border rounded-lg p-6">
 //                     <div className="flex items-center gap-3 mb-3">
-//                         <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-//                             <Package className="w-5 h-5 text-[#884cff]" />
+//                         <div className="w-10 h-10 bg-gold-solid/10 rounded-lg flex items-center justify-center">
+//                             <Package className="w-5 h-5 text-gold-solid" />
 //                         </div>
-//                         <p className="text-sm text-[#708090]">Products</p>
+//                         <p className="text-sm text-muted-foreground">Products</p>
 //                     </div>
-//                     <p className="text-3xl font-bold text-[#884cff]">{stats.products}</p>
+//                     <p className="text-3xl font-bold text-gold-solid">{stats.products}</p>
 //                 </div>
 
-//                 <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+//                 <div className="bg-card border-2 border-border rounded-lg p-6">
 //                     <div className="flex items-center gap-3 mb-3">
-//                         <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-//                             <User className="w-5 h-5 text-[#884cff]" />
+//                         <div className="w-10 h-10 bg-gold-solid/10 rounded-lg flex items-center justify-center">
+//                             <User className="w-5 h-5 text-gold-solid" />
 //                         </div>
-//                         <p className="text-sm text-[#708090]">Model Used</p>
+//                         <p className="text-sm text-muted-foreground">Model Used</p>
 //                     </div>
-//                     <p className="text-lg font-bold text-[#884cff]">
+//                     <p className="text-lg font-bold text-gold-solid">
 //                         {collectionData?.items?.[0]?.selected_model?.type === 'ai' ? 'AI' :
 //                             collectionData?.items?.[0]?.selected_model?.type === 'real' ? 'Real' : 'None'}
 //                     </p>
 //                 </div>
 
-//                 <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+//                 <div className="bg-card border-2 border-border rounded-lg p-6">
 //                     <div className="flex items-center gap-3 mb-3">
-//                         <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-//                             <CheckCircle className="w-5 h-5 text-[#884cff]" />
+//                         <div className="w-10 h-10 bg-gold-solid/10 rounded-lg flex items-center justify-center">
+//                             <CheckCircle className="w-5 h-5 text-gold-solid" />
 //                         </div>
-//                         <p className="text-sm text-[#708090]">Completion</p>
+//                         <p className="text-sm text-muted-foreground">Completion</p>
 //                     </div>
-//                     <p className="text-3xl font-bold text-[#884cff]">{stats.completion}%</p>
+//                     <p className="text-3xl font-bold text-gold-solid">{stats.completion}%</p>
 //                 </div>
 //             </div>
 
 //             {/* Workflow Progress */}
-//             <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
-//                 <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">Workflow Progress</h3>
+//             <div className="bg-card border-2 border-border rounded-lg p-6">
+//                 <h3 className="text-lg font-semibold text-foreground mb-4">Workflow Progress</h3>
 //                 <div className="space-y-3">
 //                     <div className="flex items-center gap-3">
-//                         <div className={`w-6 h-6 rounded-full flex items-center justify-center ${collectionData?.description ? 'bg-green-500' : 'bg-gray-300'}`}>
+//                         <div className={`w-6 h-6 rounded-full flex items-center justify-center ${collectionData?.description ? 'bg-green-500' : 'bg-muted'}`}>
 //                             {collectionData?.description && <CheckCircle className="w-4 h-4 text-white" />}
 //                         </div>
-//                         <p className="text-sm text-[#1a1a1a]">Step 1: Project Setup</p>
+//                         <p className="text-sm text-foreground">Step 1: Project Setup</p>
 //                     </div>
 //                     <div className="flex items-center gap-3">
-//                         <div className={`w-6 h-6 rounded-full flex items-center justify-center ${collectionData?.items?.[0]?.selected_model ? 'bg-green-500' : 'bg-gray-300'}`}>
+//                         <div className={`w-6 h-6 rounded-full flex items-center justify-center ${collectionData?.items?.[0]?.selected_model ? 'bg-green-500' : 'bg-muted'}`}>
 //                             {collectionData?.items?.[0]?.selected_model && <CheckCircle className="w-4 h-4 text-white" />}
 //                         </div>
-//                         <p className="text-sm text-[#1a1a1a]">Step 2: Model Selection</p>
+//                         <p className="text-sm text-foreground">Step 2: Model Selection</p>
 //                     </div>
 //                     <div className="flex items-center gap-3">
-//                         <div className={`w-6 h-6 rounded-full flex items-center justify-center ${stats.products > 0 ? 'bg-green-500' : 'bg-gray-300'}`}>
+//                         <div className={`w-6 h-6 rounded-full flex items-center justify-center ${stats.products > 0 ? 'bg-green-500' : 'bg-muted'}`}>
 //                             {stats.products > 0 && <CheckCircle className="w-4 h-4 text-white" />}
 //                         </div>
-//                         <p className="text-sm text-[#1a1a1a]">Step 3: Product Upload</p>
+//                         <p className="text-sm text-foreground">Step 3: Product Upload</p>
 //                     </div>
 //                     <div className="flex items-center gap-3">
-//                         <div className={`w-6 h-6 rounded-full flex items-center justify-center ${stats.totalImages > 0 ? 'bg-green-500' : 'bg-gray-300'}`}>
+//                         <div className={`w-6 h-6 rounded-full flex items-center justify-center ${stats.totalImages > 0 ? 'bg-green-500' : 'bg-muted'}`}>
 //                             {stats.totalImages > 0 && <CheckCircle className="w-4 h-4 text-white" />}
 //                         </div>
-//                         <p className="text-sm text-[#1a1a1a]">Step 4: Image Generation</p>
+//                         <p className="text-sm text-foreground">Step 4: Image Generation</p>
 //                     </div>
 //                 </div>
 //             </div>
@@ -220,7 +220,7 @@
 //             {/* Preview of Generated Images */}
 //             {stats.totalImages > 0 && (
 //                 <div>
-//                     <h3 className="text-xl font-bold text-[#1a1a1a] mb-4">Generated Images Preview</h3>
+//                     <h3 className="text-xl font-bold text-foreground mb-4">Generated Images Preview</h3>
 //                     <ProductImagesDisplay
 //                         collectionData={collectionData}
 //                         showRegenerate={false}
@@ -373,19 +373,19 @@ export default function OverviewTab({ project }) {
     if (loading && !collectionData) {
         return (
             <div className="space-y-8">
-                <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-8 animate-pulse">
-                    <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+                <div className="bg-card border-2 border-border rounded-lg p-8 animate-pulse">
+                    <div className="h-8 bg-muted rounded w-48 mb-6"></div>
                     <div className="grid grid-cols-2 gap-6">
                         {[1, 2, 3, 4].map(i => (
-                            <div key={i} className="h-20 bg-gray-100 rounded"></div>
+                            <div key={i} className="h-20 bg-muted rounded"></div>
                         ))}
                     </div>
                 </div>
-                <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-8 animate-pulse">
-                    <div className="h-8 bg-gray-200 rounded w-64 mb-6"></div>
+                <div className="bg-card border-2 border-border rounded-lg p-8 animate-pulse">
+                    <div className="h-8 bg-muted rounded w-64 mb-6"></div>
                     <div className="space-y-4">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="h-24 bg-gray-100 rounded"></div>
+                            <div key={i} className="h-24 bg-muted rounded"></div>
                         ))}
                     </div>
                 </div>
@@ -397,32 +397,32 @@ export default function OverviewTab({ project }) {
         <div className="space-y-8">
 
             {/* Project & Collection Details */}
-            <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-8">
-                <h2 className="text-2xl font-bold text-[#1a1a1a] mb-6">Project Overview</h2>
+            <div className="bg-card border-2 border-border rounded-lg p-8">
+                <h2 className="text-2xl font-bold text-foreground mb-6">Project Overview</h2>
                 <div className="grid grid-cols-2 gap-6">
                     {/* Project Name */}
-                    <InfoCard icon={<FileText className="w-6 h-6 text-[#884cff]" />} label="Project Name" value={project?.title || 'Untitled Project'} />
+                    <InfoCard icon={<FileText className="w-6 h-6 text-gold-solid" />} label="Project Name" value={project?.title || 'Untitled Project'} />
                     {/* Status */}
-                    <InfoCard icon={<CircleDot className="w-6 h-6 text-[#884cff]" />} label="Status" value={project?.status || 'progress'} dotColor={project?.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'} />
+                    <InfoCard icon={<CircleDot className="w-6 h-6 text-gold-solid" />} label="Status" value={project?.status || 'progress'} dotColor={project?.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'} />
                     {/* Created Date */}
-                    <InfoCard icon={<Calendar className="w-6 h-6 text-[#884cff]" />} label="Created Date" value={project?.created_at ? new Date(project.created_at).toLocaleDateString() : 'N/A'} />
+                    <InfoCard icon={<Calendar className="w-6 h-6 text-gold-solid" />} label="Created Date" value={project?.created_at ? new Date(project.created_at).toLocaleDateString() : 'N/A'} />
                     {/* Last Modified */}
-                    <InfoCard icon={<Clock className="w-6 h-6 text-[#884cff]" />} label="Latest Updated" value={project?.updated_at ? new Date(project.updated_at).toLocaleDateString() : (project?.created_at ? new Date(project.created_at).toLocaleDateString() : 'N/A')} />
+                    <InfoCard icon={<Clock className="w-6 h-6 text-gold-solid" />} label="Latest Updated" value={project?.updated_at ? new Date(project.updated_at).toLocaleDateString() : (project?.created_at ? new Date(project.created_at).toLocaleDateString() : 'N/A')} />
                 </div>
 
                 {collectionData?.description && <Description label="Collection Description" text={collectionData.description} />}
             </div>
 
             {/* Selected Themes, Backgrounds, Poses, Locations, Colors Section */}
-            <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-8">
-                <h2 className="text-2xl font-bold text-[#1a1a1a] mb-6">Selected Elements</h2>
+            <div className="bg-card border-2 border-border rounded-lg p-8">
+                <h2 className="text-2xl font-bold text-foreground mb-6">Selected Elements</h2>
 
                 <div className="space-y-6">
                     {/* Themes */}
                     {(item.selected_themes?.length > 0 || item.uploaded_theme_images?.length > 0) && (
                         <SelectionSection
                             title="Themes"
-                            icon={<Sparkles className="w-5 h-5 text-[#884cff]" />}
+                            icon={<Sparkles className="w-5 h-5 text-gold-solid" />}
                             selected={item.selected_themes || []}
                             uploadedImages={item.uploaded_theme_images || []}
                         />
@@ -432,7 +432,7 @@ export default function OverviewTab({ project }) {
                     {(item.selected_backgrounds?.length > 0 || item.uploaded_background_images?.length > 0) && (
                         <SelectionSection
                             title="Backgrounds"
-                            icon={<ImageIcon className="w-5 h-5 text-[#884cff]" />}
+                            icon={<ImageIcon className="w-5 h-5 text-gold-solid" />}
                             selected={item.selected_backgrounds || []}
                             uploadedImages={item.uploaded_background_images || []}
                         />
@@ -442,7 +442,7 @@ export default function OverviewTab({ project }) {
                     {(item.selected_poses?.length > 0 || item.uploaded_pose_images?.length > 0) && (
                         <SelectionSection
                             title="Poses"
-                            icon={<Camera className="w-5 h-5 text-[#884cff]" />}
+                            icon={<Camera className="w-5 h-5 text-gold-solid" />}
                             selected={item.selected_poses || []}
                             uploadedImages={item.uploaded_pose_images || []}
                         />
@@ -452,7 +452,7 @@ export default function OverviewTab({ project }) {
                     {(item.selected_locations?.length > 0 || item.uploaded_location_images?.length > 0) && (
                         <SelectionSection
                             title="Locations"
-                            icon={<MapPin className="w-5 h-5 text-[#884cff]" />}
+                            icon={<MapPin className="w-5 h-5 text-gold-solid" />}
                             selected={item.selected_locations || []}
                             uploadedImages={item.uploaded_location_images || []}
                         />
@@ -460,21 +460,21 @@ export default function OverviewTab({ project }) {
 
                     {/* Colors */}
                     {(item.selected_colors?.length > 0 || item.picked_colors?.length > 0 || item.uploaded_color_images?.length > 0) && (
-                        <div className="border-t border-[#e6e6e6] pt-6">
+                        <div className="border-t border-border pt-6">
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                                    <Palette className="w-5 h-5 text-[#884cff]" />
+                                <div className="w-10 h-10 bg-gold-solid/10 rounded-lg flex items-center justify-center">
+                                    <Palette className="w-5 h-5 text-gold-solid" />
                                 </div>
-                                <h3 className="text-lg font-semibold text-[#1a1a1a]">Colors</h3>
+                                <h3 className="text-lg font-semibold text-foreground">Colors</h3>
                             </div>
 
                             {/* Selected Colors */}
                             {item.selected_colors?.length > 0 && (
                                 <div className="mb-4">
-                                    <p className="text-sm text-[#708090] mb-2">Selected Colors:</p>
+                                    <p className="text-sm text-muted-foreground mb-2">Selected Colors:</p>
                                     <div className="flex flex-wrap gap-2">
                                         {item.selected_colors.map((color, idx) => (
-                                            <span key={idx} className="px-3 py-1 bg-[#884cff]/10 text-[#884cff] rounded-full text-sm">
+                                            <span key={idx} className="px-3 py-1 bg-gold-solid/10 text-gold-solid rounded-full text-sm">
                                                 {color}
                                             </span>
                                         ))}
@@ -485,7 +485,7 @@ export default function OverviewTab({ project }) {
                             {/* Picked Colors */}
                             {item.picked_colors?.length > 0 && (
                                 <div className="mb-4">
-                                    <p className="text-sm text-[#708090] mb-2">Picked Colors:</p>
+                                    <p className="text-sm text-muted-foreground mb-2">Picked Colors:</p>
                                     <div className="flex flex-wrap gap-2">
                                         {item.picked_colors.map((color, idx) => (
                                             <div key={idx} className="flex items-center gap-2">
@@ -494,7 +494,7 @@ export default function OverviewTab({ project }) {
                                                     style={{ backgroundColor: color }}
                                                     title={color}
                                                 />
-                                                <span className="text-xs text-[#708090]">{color}</span>
+                                                <span className="text-xs text-muted-foreground">{color}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -504,10 +504,10 @@ export default function OverviewTab({ project }) {
                             {/* Uploaded Color Images */}
                             {item.uploaded_color_images?.length > 0 && (
                                 <div>
-                                    <p className="text-sm text-[#708090] mb-2">Uploaded Color Images:</p>
+                                    <p className="text-sm text-muted-foreground mb-2">Uploaded Color Images:</p>
                                     <div className="grid grid-cols-4 gap-4">
                                         {item.uploaded_color_images.map((img, idx) => (
-                                            <div key={idx} className="relative w-full h-24 rounded-lg border border-[#e6e6e6] overflow-hidden">
+                                            <div key={idx} className="relative w-full h-24 rounded-lg border border-border overflow-hidden">
                                                 <Image
                                                     src={img.cloud_url || img.local_url}
                                                     alt={`Color ${idx + 1}`}
@@ -525,9 +525,9 @@ export default function OverviewTab({ project }) {
 
                     {/* Global Instructions */}
                     {item.global_instructions && (
-                        <div className="border-t border-[#e6e6e6] pt-6">
-                            <h3 className="text-lg font-semibold text-[#1a1a1a] mb-2">Global Instructions</h3>
-                            <p className="text-[#1a1a1a] bg-gray-50 p-4 rounded-lg">{item.global_instructions}</p>
+                        <div className="border-t border-border pt-6">
+                            <h3 className="text-lg font-semibold text-foreground mb-2">Global Instructions</h3>
+                            <p className="text-foreground bg-muted p-4 rounded-lg">{item.global_instructions}</p>
                         </div>
                     )}
                 </div>
@@ -536,17 +536,17 @@ export default function OverviewTab({ project }) {
             {/* Two Stat Cards: Model Selection and Products */}
             <div className="grid grid-cols-2 gap-6">
                 {/* Model Selection Stat Card */}
-                <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+                <div className="bg-card border-2 border-border rounded-lg p-6">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                            <User className="w-5 h-5 text-[#884cff]" />
+                        <div className="w-10 h-10 bg-gold-solid/10 rounded-lg flex items-center justify-center">
+                            <User className="w-5 h-5 text-gold-solid" />
                         </div>
-                        <h3 className="text-lg font-semibold text-[#1a1a1a]">Model Selection</h3>
+                        <h3 className="text-lg font-semibold text-foreground">Model Selection</h3>
                     </div>
                     {item.selected_model ? (
                         <div className="space-y-3">
                             <div className="flex items-center gap-3">
-                                <div className="relative w-20 h-20 rounded-lg border-2 border-[#884cff] overflow-hidden">
+                                <div className="relative w-20 h-20 rounded-lg border-2 border-gold-solid overflow-hidden">
                                     <Image
                                         src={item.selected_model.cloud || item.selected_model.local}
                                         alt="Selected Model"
@@ -556,61 +556,61 @@ export default function OverviewTab({ project }) {
                                     />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-[#1a1a1a] capitalize">
+                                    <p className="text-sm font-medium text-foreground capitalize">
                                         {item.selected_model.type === 'ai' ? 'AI Model' : 'Real Model'}
                                     </p>
-                                    <p className="text-xs text-[#708090]">
+                                    <p className="text-xs text-muted-foreground">
                                         {item.selected_model.type === 'ai' ? 'Generated' : 'Uploaded'}
                                     </p>
                                 </div>
                             </div>
                         </div>
                     ) : (
-                        <p className="text-sm text-[#708090]">No model selected</p>
+                        <p className="text-sm text-muted-foreground">No model selected</p>
                     )}
                 </div>
 
                 {/* Products Stat Card */}
-                <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+                <div className="bg-card border-2 border-border rounded-lg p-6">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                            <Package className="w-5 h-5 text-[#884cff]" />
+                        <div className="w-10 h-10 bg-gold-solid/10 rounded-lg flex items-center justify-center">
+                            <Package className="w-5 h-5 text-gold-solid" />
                         </div>
-                        <h3 className="text-lg font-semibold text-[#1a1a1a]">Products</h3>
+                        <h3 className="text-lg font-semibold text-foreground">Products</h3>
                     </div>
-                    <p className="text-3xl font-bold text-[#884cff] mb-2">{stats.products}</p>
-                    <p className="text-sm text-[#708090]">Product images uploaded</p>
+                    <p className="text-3xl font-bold text-gold-solid mb-2">{stats.products}</p>
+                    <p className="text-sm text-muted-foreground">Product images uploaded</p>
                 </div>
             </div>
 
             {/* Generation Status Section */}
-            <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-8">
-                <h2 className="text-2xl font-bold text-[#1a1a1a] mb-6">Generation Status</h2>
+            <div className="bg-card border-2 border-border rounded-lg p-8">
+                <h2 className="text-2xl font-bold text-foreground mb-6">Generation Status</h2>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <GenerationStatCard
                         label="Plain/White Background"
                         value={generationStats.whiteBackground}
-                        icon={<ImageIcon className="w-5 h-5 text-[#884cff]" />}
+                        icon={<ImageIcon className="w-5 h-5 text-gold-solid" />}
                     />
                     <GenerationStatCard
                         label="Background Replace"
                         value={generationStats.backgroundReplace}
-                        icon={<ImageIcon className="w-5 h-5 text-[#884cff]" />}
+                        icon={<ImageIcon className="w-5 h-5 text-gold-solid" />}
                     />
                     <GenerationStatCard
                         label="Model Images"
                         value={generationStats.modelImages}
-                        icon={<User className="w-5 h-5 text-[#884cff]" />}
+                        icon={<User className="w-5 h-5 text-gold-solid" />}
                     />
                     <GenerationStatCard
                         label="Campaign Images"
                         value={generationStats.campaignImages}
-                        icon={<Camera className="w-5 h-5 text-[#884cff]" />}
+                        icon={<Camera className="w-5 h-5 text-gold-solid" />}
                     />
                     <GenerationStatCard
                         label="Regenerated Images"
                         value={generationStats.regenerated}
-                        icon={<Sparkles className="w-5 h-5 text-[#884cff]" />}
+                        icon={<Sparkles className="w-5 h-5 text-gold-solid" />}
                     />
                 </div>
             </div>
@@ -632,44 +632,44 @@ export default function OverviewTab({ project }) {
 // -----------------
 const InfoCard = ({ icon, label, value, dotColor }) => (
     <div className="flex items-start gap-4">
-        <div className={`w-12 h-12 bg-[#884cff]/10 rounded-lg flex items-center justify-center flex-shrink-0 ${dotColor ? '' : ''}`}>
+        <div className={`w-12 h-12 bg-gold-solid/10 rounded-lg flex items-center justify-center flex-shrink-0 ${dotColor ? '' : ''}`}>
             {dotColor && <div className={`w-2 h-2 rounded-full ${dotColor}`} />}
             {!dotColor && icon}
         </div>
         <div>
-            <p className="text-sm text-[#708090] mb-1">{label}</p>
-            <p className="text-lg font-semibold text-[#1a1a1a]">{value}</p>
+            <p className="text-sm text-muted-foreground mb-1">{label}</p>
+            <p className="text-lg font-semibold text-foreground">{value}</p>
         </div>
     </div>
 )
 
 const Description = ({ label, text }) => (
-    <div className="mt-6 pt-6 border-t border-[#e6e6e6]">
-        <p className="text-sm text-[#708090] mb-2">{label}</p>
-        <p className="text-[#1a1a1a]">{text}</p>
+    <div className="mt-6 pt-6 border-t border-border">
+        <p className="text-sm text-muted-foreground mb-2">{label}</p>
+        <p className="text-foreground">{text}</p>
     </div>
 )
 
 const StatCard = ({ icon, label, value }) => (
-    <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+    <div className="bg-card border-2 border-border rounded-lg p-6">
         <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">{icon}</div>
-            <p className="text-sm text-[#708090]">{label}</p>
+            <div className="w-10 h-10 bg-gold-solid/10 rounded-lg flex items-center justify-center">{icon}</div>
+            <p className="text-sm text-muted-foreground">{label}</p>
         </div>
-        <p className="text-3xl font-bold text-[#884cff]">{value}</p>
+        <p className="text-3xl font-bold text-gold-solid">{value}</p>
     </div>
 )
 
 const WorkflowProgress = ({ steps }) => (
-    <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">Workflow Progress</h3>
+    <div className="bg-card border-2 border-border rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-4">Workflow Progress</h3>
         <div className="space-y-3">
             {steps.map((step, idx) => (
                 <div key={idx} className="flex items-center gap-3">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${step.completed ? 'bg-green-500' : 'bg-gray-300'}`}>
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${step.completed ? 'bg-green-500' : 'bg-muted'}`}>
                         {step.completed && <CheckCircle className="w-4 h-4 text-white" />}
                     </div>
-                    <p className="text-sm text-[#1a1a1a]">{`Step ${idx + 1}: ${step.label}`}</p>
+                    <p className="text-sm text-foreground">{`Step ${idx + 1}: ${step.label}`}</p>
                 </div>
             ))}
         </div>
@@ -677,21 +677,21 @@ const WorkflowProgress = ({ steps }) => (
 )
 
 const SelectionSection = ({ title, icon, selected, uploadedImages }) => (
-    <div className="border-t border-[#e6e6e6] pt-6 first:border-t-0 first:pt-0">
+    <div className="border-t border-border pt-6 first:border-t-0 first:pt-0">
         <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gold-solid/10 rounded-lg flex items-center justify-center">
                 {icon}
             </div>
-            <h3 className="text-lg font-semibold text-[#1a1a1a]">{title}</h3>
+            <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         </div>
 
         {/* Selected Items */}
         {selected.length > 0 && (
             <div className="mb-4">
-                <p className="text-sm text-[#708090] mb-2">Selected {title}:</p>
+                <p className="text-sm text-muted-foreground mb-2">Selected {title}:</p>
                 <div className="flex flex-wrap gap-2">
                     {selected.map((item, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-[#884cff]/10 text-[#884cff] rounded-full text-sm">
+                        <span key={idx} className="px-3 py-1 bg-gold-solid/10 text-gold-solid rounded-full text-sm">
                             {item}
                         </span>
                     ))}
@@ -702,10 +702,10 @@ const SelectionSection = ({ title, icon, selected, uploadedImages }) => (
         {/* Uploaded Images */}
         {uploadedImages.length > 0 && (
             <div>
-                <p className="text-sm text-[#708090] mb-2">Uploaded {title} Images:</p>
+                <p className="text-sm text-muted-foreground mb-2">Uploaded {title} Images:</p>
                 <div className="grid grid-cols-4 gap-4">
                     {uploadedImages.map((img, idx) => (
-                        <div key={idx} className="relative w-full h-24 rounded-lg border border-[#e6e6e6] overflow-hidden">
+                        <div key={idx} className="relative w-full h-24 rounded-lg border border-border overflow-hidden">
                             <Image
                                 src={img.cloud_url || img.local_url}
                                 alt={`${title} ${idx + 1}`}
@@ -722,13 +722,13 @@ const SelectionSection = ({ title, icon, selected, uploadedImages }) => (
 )
 
 const GenerationStatCard = ({ label, value, icon }) => (
-    <div className="bg-gray-50 border border-[#e6e6e6] rounded-lg p-4">
+    <div className="bg-muted border border-border rounded-lg p-4">
         <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gold-solid/10 rounded-lg flex items-center justify-center">
                 {icon}
             </div>
-            <p className="text-2xl font-bold text-[#884cff]">{value}</p>
+            <p className="text-2xl font-bold text-gold-solid">{value}</p>
         </div>
-        <p className="text-xs text-[#708090]">{label}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
     </div>
 )

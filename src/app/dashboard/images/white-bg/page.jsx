@@ -279,35 +279,30 @@ const PlainBackgroundForm = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#fcfcfc] via-[#f8f7ff] to-[#f5f3ff] p-8">
-            {/* Background decoration */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-20 right-20 w-60 h-60 bg-gradient-to-r from-[#884cff]/10 to-[#5a2fcf]/10 rounded-full blur-3xl"></div>
-            </div>
-
-            <div className="max-w-6xl mx-auto relative z-10">
+        <div className="min-h-screen">
+            <div className="max-w-6xl mx-auto">
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-12">
-                    <div className="p-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] rounded-2xl shadow-lg">
+                    <div className="p-3 bg-gold-gradient rounded-2xl shadow-lg">
                         <MdPhotoSizeSelectLarge className="w-8 h-8 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">
+                        <h1 className="text-4xl font-bold text-foreground">
                             {t("images.plainBackground")}
                         </h1>
-                        <p className="text-[#737373] mt-2">{t("images.cleanProductShots")}</p>
+                        <p className="text-muted-foreground mt-2">{t("images.cleanProductShots")}</p>
                     </div>
                 </div>
 
                 {/* Form and Result Container */}
                 <div className={`grid grid-cols-1 gap-8 transition-all duration-500 ${result ? 'lg:grid-cols-[4fr_6fr]' : 'lg:grid-cols-[7fr_3fr]'}`}>
                     {/* Form */}
-                    <div className="space-y-8 bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
+                    <div className="space-y-8 bg-card rounded-xl p-8 border border-border">
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Product Image Upload */}
                             <div>
-                                <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
-                                    <Upload size={20} className="text-[#884cff]" />
+                                <label className="block text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                                    <Upload size={20} className="text-gold-solid" />
                                     {t("images.productImage")}<span className="text-red-500 ml-1">*</span>
                                     {uploadError && (
   <p className="mt-3 text-sm text-red-600 flex items-center gap-2">
@@ -320,10 +315,10 @@ const PlainBackgroundForm = () => {
                                 <div
   className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 cursor-pointer ${
     uploadError
-      ? "border-red-500 bg-red-50"
+      ? "border-red-500 bg-red-500/10"
       : isDragging
-      ? "border-[#884cff] bg-[#884cff]/5"
-      : "border-[#e6e6e6] hover:border-[#884cff] hover:bg-[#884cff]/5"
+      ? "border-gold-muted bg-gold-solid/5"
+      : "border-border hover:border-gold-muted hover:bg-gold-solid/5"
   }`}
   onDragOver={handleDragOver}
   onDragLeave={handleDragLeave}
@@ -354,9 +349,9 @@ const PlainBackgroundForm = () => {
                                         </div>
                                     ) : (
                                         <>
-                                            <Upload className="w-12 h-12 text-[#884cff] mx-auto mb-4" />
-                                            <p className="text-[#1a1a1a] font-medium mb-2">{t("images.dragDropProduct")}</p>
-                                            <p className="text-[#737373] text-sm">{t("images.clickToBrowse")}</p>
+                                            <Upload className="w-12 h-12 text-gold-solid mx-auto mb-4" />
+                                            <p className="text-foreground font-medium mb-2">{t("images.dragDropProduct")}</p>
+                                            <p className="text-muted-foreground text-sm">{t("images.clickToBrowse")}</p>
                                         </>
                                     )}
                                 </div>
@@ -364,16 +359,16 @@ const PlainBackgroundForm = () => {
 
                             {/* Prompt */}
                             <div>
-                                <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
-                                    <Sparkles size={20} className="text-[#884cff]" />
-                                    {t("images.descriptionPrompt")} <span className="text-gray-400 text-sm font-normal">({t("common.optional")})</span>
+                                <label className="block text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                                    <Sparkles size={20} className="text-gold-solid" />
+                                    {t("images.descriptionPrompt")} <span className="text-muted-foreground text-sm font-normal">({t("common.optional")})</span>
                                 </label>
                                 <Input
                                     type="text"
                                     // placeholder={t("images.removeBackgroundPlaceholder")}
                                     value={formData.prompt}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, prompt: e.target.value }))}
-                                    className="w-full px-4 py-3 border border-[#e6e6e6] rounded-xl bg-white text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent"
+                                    className="w-full px-4 py-3 border border-border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                                 />
                             </div>
 
@@ -381,16 +376,16 @@ const PlainBackgroundForm = () => {
                             <DimensionsSelector
                                 selectedDimension={formData.dimension}
                                 onDimensionChange={(dimension) => setFormData((prev) => ({ ...prev, dimension }))}
-                                primaryColor="#884cff"
+                                
                             />
 
                             {/* Background Color */}
                             {/* <div>
-                                <label className="block text-lg font-semibold text-[#1a1a1a] mb-4 flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-gradient-to-r from-[#884cff] to-[#5a2fcf]"></div>
+                                <label className="block text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-gold-gradient"></div>
                                     Background Color
                                 </label>
-                                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-[#f8f7ff] to-[#f5f3ff] rounded-2xl border border-[#e6e6e6]">
+                                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-[#f8f7ff] to-[#f5f3ff] rounded-2xl border border-border">
                                     <div className="relative">
                                         <input
                                             type="color"
@@ -414,7 +409,7 @@ const PlainBackgroundForm = () => {
                                                     backgroundColor: e.target.value,
                                                 }))
                                             }
-                                            className="w-full px-4 py-3 border border-[#e6e6e6] rounded-xl bg-white text-[#1a1a1a] font-mono focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent"
+                                            className="w-full px-4 py-3 border border-border rounded-xl bg-input text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                                         />
                                     </div>
                                 </div>
@@ -422,18 +417,18 @@ const PlainBackgroundForm = () => {
 
                             {/* Error Message */}
                             {error && (
-                                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                                <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500" />
-                                    <p className="text-red-700 text-sm">{error}</p>
+                                    <p className="text-red-400 text-sm">{error}</p>
                                 </div>
                             )}
 
                             {/* Buttons */}
-                            <div className="flex items-center justify-between pt-8 border-t border-[#e6e6e6]">
+                            <div className="flex items-center justify-between pt-8 border-t border-border">
                                 <button
                                     type="button"
                                     onClick={() => router.back()}
-                                    className="flex items-center gap-3 px-6 py-3 text-[#884cff] font-semibold hover:bg-[#f0e6ff] rounded-xl transition-all duration-300 hover:scale-105"
+                                    className="flex items-center gap-3 px-6 py-3 text-gold-solid font-semibold hover:bg-accent rounded-xl transition-all duration-300"
                                 >
                                     <ChevronLeft size={20} />
                                     {t("common.back")}
@@ -441,7 +436,8 @@ const PlainBackgroundForm = () => {
                                 <Button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-[#884cff]/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    variant="brand"
+                                    className="flex items-center gap-3 px-8 py-4 h-auto rounded-xl text-base disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isLoading ? (
                                         <>
@@ -460,36 +456,36 @@ const PlainBackgroundForm = () => {
                     </div>
 
                     {/* Result Preview */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
-                        <h3 className="text-2xl font-bold text-[#1a1a1a] mb-6 flex items-center gap-2">
-                            <CheckCircle className="w-6 h-6 text-[#884cff]" />
+                    <div className="bg-card rounded-xl p-8 border border-border">
+                        <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                            <CheckCircle className="w-6 h-6 text-gold-solid" />
                             {t("images.resultPreview")}
                         </h3>
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center h-[400px] text-center">
-                                <Loader2 className="w-16 h-16 text-[#884cff] animate-spin mb-4" />
-                                <p className="text-[#737373] text-lg">{t("images.generatingYourImage")}</p>
-                                <p className="text-[#737373] text-sm mt-2">{t("images.mayTakeFewMoments")}</p>
+                                <Loader2 className="w-16 h-16 text-gold-solid animate-spin mb-4" />
+                                <p className="text-muted-foreground text-lg">{t("images.generatingYourImage")}</p>
+                                <p className="text-muted-foreground text-sm mt-2">{t("images.mayTakeFewMoments")}</p>
                             </div>
                         ) : result ? (
                             <div className="space-y-6">
-                                <div className="relative w-full h-[400px] rounded-2xl overflow-hidden border-2 border-[#884cff]/20">
+                                <div className="relative w-full h-[400px] rounded-2xl overflow-hidden border-2 border-gold-muted/20">
                                     <Image
                                         src={result.generated_image_url}
                                         alt="Generated"
                                         fill
-                                        className="object-contain bg-gray-50"
+                                        className="object-contain bg-secondary/30"
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                                        <p className="text-green-700 font-semibold">✓ {t("images.imageGeneratedSuccess")}</p>
+                                    <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+                                        <p className="text-green-400 font-semibold">✓ {t("images.imageGeneratedSuccess")}</p>
                                     </div>
                                     <div className="grid grid-cols-3 gap-3">
                                         <button
                                             type="button"
                                             onClick={() => handleView(result)}
-                                            className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                                            className="px-4 py-3 border-2 border-border text-foreground rounded-xl font-semibold hover:bg-secondary/30 transition-all flex items-center justify-center gap-2"
                                         >
                                             <Eye size={16} />
                                             {t("images.view")}
@@ -497,7 +493,7 @@ const PlainBackgroundForm = () => {
                                         <button
                                             type="button"
                                             onClick={() => downloadImage(result.generated_image_url, "generated-image.png")}
-                                            className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
+                                            className="px-4 py-3 bg-gold-gradient text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
                                         >
                                             <Download size={16} />
                                             {t("images.download")}
@@ -505,7 +501,7 @@ const PlainBackgroundForm = () => {
                                         <button
                                             type="button"
                                             onClick={handleRegenerate}
-                                            className="px-4 py-3 border-2 border-[#884cff] text-[#884cff] rounded-xl font-semibold hover:bg-[#f0e6ff] transition-all flex items-center justify-center gap-2"
+                                            className="px-4 py-3 border-2 border-gold-muted text-gold-solid rounded-xl font-semibold hover:bg-[#f0e6ff] transition-all flex items-center justify-center gap-2"
                                         >
                                             <RefreshCw size={16} />
                                             {t("images.regenerate")}
@@ -517,7 +513,7 @@ const PlainBackgroundForm = () => {
                                                 setFormData({ image: null, prompt: "", backgroundColor: "#ffffff", dimension: "1:1" })
                                                 setImagePreview(null)
                                             }}
-                                            className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
+                                            className="px-4 py-3 border-2 border-border text-foreground rounded-xl font-semibold hover:bg-secondary/30 transition-all"
                                         >
                                             {t("images.newImage")}
                                         </button>
@@ -532,11 +528,11 @@ const PlainBackgroundForm = () => {
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center h-[400px] text-center">
-                                <div className="w-24 h-24 bg-gradient-to-br from-[#884cff]/10 to-[#5a2fcf]/10 rounded-full flex items-center justify-center mb-4">
-                                    <Sparkles className="w-12 h-12 text-[#884cff]" />
+                                <div className="w-24 h-24 bg-gradient-to-br from-gold-from/10 to-gold-to/10 rounded-full flex items-center justify-center mb-4">
+                                    <Sparkles className="w-12 h-12 text-gold-solid" />
                                 </div>
-                                <p className="text-[#737373] text-lg">{t("images.generatedImageWillAppear")}</p>
-                                <p className="text-[#737373] text-sm mt-2">{t("images.uploadAndClickGenerate")}</p>
+                                <p className="text-muted-foreground text-lg">{t("images.generatedImageWillAppear")}</p>
+                                <p className="text-muted-foreground text-sm mt-2">{t("images.uploadAndClickGenerate")}</p>
                             </div>
                         )}
                     </div>
@@ -546,25 +542,25 @@ const PlainBackgroundForm = () => {
             {/* Regenerate Modal */}
             {regenerateModal.isOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+                    <div className="bg-card rounded-xl border border-border shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
                         {/* Modal Header */}
-                        <div className="flex-shrink-0 border-b border-gray-200 bg-white p-6 rounded-t-3xl z-10 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+                        <div className="flex-shrink-0 border-b border-border bg-card p-6 rounded-t-xl z-10 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] rounded-xl">
+                                    <div className="p-2 bg-gold-gradient rounded-xl">
                                         <RefreshCw className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">{t("images.regenerateImage")}</h2>
-                                        <p className="text-sm text-gray-500">{t("images.modifyAndRegenerate")}</p>
+                                        <h2 className="text-2xl font-bold text-foreground">{t("images.regenerateImage")}</h2>
+                                        <p className="text-sm text-muted-foreground">{t("images.modifyAndRegenerate")}</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={closeRegenerateModal}
                                     disabled={regenerateModal.loading}
-                                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50"
+                                    className="p-2 hover:bg-accent rounded-xl transition-colors disabled:opacity-50"
                                 >
-                                    <X className="w-6 h-6 text-gray-500" />
+                                    <X className="w-6 h-6 text-muted-foreground" />
                                 </button>
                             </div>
                         </div>
@@ -573,13 +569,13 @@ const PlainBackgroundForm = () => {
                         <div className="flex-1 overflow-y-auto min-h-0 p-6 space-y-6">
                             {/* Current Image */}
                             <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-3">Current Image:</p>
-                                <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-gray-200">
+                                <p className="text-sm font-semibold text-foreground mb-3">Current Image:</p>
+                                <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-border">
                                     <Image
                                         src={result?.generated_image_url}
                                         alt="Current image"
                                         fill
-                                        className="object-contain bg-gray-50"
+                                        className="object-contain bg-secondary/30"
                                     />
                                 </div>
                             </div>
@@ -594,44 +590,44 @@ const PlainBackgroundForm = () => {
 
                             {/* New Prompt Input */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-[#884cff]" />
+                                <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-gold-solid" />
                                     What would you like to change?
                                 </label>
                                 <textarea
                                     value={regenerateModal.prompt}
                                     onChange={(e) => setRegenerateModal(prev => ({ ...prev, prompt: e.target.value }))}
                                     placeholder="E.g., 'Add more sparkle and brightness', 'Make it more vibrant', 'Add gold accents'..."
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent resize-none"
+                                    className="w-full px-4 py-3 border border-border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
                                     rows="4"
                                     disabled={regenerateModal.loading}
                                 />
-                                <p className="text-xs text-gray-500 mt-2">
+                                <p className="text-xs text-muted-foreground mt-2">
                                     💡 Your modification will be applied to regenerate the image
                                 </p>
                             </div>
 
                             {/* Error Message */}
                             {regenerateModal.error && (
-                                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                                <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                    <p className="text-red-700 text-sm"> Oops! Something went wrong. Please try again.</p>
+                                    <p className="text-red-400 text-sm"> Oops! Something went wrong. Please try again.</p>
                                 </div>
                             )}
 
                             {/* Action Buttons */}
-                            <div className="flex gap-3 pt-4 border-t border-gray-200">
+                            <div className="flex gap-3 pt-4 border-t border-border">
                                 <button
                                     onClick={closeRegenerateModal}
                                     disabled={regenerateModal.loading}
-                                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
+                                    className="flex-1 px-6 py-3 border-2 border-border text-foreground rounded-xl font-semibold hover:bg-secondary/30 transition-all disabled:opacity-50"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={submitRegenerate}
                                     disabled={regenerateModal.loading || !regenerateModal.prompt.trim()}
-                                    className="flex-1 px-6 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                                    className="flex-1 px-6 py-3 bg-gold-gradient text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
                                 >
                                     {regenerateModal.loading ? (
                                         <>

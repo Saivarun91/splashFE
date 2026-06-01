@@ -231,7 +231,7 @@ export function ProductImagesDisplay({
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors ${
                     commentsCount > 0
                         ? "text-red-600 hover:bg-red-50"
-                        : "text-[#884cff] hover:bg-[#f3efff]"
+                        : "text-gold-solid hover:bg-gold-solid/10"
                 }`}
                 aria-label="Open comments"
                 title="Open comments"
@@ -244,12 +244,12 @@ export function ProductImagesDisplay({
     if (!collectionData?.items?.[0]?.product_images) {
         return (
             <div className="mb-12">
-                <div className="text-center py-16 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                        <ImageIcon className="w-8 h-8 text-gray-400" />
+                <div className="text-center py-16 border-2 border-dashed border-border rounded-xl bg-gray-50/50">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
+                        <ImageIcon className="w-8 h-8 text-muted-foreground/70" />
                     </div>
-                    <p className="text-gray-600 mb-2 font-medium">No product images found</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-muted-foreground mb-2 font-medium">No product images found</p>
+                    <p className="text-sm text-muted-foreground">
                         Upload product images in Step 3 to get started
                     </p>
                 </div>
@@ -427,18 +427,18 @@ export function ProductImagesDisplay({
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    <h3 className="text-2xl font-bold text-foreground mb-2">
                         Generated Product Images
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-muted-foreground">
                         {products.length} product{products.length !== 1 ? 's' : ''} • Preview and manage your AI-generated images
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
                     {renderCommentButton("generated_product_images")}
-                    <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-full">
-                        <Sparkles className="w-4 h-4 text-purple-600" />
-                        <span className="text-sm font-medium text-purple-700">AI Generated</span>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-gold-solid/10 border border-gold-muted rounded-full">
+                        <Sparkles className="w-4 h-4 text-gold-solid" />
+                        <span className="text-sm font-medium text-gold-solid">AI Generated</span>
                     </div>
                 </div>
             </div>
@@ -464,20 +464,20 @@ export function ProductImagesDisplay({
                     const hasGeneratedImages = product.generated_images && product.generated_images.length > 0
 
                     return (
-                        <div key={productIndex} className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div key={productIndex} className="bg-card rounded-2xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
                             {/* Product Header */}
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                    <div className="w-10 h-10 bg-gradient-to-br from-gold-solid to-gold-solid/80 rounded-lg flex items-center justify-center">
                                         <span className="text-white font-semibold text-sm">
                                             {productIndex + 1}
                                         </span>
                                     </div>
                                     <div>
-                                        <h4 className="text-lg font-semibold text-gray-900">
+                                        <h4 className="text-lg font-semibold text-foreground">
                                             Product {productIndex + 1}
                                         </h4>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-muted-foreground">
                                             {hasGeneratedImages
                                                 ? `${product.generated_images.length} generated image${product.generated_images.length !== 1 ? 's' : ''}`
                                                 : 'No images generated yet'
@@ -493,7 +493,7 @@ export function ProductImagesDisplay({
                                 <div className="md:col-span-1">
                                     <div className="space-y-3">
                                         <div className="relative group">
-                                            <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 border-2 border-purple-500 shadow-sm">
+                                            <div className="aspect-square rounded-xl overflow-hidden bg-muted border-2 border-gold-solid shadow-sm">
                                                 <img
                                                     src={product.uploaded_image_url}
                                                     alt={`Product ${productIndex + 1}`}
@@ -501,11 +501,11 @@ export function ProductImagesDisplay({
                                                     onClick={() => setZoomedImage(product.uploaded_image_url)}
                                                 />
                                             </div>
-                                            <div className="absolute top-3 left-3 bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-medium">
+                                            <div className="absolute top-3 left-3 bg-gold-solid text-white text-xs px-2 py-1 rounded-full font-medium">
                                                 Original
                                             </div>
                                         </div>
-                                        <p className="text-xs text-gray-600 text-center font-medium">
+                                        <p className="text-xs text-muted-foreground text-center font-medium">
                                             Source Image
                                         </p>
                                     </div>
@@ -543,7 +543,7 @@ export function ProductImagesDisplay({
                                                 return (
                                                     <div key={imgIndex} className="group">
                                                         <div className="space-y-3">
-                                                            <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                                                            <div className="relative aspect-square rounded-xl overflow-hidden bg-muted border border-border shadow-sm hover:shadow-md transition-all">
                                                                 <img
                                                                     src={imageToShow.cloud_url}
                                                                     alt={`${imageToShow.type} ${imgIndex + 1}`}
@@ -574,12 +574,12 @@ export function ProductImagesDisplay({
                                                                                         }))
                                                                                     }}
                                                                                     disabled={currentIndex === 0}
-                                                                                    className="flex-1 bg-white/90 text-gray-700 text-xs p-1 rounded hover:bg-white transition-all disabled:opacity-40 font-medium"
+                                                                                    className="flex-1 bg-card/90 text-muted-foreground text-xs p-1 rounded hover:bg-card transition-all disabled:opacity-40 font-medium"
                                                                                 >
                                                                                     ←
                                                                                 </button>
                                                                                 {totalVersions > 1 && (
-                                                                                    <div className="bg-white/20 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
+                                                                                    <div className="bg-card/20 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
                                                                                         {currentIndex + 1}/{totalVersions}
                                                                                     </div>
                                                                                 )}
@@ -592,7 +592,7 @@ export function ProductImagesDisplay({
                                                                                         }))
                                                                                     }}
                                                                                     disabled={currentIndex === totalVersions - 1}
-                                                                                    className="flex-1 bg-white/90 text-gray-700 text-xs p-1 rounded hover:bg-white transition-all disabled:opacity-40 font-medium"
+                                                                                    className="flex-1 bg-card/90 text-muted-foreground text-xs p-1 rounded hover:bg-card transition-all disabled:opacity-40 font-medium"
                                                                                 >
                                                                                     →
                                                                                 </button>
@@ -607,7 +607,7 @@ export function ProductImagesDisplay({
                                                                             <Button
                                                                                 size="sm"
                                                                                 variant="secondary"
-                                                                                className="gap-1 text-xs px-2 py-1 h-auto bg-white/90 backdrop-blur-sm hover:bg-white"
+                                                                                className="gap-1 text-xs px-2 py-1 h-auto bg-card/90 backdrop-blur-sm hover:bg-card"
                                                                                 onClick={() => window.open(imageToShow.cloud_url, "_blank")}
                                                                             >
                                                                                 <ExternalLink className="w-3 h-3" /> View
@@ -615,7 +615,7 @@ export function ProductImagesDisplay({
                                                                             <Button
                                                                                 size="sm"
                                                                                 variant="secondary"
-                                                                                className="gap-1 text-xs px-2 py-1 h-auto bg-white/90 backdrop-blur-sm hover:bg-white"
+                                                                                className="gap-1 text-xs px-2 py-1 h-auto bg-card/90 backdrop-blur-sm hover:bg-card"
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation();
                                                                                     // Calculate version index based on current view
@@ -648,7 +648,7 @@ export function ProductImagesDisplay({
                                                                             <div className="flex gap-2 justify-center">
                                                                                 <Button
                                                                                     size="sm"
-                                                                                    className="bg-purple-600 hover:bg-purple-700 text-white gap-1 text-xs px-2 py-1 h-auto"
+                                                                                    className="bg-gold-solid hover:brightness-110 text-white gap-1 text-xs px-2 py-1 h-auto"
                                                                                     onClick={() => handleEnhance(product, imageToShow)}
                                                                                     disabled={isRegenerating}
                                                                                 >
@@ -657,7 +657,7 @@ export function ProductImagesDisplay({
                                                                                 </Button>
                                                                                 <Button
                                                                                     size="sm"
-                                                                                    className="bg-purple-600 hover:bg-purple-700 text-white gap-1 text-xs px-2 py-1 h-auto"
+                                                                                    className="bg-gold-solid hover:brightness-110 text-white gap-1 text-xs px-2 py-1 h-auto"
                                                                                     onClick={() => openPromptModal(product, imageToShow, currentIndex > 0)}
                                                                                     disabled={isRegenerating}
                                                                                 >
@@ -677,7 +677,7 @@ export function ProductImagesDisplay({
                                                             {/* Image Label */}
                                                             <div className="text-center">
                                                                 <p className={`text-xs font-medium ${currentIndex === 0
-                                                                    ? "text-gray-600"
+                                                                    ? "text-muted-foreground"
                                                                     : versionType === 'enhanced'
                                                                         ? "text-blue-600"
                                                                         : "text-green-600"
@@ -748,11 +748,11 @@ export function ProductImagesDisplay({
                                                                     if (totalUniqueModels > 0) {
                                                                         return (
                                                                             <div className="mt-1 flex items-center justify-center gap-1 flex-wrap">
-                                                                                <span className="text-xs text-gray-500">
+                                                                                <span className="text-xs text-muted-foreground">
                                                                                     {totalUniqueModels} {totalUniqueModels === 1 ? 'model' : 'models'}:
                                                                                 </span>
                                                                                 {aiCount > 0 && (
-                                                                                    <span className="text-xs px-1.5 py-0.5 rounded bg-purple-100 text-purple-600 font-medium">
+                                                                                    <span className="text-xs px-1.5 py-0.5 rounded bg-gold-solid/15 text-gold-solid font-medium">
                                                                                         {aiCount} AI
                                                                                     </span>
                                                                                 )}
@@ -774,11 +774,11 @@ export function ProductImagesDisplay({
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="md:col-span-5 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-12 bg-gray-50/50">
+                                    <div className="md:col-span-5 flex items-center justify-center border-2 border-dashed border-border rounded-xl p-12 bg-gray-50/50">
                                         <div className="text-center">
-                                            <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                                            <p className="text-gray-600 font-medium mb-1">No generated images yet</p>
-                                            <p className="text-sm text-gray-500">
+                                            <ImageIcon className="w-12 h-12 text-muted-foreground/70 mx-auto mb-3" />
+                                            <p className="text-muted-foreground font-medium mb-1">No generated images yet</p>
+                                            <p className="text-sm text-muted-foreground">
                                                 Generate images to see them appear here
                                             </p>
                                         </div>
@@ -812,13 +812,13 @@ export function ProductImagesDisplay({
             {/* Regenerate Prompt Modal */}
             {showPromptModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
+                    <div className="bg-card rounded-2xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h3 className="text-xl font-bold text-gray-900">
+                                <h3 className="text-xl font-bold text-foreground">
                                     Regenerate Image
                                 </h3>
-                                <p className="text-gray-600 text-sm mt-1">
+                                <p className="text-muted-foreground text-sm mt-1">
                                     Use AI to improve your generated image
                                 </p>
                             </div>
@@ -828,7 +828,7 @@ export function ProductImagesDisplay({
                                     setCustomPrompt("")
                                     setError(null)
                                 }}
-                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                                className="text-muted-foreground/70 hover:text-muted-foreground transition-colors"
                             >
                                 <X className="w-6 h-6" />
                             </button>
@@ -852,10 +852,10 @@ export function ProductImagesDisplay({
 
                         {/* Original Prompt Display */}
                         {/* {showPromptModal.generatedImage.prompt && (
-                            <div className="mb-6 p-4 bg-purple-50 rounded-xl border border-purple-200">
-                                <p className="text-sm font-semibold text-purple-900 mb-2">📝 Original Style Prompt:</p>
-                                <p className="text-sm text-purple-700 italic">{showPromptModal.generatedImage.prompt}</p>
-                                <p className="text-xs text-purple-600 mt-2">
+                            <div className="mb-6 p-4 bg-gold-solid/10 rounded-xl border border-gold-muted">
+                                <p className="text-sm font-semibold text-foreground mb-2">📝 Original Style Prompt:</p>
+                                <p className="text-sm text-gold-solid italic">{showPromptModal.generatedImage.prompt}</p>
+                                <p className="text-xs text-gold-solid mt-2">
                                     ℹ️ This will be automatically considered along with your new modifications
                                 </p>
                             </div>
@@ -865,24 +865,24 @@ export function ProductImagesDisplay({
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                             {/* Original Product */}
                             <div className="text-center">
-                                <label className="block text-sm font-semibold text-gray-900 mb-3">
+                                <label className="block text-sm font-semibold text-foreground mb-3">
                                     Original Product
                                 </label>
-                                <div className="border-2 border-purple-500 rounded-xl overflow-hidden shadow-sm">
+                                <div className="border-2 border-gold-solid rounded-xl overflow-hidden shadow-sm">
                                     <img
                                         src={showPromptModal.product.uploaded_image_url}
                                         alt="Original Product"
                                         className="w-full h-48 object-cover"
                                     />
                                 </div>
-                                <p className="text-xs text-gray-600 mt-2 font-medium">
+                                <p className="text-xs text-muted-foreground mt-2 font-medium">
                                     📦 Source Image
                                 </p>
                             </div>
 
                             {/* Current Generated */}
                             {/* <div className="text-center">
-                                <label className="block text-sm font-semibold text-gray-900 mb-3">
+                                <label className="block text-sm font-semibold text-foreground mb-3">
                                     Current Version
                                 </label>
                                 <div className="border-2 border-green-500 rounded-xl overflow-hidden shadow-sm">
@@ -892,7 +892,7 @@ export function ProductImagesDisplay({
                                         className="w-full h-48 object-cover"
                                     />
                                 </div>
-                                <p className="text-xs text-gray-600 mt-2 font-medium capitalize">
+                                <p className="text-xs text-muted-foreground mt-2 font-medium capitalize">
                                     🎨 {showPromptModal.generatedImage.type?.replace('_', ' ')}
                                 </p>
                             </div> */}
@@ -900,13 +900,13 @@ export function ProductImagesDisplay({
                             {/* Result Indicator */}
                             <div className="flex items-center justify-center">
                                 <div className="text-center">
-                                    <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-3 shadow-lg">
+                                    <div className="w-20 h-20 bg-gradient-to-br from-gold-solid to-gold-solid/80 rounded-full flex items-center justify-center mb-3 shadow-lg">
                                         <RefreshCw className="w-8 h-8 text-white" />
                                     </div>
-                                    <p className="text-sm font-semibold text-gray-900">
+                                    <p className="text-sm font-semibold text-foreground">
                                         New Enhanced Version
                                     </p>
-                                    <p className="text-xs text-gray-600 mt-1">
+                                    <p className="text-xs text-muted-foreground mt-1">
                                         Based on your instructions
                                     </p>
                                 </div>
@@ -920,7 +920,7 @@ export function ProductImagesDisplay({
                                 <div className="flex items-center gap-4 text-sm">
                                     <div>
                                         <span className="text-blue-700">Type:</span>{' '}
-                                        <span className={`font-medium px-2 py-1 rounded ${showPromptModal.generatedImage.model_used.type === 'ai' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
+                                        <span className={`font-medium px-2 py-1 rounded ${showPromptModal.generatedImage.model_used.type === 'ai' ? 'bg-gold-solid/15 text-gold-solid' : 'bg-green-100 text-green-700'}`}>
                                             {showPromptModal.generatedImage.model_used.type === 'ai' ? 'AI Model' : 'Real Model'}
                                         </span>
                                     </div>
@@ -935,7 +935,7 @@ export function ProductImagesDisplay({
                         )} */}
 
                         {/* Model Selection Option */}
-                        <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-border">
                             <div className="flex items-center gap-3 mb-3">
                                 <input
                                     type="checkbox"
@@ -945,9 +945,9 @@ export function ProductImagesDisplay({
                                         setUseDifferentModel(e.target.checked)
                                         if (!e.target.checked) setSelectedModel(null)
                                     }}
-                                    className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                                    className="w-4 h-4 text-gold-solid border-input rounded focus:ring-ring"
                                 />
-                                <label htmlFor="useDifferentModel" className="text-sm font-semibold text-gray-900 cursor-pointer">
+                                <label htmlFor="useDifferentModel" className="text-sm font-semibold text-foreground cursor-pointer">
                                     🔄 Try with a different model
                                 </label>
                             </div>
@@ -959,22 +959,22 @@ export function ProductImagesDisplay({
 
                             {useDifferentModel && (
                                 <div className="mt-3 space-y-3">
-                                    <p className="text-xs text-gray-600 mb-2">
+                                    <p className="text-xs text-muted-foreground mb-2">
                                         Select a different model to regenerate this image:
                                     </p>
 
                                     {/* AI Models */}
                                     {availableModels.ai_models.length > 0 && (
                                         <div>
-                                            <p className="text-xs font-medium text-gray-700 mb-2">AI Models</p>
+                                            <p className="text-xs font-medium text-muted-foreground mb-2">AI Models</p>
                                             <div className="grid grid-cols-4 gap-2">
                                                 {availableModels.ai_models.map((model, idx) => (
                                                     <button
                                                         key={idx}
                                                         onClick={() => setSelectedModel({ type: 'ai', ...model })}
                                                         className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedModel?.local === model.local
-                                                            ? 'border-purple-500 ring-2 ring-purple-300'
-                                                            : 'border-gray-200 hover:border-purple-300'
+                                                            ? 'border-gold-solid ring-2 ring-gold-muted'
+                                                            : 'border-border hover:border-gold-muted'
                                                             }`}
                                                     >
                                                         <img
@@ -983,8 +983,8 @@ export function ProductImagesDisplay({
                                                             className="w-full h-full object-cover"
                                                         />
                                                         {selectedModel?.local === model.local && (
-                                                            <div className="absolute inset-0 bg-purple-600/20 flex items-center justify-center">
-                                                                <div className="bg-purple-600 text-white rounded-full p-1">
+                                                            <div className="absolute inset-0 bg-gold-solid/20 flex items-center justify-center">
+                                                                <div className="bg-gold-solid text-white rounded-full p-1">
                                                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                                     </svg>
@@ -1000,7 +1000,7 @@ export function ProductImagesDisplay({
                                     {/* Real Models */}
                                     {availableModels.real_models.length > 0 && (
                                         <div>
-                                            <p className="text-xs font-medium text-gray-700 mb-2">Real Models</p>
+                                            <p className="text-xs font-medium text-muted-foreground mb-2">Real Models</p>
                                             <div className="grid grid-cols-4 gap-2">
                                                 {availableModels.real_models.map((model, idx) => (
                                                     <button
@@ -1008,7 +1008,7 @@ export function ProductImagesDisplay({
                                                         onClick={() => setSelectedModel({ type: 'real', ...model })}
                                                         className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedModel?.local === model.local
                                                             ? 'border-green-500 ring-2 ring-green-300'
-                                                            : 'border-gray-200 hover:border-green-300'
+                                                            : 'border-border hover:border-green-300'
                                                             }`}
                                                     >
                                                         <img
@@ -1045,17 +1045,17 @@ export function ProductImagesDisplay({
 
                         {/* Prompt Input */}
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-gray-900 mb-3">
+                            <label className="block text-sm font-semibold text-foreground mb-3">
                                 {useDifferentModel ? '📝 Using Original Prompt' : '✍️ Your Enhancement Instructions *'}
                             </label>
                             <textarea
                                 value={customPrompt}
                                 onChange={(e) => setCustomPrompt(e.target.value)}
                                 disabled={useDifferentModel}
-                                className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent min-h-[120px] resize-none text-gray-900 placeholder-gray-500 ${useDifferentModel ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                className={`w-full px-4 py-3 border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent min-h-[120px] resize-none text-foreground placeholder-gray-500 ${useDifferentModel ? 'bg-muted cursor-not-allowed' : ''}`}
                                 placeholder={useDifferentModel ? "Using original prompt from generated image..." : "Describe what you want to improve... (e.g., Make the background more vibrant, add soft shadows, change the lighting to golden hour, improve contrast...)"}
                             />
-                            <p className="text-xs text-gray-600 mt-2">
+                            <p className="text-xs text-muted-foreground mt-2">
                                 {useDifferentModel
                                     ? '🔒 Prompt is locked when using a different model. The original prompt will be used automatically.'
                                     : '💬 Be specific about what you want to change or improve in the image'
@@ -1078,8 +1078,8 @@ export function ProductImagesDisplay({
 
                         {/* Example Prompts - Only show when not using different model */}
                         {!useDifferentModel && (
-                            <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                                <p className="text-xs font-semibold text-gray-900 mb-3">💡 Quick Enhancement Ideas:</p>
+                            <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-border">
+                                <p className="text-xs font-semibold text-foreground mb-3">💡 Quick Enhancement Ideas:</p>
                                 <div className="flex flex-wrap gap-2">
                                     {[
                                         "Make colors more vibrant and saturated",
@@ -1093,7 +1093,7 @@ export function ProductImagesDisplay({
                                         <button
                                             key={idx}
                                             onClick={() => setCustomPrompt(example)}
-                                            className="text-xs px-3 py-2 bg-white border border-gray-300 rounded-lg hover:border-purple-500 hover:text-purple-600 transition-colors font-medium"
+                                            className="text-xs px-3 py-2 bg-card border border-input rounded-lg hover:border-gold-solid hover:text-gold-solid transition-colors font-medium"
                                         >
                                             {example}
                                         </button>
@@ -1116,7 +1116,7 @@ export function ProductImagesDisplay({
                                 Cancel
                             </Button>
                             <Button
-                                className="bg-purple-600 hover:bg-purple-700 text-white px-6"
+                                className="bg-gold-solid hover:brightness-110 text-white px-6"
                                 onClick={() => handleRegenerate(showPromptModal.product, showPromptModal.generatedImage)}
                                 disabled={
                                     regenerating ||
@@ -1132,13 +1132,13 @@ export function ProductImagesDisplay({
             )}
             {activeCommentField && (
                 <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-                    <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-[#e6e6e6]">
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-[#e6e6e6]">
-                            <h4 className="text-sm font-semibold text-[#1a1a1a]">{activeCommentConfig?.title} Comments</h4>
+                    <div className="w-full max-w-md bg-card rounded-xl shadow-2xl border border-border">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                            <h4 className="text-sm font-semibold text-foreground">{activeCommentConfig?.title} Comments</h4>
                             <button
                                 type="button"
                                 onClick={closeComments}
-                                className="p-1 rounded hover:bg-gray-100"
+                                className="p-1 rounded hover:bg-muted"
                                 aria-label="Close comments"
                             >
                                 <X className="w-4 h-4 text-[#666]" />
@@ -1148,24 +1148,24 @@ export function ProductImagesDisplay({
                         <div className="p-4 space-y-3">
                             <div className="max-h-48 overflow-y-auto space-y-2">
                                 {currentComments.length === 0 ? (
-                                    <p className="text-xs text-[#708090]">No comments yet.</p>
+                                    <p className="text-xs text-muted-foreground">No comments yet.</p>
                                 ) : (
                                     currentComments.map((comment) => (
-                                        <div key={comment.id} className="border border-[#e6e6e6] rounded-md p-2 bg-[#fafafa]">
+                                        <div key={comment.id} className="border border-border rounded-md p-2 bg-muted">
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="min-w-0">
                                                     <p className="text-xs font-medium text-[#444]">
                                                         {(comment.authorName || "Member")} • {formatRelativeCommentTime(comment.createdAt, nowMs)}
                                                     </p>
-                                                    <p className="text-sm text-[#1a1a1a] break-words">{comment.comment}</p>
+                                                    <p className="text-sm text-foreground break-words">{comment.comment}</p>
                                                     {Array.isArray(comment.replies) && comment.replies.length > 0 && (
-                                                        <div className="mt-2 pl-3 border-l border-[#e6e6e6] space-y-2">
+                                                        <div className="mt-2 pl-3 border-l border-border space-y-2">
                                                             {comment.replies.map((reply) => (
-                                                                <div key={reply.id} className="bg-white border border-[#f0f0f0] rounded p-2">
+                                                                <div key={reply.id} className="bg-card border border-[#f0f0f0] rounded p-2">
                                                                     <p className="text-xs font-medium text-[#555]">
                                                                         {(reply.authorName || "Member")} • {formatRelativeCommentTime(reply.createdAt, nowMs)}
                                                                     </p>
-                                                                    <p className="text-sm text-[#1a1a1a] break-words">{reply.comment}</p>
+                                                                    <p className="text-sm text-foreground break-words">{reply.comment}</p>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -1175,7 +1175,7 @@ export function ProductImagesDisplay({
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleStartReply(comment.id)}
-                                                                className="text-xs text-[#884cff] hover:text-[#7a3ff0]"
+                                                                className="text-xs text-gold-solid hover:text-[#7a3ff0]"
                                                             >
                                                                 {replyingToCommentId === comment.id ? "Replying..." : "Reply"}
                                                             </button>
@@ -1187,7 +1187,7 @@ export function ProductImagesDisplay({
                                                                 value={replyDraftByCommentId[comment.id] || ""}
                                                                 onChange={(e) => handleReplyDraftChange(comment.id, e.target.value)}
                                                                 placeholder="Write a reply..."
-                                                                className="w-full h-16 px-2 py-1.5 border border-[#e6e6e6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#884cff] resize-none text-sm"
+                                                                className="w-full h-16 px-2 py-1.5 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm"
                                                             />
                                                             <div className="flex items-center justify-end gap-2">
                                                                 <button
@@ -1201,7 +1201,7 @@ export function ProductImagesDisplay({
                                                                     type="button"
                                                                     onClick={() => handleAddReply(comment.id)}
                                                                     disabled={savingComments || !(replyDraftByCommentId[comment.id] || "").trim()}
-                                                                    className="px-2 py-1 text-xs rounded-md bg-[#884cff] text-white hover:bg-[#7a3ff0] disabled:opacity-60"
+                                                                    className="px-2 py-1 text-xs rounded-md bg-gold-gradient text-white hover:brightness-110 disabled:opacity-60"
                                                                 >
                                                                     {savingComments ? "Submitting..." : "Submit reply"}
                                                                 </button>
@@ -1231,7 +1231,7 @@ export function ProductImagesDisplay({
                                         value={draftComment}
                                         onChange={(e) => setDraftComment(e.target.value)}
                                         placeholder="Write a comment..."
-                                        className="w-full h-20 px-3 py-2 border border-[#e6e6e6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#884cff] resize-none text-sm"
+                                        className="w-full h-20 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm"
                                     />
 
                                     <div className="flex items-center justify-end gap-2">
@@ -1239,7 +1239,7 @@ export function ProductImagesDisplay({
                                             type="button"
                                             onClick={handleAddComment}
                                             disabled={savingComments || !draftComment.trim()}
-                                            className="px-3 py-1.5 text-sm rounded-md bg-[#884cff] text-white hover:bg-[#7a3ff0] disabled:opacity-60"
+                                            className="px-3 py-1.5 text-sm rounded-md bg-gold-gradient text-white hover:brightness-110 disabled:opacity-60"
                                         >
                                             {savingComments ? "Submitting..." : "Submit"}
                                         </button>

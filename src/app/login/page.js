@@ -21,10 +21,10 @@ export default function LoginPage() {
     // Show loading state while checking authentication
     if (isLoading) {
         return (
-            <main className="min-h-screen bg-white flex items-center justify-center p-4">
+            <main className="dark min-h-screen bg-surface-gradient flex items-center justify-center p-4">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-solid mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading...</p>
                 </div>
             </main>
         );
@@ -36,7 +36,7 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="dark min-h-screen bg-surface-gradient">
             <Navigation />
             <main className="pt-20 pb-8 flex items-center justify-center p-4">
                 <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">

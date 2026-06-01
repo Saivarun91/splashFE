@@ -626,56 +626,56 @@ export default function ResultsTab({ project }) {
                     // Show skeleton loaders instead of 0 values
                     <>
                         {[1, 2, 3, 4].map(i => (
-                            <div key={i} className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6 animate-pulse">
+                            <div key={i} className="bg-card border-2 border-[#e6e6e6] rounded-lg p-6 animate-pulse">
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                    <div className="w-10 h-10 bg-muted rounded-lg"></div>
+                                    <div className="h-4 bg-muted rounded w-24"></div>
                                 </div>
-                                <div className="h-8 bg-gray-200 rounded w-16"></div>
+                                <div className="h-8 bg-muted rounded w-16"></div>
                             </div>
                         ))}
                     </>
                 ) : (
                     // Show actual stats only when data is loaded
                     <>
-                        <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+                        <div className="bg-card border-2 border-[#e6e6e6] rounded-lg p-6">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                                    <ImageIcon className="w-5 h-5 text-[#884cff]" />
+                                <div className="w-10 h-10 bg-gold-solid/10 rounded-lg flex items-center justify-center">
+                                    <ImageIcon className="w-5 h-5 text-gold-solid" />
                                 </div>
                                 <p className="text-sm text-[#708090]">Total Images</p>
                             </div>
-                            <p className="text-3xl font-bold text-[#884cff]">{modelStats?.total_generations ?? 0}</p>
+                            <p className="text-3xl font-bold text-gold-solid">{modelStats?.total_generations ?? 0}</p>
                         </div>
 
-                        <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+                        <div className="bg-card border-2 border-[#e6e6e6] rounded-lg p-6">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                                    <span className="text-xl"><Box className="w-5 h-5 text-[#884cff]" /></span>
+                                <div className="w-10 h-10 bg-gold-solid/10 rounded-lg flex items-center justify-center">
+                                    <span className="text-xl"><Box className="w-5 h-5 text-gold-solid" /></span>
                                 </div>
                                 <p className="text-sm text-[#708090]">Products</p>
                             </div>
-                            <p className="text-3xl font-bold text-[#884cff]">{stats?.products ?? 0}</p>
+                            <p className="text-3xl font-bold text-gold-solid">{stats?.products ?? 0}</p>
                         </div>
 
-                        <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+                        <div className="bg-card border-2 border-[#e6e6e6] rounded-lg p-6">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                                    <span className="text-xl"><User className="w-5 h-5 text-[#884cff]" /></span>
+                                <div className="w-10 h-10 bg-gold-solid/10 rounded-lg flex items-center justify-center">
+                                    <span className="text-xl"><User className="w-5 h-5 text-gold-solid" /></span>
                                 </div>
                                 <p className="text-sm text-[#708090]">Total Models Used</p>
                             </div>
-                            <p className="text-3xl font-bold text-[#884cff]">{modelStats?.total_models_used ?? 0}</p>
+                            <p className="text-3xl font-bold text-gold-solid">{modelStats?.total_models_used ?? 0}</p>
                         </div>
 
-                        <div className="bg-white border-2 border-[#e6e6e6] rounded-lg p-6">
+                        <div className="bg-card border-2 border-[#e6e6e6] rounded-lg p-6">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 bg-[#884cff]/10 rounded-lg flex items-center justify-center">
-                                    <span className="text-xl"><CheckCircle className="w-5 h-5 text-[#884cff]" /></span>
+                                <div className="w-10 h-10 bg-gold-solid/10 rounded-lg flex items-center justify-center">
+                                    <span className="text-xl"><CheckCircle className="w-5 h-5 text-gold-solid" /></span>
                                 </div>
                                 <p className="text-sm text-[#708090]">Completion</p>
                             </div>
-                            <p className="text-3xl font-bold text-[#884cff]">{stats?.completion ?? 0}%</p>
+                            <p className="text-3xl font-bold text-gold-solid">{stats?.completion ?? 0}%</p>
                         </div>
                     </>
                 )}
@@ -685,7 +685,7 @@ export default function ResultsTab({ project }) {
 
             {/* Action Bar */}
             {(hasResults || (historyData?.history_by_product?.length > 0)) && (
-                <div className="flex items-center justify-between mb-6 p-4 bg-white border-2 border-[#e6e6e6] rounded-lg">
+                <div className="flex items-center justify-between mb-6 p-4 bg-card border-2 border-[#e6e6e6] rounded-lg">
                     <div>
                         <h3 className="font-semibold text-[#1a1a1a]">All Generated Images</h3>
                         <p className="text-sm text-[#708090]">
@@ -693,7 +693,7 @@ export default function ResultsTab({ project }) {
                         </p>
                     </div>
                     <Button
-                        className="bg-[#884cff] hover:bg-[#7a3ff0] text-white gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-gold-gradient hover:brightness-110 text-white gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={handleDownloadAll}
                         disabled={isDownloading}
                     >
@@ -713,21 +713,21 @@ export default function ResultsTab({ project }) {
                     {/* Header Skeleton */}
                     <div className="flex items-center justify-between mb-8 animate-pulse">
                         <div className="space-y-2">
-                            <div className="h-7 bg-gray-200 rounded w-64"></div>
-                            <div className="h-4 bg-gray-200 rounded w-80"></div>
+                            <div className="h-7 bg-muted rounded w-64"></div>
+                            <div className="h-4 bg-muted rounded w-80"></div>
                         </div>
-                        <div className="h-10 w-32 bg-gray-200 rounded-full"></div>
+                        <div className="h-10 w-32 bg-muted rounded-full"></div>
                     </div>
                     
                     {/* Product Sections Skeleton - Matching ProductImagesDisplay structure */}
                     {Array.from({ length: 2 }).map((_, productIdx) => (
-                        <div key={productIdx} className="bg-white border-2 border-[#e6e6e6] rounded-xl p-6 space-y-4 animate-pulse">
+                        <div key={productIdx} className="bg-card border-2 border-[#e6e6e6] rounded-xl p-6 space-y-4 animate-pulse">
                             {/* Product Header Skeleton */}
                             <div className="flex items-center gap-4 mb-4">
-                                <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
+                                <div className="w-16 h-16 bg-muted rounded-lg"></div>
                                 <div className="flex-1 space-y-2">
-                                    <div className="h-5 bg-gray-200 rounded w-48"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                                    <div className="h-5 bg-muted rounded w-48"></div>
+                                    <div className="h-4 bg-muted rounded w-32"></div>
                                 </div>
                             </div>
                             
@@ -735,7 +735,7 @@ export default function ResultsTab({ project }) {
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                                 {Array.from({ length: 5 }).map((_, imgIdx) => (
                                     <div key={imgIdx} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
-                                        <div className="w-full h-full bg-gray-200"></div>
+                                        <div className="w-full h-full bg-muted"></div>
                                     </div>
                                 ))}
                             </div>
@@ -765,18 +765,18 @@ export default function ResultsTab({ project }) {
                     <div className="mb-6">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
-                                <Clock className="w-6 h-6 text-[#884cff]" />
+                                <Clock className="w-6 h-6 text-gold-solid" />
                                 <div>
                                     <h2 className="text-2xl font-bold text-[#1a1a1a]">Previously Generated Images</h2>
                                     {historyData?.project_name && (
                                         <p className="text-sm text-[#708090] mt-1">
-                                            Project: <span className="font-medium text-[#884cff]">{historyData.project_name}</span>
+                                            Project: <span className="font-medium text-gold-solid">{historyData.project_name}</span>
                                         </p>
                                     )}
                                 </div>
                             </div>
                             <Button
-                                className="bg-[#884cff] hover:bg-[#7a3ff0] text-white gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="bg-gold-gradient hover:brightness-110 text-white gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 onClick={handleDownloadAllHistory}
                                 disabled={isDownloading}
                             >
@@ -795,7 +795,7 @@ export default function ResultsTab({ project }) {
                                 className={`px-4 py-2 rounded-lg font-medium transition-all ${
                                     imageFilter === 'all'
                                         ? 'bg-[#884cff] text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-muted'
                                 }`}
                             >
                                 All
@@ -808,7 +808,7 @@ export default function ResultsTab({ project }) {
                                 className={`px-4 py-2 rounded-lg font-medium transition-all ${
                                     imageFilter === 'white_background'
                                         ? 'bg-[#884cff] text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-muted'
                                 }`}
                             >
                                 White Background
@@ -821,7 +821,7 @@ export default function ResultsTab({ project }) {
                                 className={`px-4 py-2 rounded-lg font-medium transition-all ${
                                     imageFilter === 'background_replace'
                                         ? 'bg-[#884cff] text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-muted'
                                 }`}
                             >
                                 Background Replace
@@ -834,7 +834,7 @@ export default function ResultsTab({ project }) {
                                 className={`px-4 py-2 rounded-lg font-medium transition-all ${
                                     imageFilter === 'model_image'
                                         ? 'bg-[#884cff] text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-muted'
                                 }`}
                             >
                                 Model Image
@@ -847,7 +847,7 @@ export default function ResultsTab({ project }) {
                                 className={`px-4 py-2 rounded-lg font-medium transition-all ${
                                     imageFilter === 'campaign_image'
                                         ? 'bg-[#884cff] text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-muted'
                                 }`}
                             >
                                 Campaign Image
@@ -887,7 +887,7 @@ export default function ResultsTab({ project }) {
                                                     <Button
                                                         size="sm"
                                                         variant="secondary"
-                                                        className="gap-1 text-xs px-2 py-1 h-auto bg-white/90 backdrop-blur-sm hover:bg-white"
+                                                        className="gap-1 text-xs px-2 py-1 h-auto bg-card/90 backdrop-blur-sm hover:bg-card"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             window.open(image.image_url, "_blank");
@@ -898,7 +898,7 @@ export default function ResultsTab({ project }) {
                                                     <Button
                                                         size="sm"
                                                         variant="secondary"
-                                                        className="gap-1 text-xs px-2 py-1 h-auto bg-white/90 backdrop-blur-sm hover:bg-white"
+                                                        className="gap-1 text-xs px-2 py-1 h-auto bg-card/90 backdrop-blur-sm hover:bg-card"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             const globalIndex = (currentPage - 1) * imagesPerPage + index;

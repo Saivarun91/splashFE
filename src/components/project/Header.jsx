@@ -76,16 +76,16 @@ export function Header({ project, onProjectUpdate }) {
         if (isCompleted) {
             return {
                 border: "border-green-500",
-                bg: "bg-green-50",
+                bg: "bg-green-500/15",
                 dot: "bg-green-500",
-                text: "text-green-700",
+                text: "text-green-400",
             }
         }
         return {
             border: "border-amber-500",
-            bg: "bg-amber-50",
+            bg: "bg-amber-500/15",
             dot: "bg-amber-500",
-            text: "text-amber-700",
+            text: "text-amber-400",
         }
     }
 
@@ -165,17 +165,17 @@ export function Header({ project, onProjectUpdate }) {
     }
 
     return (
-        <div className="border-b border-[#e6e6e6] bg-white px-8 py-6">
+        <div className="border-b border-border bg-card px-8 py-6">
             <div className="flex items-center justify-between">
                 {/* Left section: Title + Status */}
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-[#884cff] rounded-full flex items-center justify-center">
-                            <span className="text-white text-sm font-bold">
+                        <div className="w-8 h-8 bg-gold-gradient rounded-full flex items-center justify-center">
+                            <span className="text-primary-foreground text-sm font-bold">
                                 {getInitial(projectData.title)}
                             </span>
                         </div>
-                        <h1 className="text-2xl font-bold text-[#1a1a1a]">
+                        <h1 className="text-2xl font-bold text-foreground">
                             {projectData.title}
                         </h1>
                     </div>

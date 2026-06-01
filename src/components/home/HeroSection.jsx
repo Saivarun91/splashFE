@@ -46,25 +46,25 @@ const HeroSection = ({ hero: heroContent }) => {
   return (
     <section
       ref={heroRef}
-      className="relative w-full overflow-hidden bg-white pt-12 lg:pt-14"
+      className="relative w-full overflow-hidden bg-transparent pt-12 lg:pt-14"
     >
       {/* Top Content */}
       <div className="max-w-screen-xl mx-auto px-6 lg:px-12 py-2 lg:py-3 text-center relative z-10">
-        <h1 className="text-[1.3rem] lg:text-[1.6rem] font-bold my-4 text-transparent bg-clip-text bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] animate-slideFadeIn">
+        <h1 className="text-[1.3rem] lg:text-[1.6rem] font-bold my-4 text-foreground animate-slideFadeIn">
           {title}
         </h1>
 
         <div className="flex flex-col sm:flex-row gap-2 justify-center mb-0">
           <Link
             href={ctaPrimaryHref}
-            className="inline-flex items-center justify-center bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] text-white font-medium rounded-xl hover:bg-purple-600 transition-colors sm:flex-1 sm:max-w-[180px] animate-slideFadeIn delay-100"
+            className="inline-flex items-center justify-center bg-gold-gradient text-primary-foreground font-medium rounded-xl hover:brightness-110 transition-all sm:flex-1 sm:max-w-[180px] animate-slideFadeIn delay-100"
           >
             {ctaPrimaryText}
             <ChevronRight className="ml-2" size={20} />
           </Link>
           <a
             href={ctaSecondaryHref}
-            className="inline-flex items-center justify-center px-4 py-2 border-2 border-gray-300 rounded text-gray-800 hover:bg-gray-100 transition-colors sm:flex-1 sm:max-w-[180px] animate-slideFadeIn delay-200"
+            className="inline-flex items-center justify-center px-4 py-2 border border-gold-muted rounded-xl text-foreground hover:bg-accent transition-colors sm:flex-1 sm:max-w-[180px] animate-slideFadeIn delay-200"
           >
             {ctaSecondaryText}
           </a>
@@ -94,7 +94,7 @@ const HeroSection = ({ hero: heroContent }) => {
             <button
               key={index}
               onClick={() => setCurrentImage(index)}
-              className={`h-1 rounded-full transition-all duration-300 ${index === currentImage ? "w-8 bg-[#A64DFF]" : "w-1 bg-[#A64DFF]/50"
+              className={`h-1 rounded-full transition-all duration-300 ${index === currentImage ? "w-8 bg-gold-solid" : "w-1 bg-gold-muted"
                 }`}
               aria-label={`Go to slide ${index + 1}`}
             />
@@ -104,7 +104,7 @@ const HeroSection = ({ hero: heroContent }) => {
 
       {/* Bottom Text (smaller size) */}
       <div className="max-w-screen-xl mx-auto px-6 lg:px-12 py-3 text-center relative z-10">
-        <p className="text-[0.95rem] lg:text-[1.1rem] max-w-2xl mx-auto text-black animate-slideFadeIn">
+        <p className="text-[0.95rem] lg:text-[1.1rem] max-w-2xl mx-auto text-muted-foreground animate-slideFadeIn">
           {bottomText}
         </p>
       </div>
@@ -114,21 +114,21 @@ const HeroSection = ({ hero: heroContent }) => {
         className={`fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 transition-all duration-500 ease-in-out w-[95%] sm:w-auto max-w-[95vw] ${scrolledPastHero ? "opacity-100 translate-y-0 animate-slideUpIn" : "opacity-0 -translate-y-6 pointer-events-none"
           }`}
       >
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 bg-white/60 backdrop-blur-md px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-lg border border-white/20">
-          <span className="text-[0.75rem] sm:text-[0.95rem] font-bold text-transparent bg-clip-text bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] animate-slideFadeIn text-center sm:text-left whitespace-normal sm:whitespace-nowrap">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 bg-card/80 backdrop-blur-md px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-lg border border-border">
+          <span className="text-[0.75rem] sm:text-[0.95rem] font-bold text-gold-solid animate-slideFadeIn text-center sm:text-left whitespace-normal sm:whitespace-nowrap">
             {title}
           </span>
           <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
             <Link
               href={ctaPrimaryHref}
-              className="inline-flex items-center justify-center bg-gradient-to-br from-[#5533FF] via-[#863FFF] to-[#C44DFF] text-white text-xs sm:text-sm font-medium rounded-xl px-3 sm:px-3 py-1.5 sm:py-2 hover:bg-purple-600 transition-colors animate-slideFadeIn delay-100 flex-1 sm:flex-initial"
+              className="inline-flex items-center justify-center bg-gold-gradient text-primary-foreground text-xs sm:text-sm font-medium rounded-xl px-3 sm:px-3 py-1.5 sm:py-2 hover:brightness-110 transition-all animate-slideFadeIn delay-100 flex-1 sm:flex-initial"
             >
               {ctaPrimaryText}
               <ChevronRight className="ml-1" size={14} />
             </Link>
             <a
               href={ctaSecondaryHref}
-              className="inline-flex items-center justify-center px-3 py-1.5 sm:py-2 border-2 border-gray-300 rounded text-gray-800 text-xs sm:text-sm hover:bg-gray-100 transition-colors animate-slideFadeIn delay-200 flex-1 sm:flex-initial"
+              className="inline-flex items-center justify-center px-3 py-1.5 sm:py-2 border border-gold-muted rounded-xl text-foreground text-xs sm:text-sm hover:bg-accent transition-colors animate-slideFadeIn delay-200 flex-1 sm:flex-initial"
             >
               {ctaSecondaryText}
             </a>

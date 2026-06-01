@@ -143,30 +143,30 @@ export default function ProjectsRecentPage() {
     const getImageTypeColor = (imageType) => {
         switch (imageType) {
             case 'white_background':
-                return 'bg-gray-100 text-gray-700';
+                return 'bg-muted text-foreground';
             case 'background_replace':
                 return 'bg-blue-100 text-blue-700';
             case 'model_image':
             case 'model_with_ornament':
             case 'real_model':
-                return 'bg-purple-100 text-purple-700';
+                return 'bg-gold-solid/15 text-gold-solid';
             case 'campaign_image':
             case 'campaign_shot':
                 return 'bg-pink-100 text-pink-700';
             case 'regenerated':
                 return 'bg-orange-100 text-orange-700';
             default:
-                return 'bg-gray-100 text-gray-700';
+                return 'bg-muted text-foreground';
         }
     };
 
     if (loading && history.length === 0) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+            <div className="min-h-[50vh] flex items-center justify-center">
                 <div className="flex items-center justify-center h-64">
                     <div className="flex items-center space-x-2">
-                        <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
-                        <span className="text-gray-600">Loading recent history...</span>
+                        <Loader2 className="w-6 h-6 animate-spin text-gold-solid" />
+                        <span className="text-muted-foreground">Loading recent history...</span>
                     </div>
                 </div>
             </div>
@@ -174,14 +174,14 @@ export default function ProjectsRecentPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-            <div className="p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+            <div>
                 {/* Header */}
                 <div className="mb-8">
                     <div className="flex items-center gap-4 mb-4">
                         <Link
                             href="/dashboard/projects"
-                            className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors"
+                            className="flex items-center gap-2 text-muted-foreground hover:text-gold-solid transition-colors"
                         >
                             <ArrowLeft className="w-5 h-5" />
                             Back to Projects
@@ -189,8 +189,8 @@ export default function ProjectsRecentPage() {
                     </div>
 
                     <div className="flex items-center gap-3 mb-3">
-                        <div className="w-1 h-12 bg-gradient-to-b from-[#7753ff] to-[#ec4899] rounded-full"></div>
-                        <h1 className="text-4xl font-extrabold bg-gradient-to-r from-[#7753ff] via-[#a855f7] to-[#ec4899] bg-clip-text text-transparent">
+                        <div className="w-1 h-12 bg-gold-gradient rounded-full"></div>
+                        <h1 className="text-4xl font-extrabold text-foreground">
                             Recent History
                         </h1>
                     </div>
@@ -200,17 +200,17 @@ export default function ProjectsRecentPage() {
                 </div>
 
                 {/* Filters */}
-                <div className="bg-white/80 backdrop-blur-sm border border-purple-100 rounded-2xl p-6 mb-8 shadow-sm">
+                <div className="bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-6 mb-8 shadow-sm">
                     <div className="flex flex-wrap items-center gap-4">
                         <div className="flex items-center gap-2">
-                            <Filter className="w-5 h-5 text-gray-500" />
-                            <span className="text-sm font-medium text-gray-700">Filters:</span>
+                            <Filter className="w-5 h-5 text-muted-foreground" />
+                            <span className="text-sm font-medium text-foreground">Filters:</span>
                         </div>
 
                         <select
                             value={timeFilter}
                             onChange={(e) => setTimeFilter(Number(e.target.value))}
-                            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            className="px-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                         >
                             <option value={7}>Last 7 days</option>
                             <option value={30}>Last 30 days</option>
@@ -218,7 +218,7 @@ export default function ProjectsRecentPage() {
                             <option value={365}>Last year</option>
                         </select>
 
-                        <div className="ml-auto text-sm text-gray-600">
+                        <div className="ml-auto text-sm text-muted-foreground">
                             {history.length} items found
                         </div>
                     </div>
@@ -234,16 +234,16 @@ export default function ProjectsRecentPage() {
                 {/* History List */}
                 {history.length === 0 && !loading ? (
                     <div className="text-center py-12">
-                        <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                        <div className="w-24 h-24 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
                             <Clock className="w-12 h-12 text-gray-400" />
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-700 mb-2">No recent project activity</h3>
-                        <p className="text-gray-500 mb-6">
+                        <h3 className="text-lg font-semibold text-foreground mb-2">No recent project activity</h3>
+                        <p className="text-muted-foreground mb-6">
                             You haven&apos;t generated any project images recently. Start creating to see your project history here.
                         </p>
                         <Link
                             href="/dashboard/projects/create"
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#7753ff] to-[#a855f7] text-white rounded-lg font-semibold hover:from-[#884cff] hover:to-[#b565f8] transition-all duration-300 shadow-md hover:shadow-lg"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-gold-gradient text-primary-foreground rounded-lg font-semibold hover:brightness-110 transition-all duration-300 shadow-md hover:shadow-lg"
                         >
                             <Sparkles className="w-5 h-5" />
                             Create New Project
@@ -254,12 +254,12 @@ export default function ProjectsRecentPage() {
                         {history.map((item, index) => (
                             <div
                                 key={`${item.id}-${index}`}
-                                className="bg-white/80 backdrop-blur-sm border border-purple-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group"
+                                className="bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group"
                             >
                                 <div className="flex items-start gap-4">
                                     {/* Image Preview */}
                                     <div className="flex-shrink-0">
-                                        <div className="w-20 h-20 bg-gray-100 rounded-xl overflow-hidden border-2 border-gray-200 group-hover:border-purple-300 transition-colors">
+                                        <div className="w-20 h-20 bg-muted rounded-xl overflow-hidden border-2 border-border group-hover:border-gold-muted transition-colors">
                                             {item.image_url ? (
                                                 <img
                                                     src={item.image_url}
@@ -272,7 +272,7 @@ export default function ProjectsRecentPage() {
                                                 />
                                             ) : null}
                                             <div
-                                                className="w-full h-full flex items-center justify-center bg-gray-100"
+                                                className="w-full h-full flex items-center justify-center bg-muted"
                                                 style={{ display: item.image_url ? 'none' : 'flex' }}
                                             >
                                                 <ImageIcon className="w-8 h-8 text-gray-400" />
@@ -302,7 +302,7 @@ export default function ProjectsRecentPage() {
                                         </div>
 
                                         {item.prompt && (
-                                            <p className="text-gray-700 text-sm mb-3 line-clamp-2">
+                                            <p className="text-foreground text-sm mb-3 line-clamp-2">
                                                 {item.prompt}
                                             </p>
                                         )}
@@ -320,7 +320,7 @@ export default function ProjectsRecentPage() {
                                             {item.image_url && (
                                                 <button
                                                     onClick={() => window.open(item.image_url, '_blank')}
-                                                    className="flex items-center gap-1 px-3 py-1.5 text-sm text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
+                                                    className="flex items-center gap-1 px-3 py-1.5 text-sm text-gold-solid hover:brightness-110 hover:bg-gold-solid/10 rounded-lg transition-colors"
                                                 >
                                                     <Eye className="w-4 h-4" />
                                                     View
@@ -335,7 +335,7 @@ export default function ProjectsRecentPage() {
                                                         link.download = `image-${item.id}.png`;
                                                         link.click();
                                                     }}
-                                                    className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                                                    className="flex items-center gap-1 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-gray-50 rounded-lg transition-colors"
                                                 >
                                                     <Download className="w-4 h-4" />
                                                     Download
@@ -363,7 +363,7 @@ export default function ProjectsRecentPage() {
                                 <button
                                     onClick={loadMore}
                                     disabled={loadingMore}
-                                    className="inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-purple-200 text-purple-600 rounded-lg font-semibold hover:bg-purple-50 hover:border-purple-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="inline-flex items-center gap-2 px-6 py-3 bg-card border-2 border-gold-muted text-gold-solid rounded-lg font-semibold hover:bg-gold-solid/10 hover:border-gold-solid transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loadingMore ? (
                                         <>

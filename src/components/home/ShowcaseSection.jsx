@@ -117,13 +117,13 @@ const ShowcaseSection = ({ showcase: propShowcase }) => {
   const showcase = propShowcase?.images?.length ? propShowcase : defaultShowcase;
   const images = showcase.images || defaultShowcase.images;
   return (
-    <section id="showcase" className="py-8 sm:py-10 md:py-12 lg:py-16 bg-white">
+    <section id="showcase" className="py-8 sm:py-10 md:py-12 lg:py-16 bg-secondary/20">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-12">
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-bold text-foreground mb-3 sm:mb-4">
             {showcase.heading || defaultShowcase.heading}
           </h2>
-          <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-2">
+          <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
             {showcase.subheading || defaultShowcase.subheading}
           </p>
         </div>

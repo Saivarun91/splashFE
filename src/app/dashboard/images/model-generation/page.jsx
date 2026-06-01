@@ -643,19 +643,19 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#fcfcfc] via-[#f8f7ff] to-[#f5f3ff] p-8">
+        <div className="min-h-screen">
             <div className="max-w-6xl mx-auto">
                 {/* Enhanced Header */}
                 <div className="mb-12">
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="p-3 bg-[#7753ff] rounded-2xl shadow-lg">
+                        <div className="p-3 bg-gold-solid rounded-2xl shadow-lg">
                             <HiOutlineUserCircle className="w-8 h-8 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">
+                            <h1 className="text-4xl font-bold text-foreground">
                                 {t("images.modelGeneration")}
                             </h1>
-                            <p className="text-[#737373] mt-2">{t("images.generateAIModelsOrUseReal")}</p>
+                            <p className="text-muted-foreground mt-2">{t("images.generateAIModelsOrUseReal")}</p>
                         </div>
                     </div>
 
@@ -664,8 +664,8 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                         <button
                             onClick={() => setActiveTab("ai_model")}
                             className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${activeTab === "ai_model"
-                                ? "bg-white/90 backdrop-blur-md text-[#7753ff] shadow-[0_8px_32px_0_rgba(119,83,255,0.3)] border border-white/20"
-                                : "bg-white/60 backdrop-blur-sm text-gray-700 hover:bg-white/80 border border-gray-200/50 shadow-sm"
+                                ? "bg-card text-gold-solid border border-gold-muted shadow-md"
+                                : "bg-secondary/50 text-muted-foreground hover:bg-accent border border-border"
                                 }`}
                         >
                             <Cpu className="w-5 h-5" />
@@ -674,8 +674,8 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                         <button
                             onClick={() => setActiveTab("real_model")}
                             className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${activeTab === "real_model"
-                                ? "bg-white/90 backdrop-blur-md text-[#7753ff] shadow-[0_8px_32px_0_rgba(119,83,255,0.3)] border border-white/20"
-                                : "bg-white/60 backdrop-blur-sm text-gray-700 hover:bg-white/80 border border-gray-200/50 shadow-sm"
+                                ? "bg-card text-gold-solid border border-gold-muted shadow-md"
+                                : "bg-secondary/50 text-muted-foreground hover:bg-accent border border-border"
                                 }`}
                         >
                             <Users className="w-5 h-5" />
@@ -687,15 +687,15 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                 {/* Form and Result Container */}
                 <div className={`grid grid-cols-1 gap-8 transition-all duration-500 ${currentState.result ? 'lg:grid-cols-[4fr_6fr]' : 'lg:grid-cols-[7fr_3fr]'}`}>
                     {/* Form */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
+                    <div className="bg-card rounded-xl p-8 border border-border">
                         {activeTab === "ai_model" ? (
                             <form onSubmit={handleAiSubmit} className="space-y-6">
                                 {/* Ornament Image */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2 flex-wrap">
-                                        <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
+                                    <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2 flex-wrap">
+                                        <div className="w-2 h-2 bg-gold-solid rounded-full"></div>
                                         {t("images.ornamentProductImage")}<span className="text-red-500 ml-1">*</span> <br />
-                                        <span className="text-xs text-gray-500 font-normal">upload the product image which is captured with the help of scale for better measurements.</span>
+                                        <span className="text-xs text-muted-foreground font-normal">upload the product image which is captured with the help of scale for better measurements.</span>
                                         <button type="button" onClick={(e) => { e.preventDefault(); setShowReferenceModal(true); }} className="text-xs text-blue-600 hover:underline font-medium">(View reference)</button>
                                         {aiUploadErrors.ornamentImage && (
   <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
@@ -708,8 +708,8 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                     <div
   className={`border-2 border-dashed rounded-xl p-6 cursor-pointer ${
     aiUploadErrors.ornamentImage
-      ? "border-red-500 bg-red-50"
-      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+      ? "border-red-500 bg-red-500/10"
+      : "border-border bg-secondary/30 hover:bg-accent"
   }`}
   onClick={() => document.getElementById("ai-ornament-input")?.click()}
 >
@@ -730,15 +730,15 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                                 <button
                                                     type="button"
                                                     onClick={removeAiOrnamentImage}
-                                                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                                    className="absolute -top-2 -right-2 p-1 bg-red-500/100 text-white rounded-full hover:bg-red-600 transition-colors z-10"
                                                 >
                                                     <X size={14} />
                                                 </button>
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
-                                                <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#7753ff] transition-colors" />
-                                                <p className="text-sm text-gray-500">{t("images.pngJpgWebpUpTo15MB")}</p>
+                                                <Upload className="w-8 h-8 text-muted-foreground group-hover:text-gold-solid transition-colors" />
+                                                <p className="text-sm text-muted-foreground">{t("images.pngJpgWebpUpTo15MB")}</p>
                                             </div>
                                         )}
                                     </div>
@@ -746,8 +746,8 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
 
                                 {/* Pose Style */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                        <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
+                                    <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                        <div className="w-2 h-2 bg-gold-solid rounded-full"></div>
                                         {t("images.poseStyleReference")} ({t("common.optional")})
                                         {aiUploadErrors.poseImage && (
   <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
@@ -760,8 +760,8 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                     <div
   className={`border-2 border-dashed rounded-xl p-6 cursor-pointer ${
     aiUploadErrors.poseImage
-      ? "border-red-500 bg-red-50"
-      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+      ? "border-red-500 bg-red-500/10"
+      : "border-border bg-secondary/30 hover:bg-accent"
   }`}
   onClick={() => document.getElementById("ai-pose-input")?.click()}
 >
@@ -782,15 +782,15 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                                 <button
                                                     type="button"
                                                     onClick={removeAiPoseImage}
-                                                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                                    className="absolute -top-2 -right-2 p-1 bg-red-500/100 text-white rounded-full hover:bg-red-600 transition-colors z-10"
                                                 >
                                                     <X size={14} />
                                                 </button>
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
-                                                <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#7753ff] transition-colors" />
-                                                <p className="text-sm text-gray-500">{t("images.uploadReferencePoseImage")}</p>
+                                                <Upload className="w-8 h-8 text-muted-foreground group-hover:text-gold-solid transition-colors" />
+                                                <p className="text-sm text-muted-foreground">{t("images.uploadReferencePoseImage")}</p>
                                             </div>
                                         )}
                                     </div>
@@ -806,23 +806,23 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
 
                                 {/* Custom Prompt */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                        <Sparkles className="w-4 h-4 text-[#7753ff]" />
+                                    <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-gold-solid" />
                                         {t("images.customInstructions")} ({t("common.optional")})
                                     </label>
                                     <textarea
                                         value={aiFormData.prompt}
                                         onChange={(e) => setAiFormData((prev) => ({ ...prev, prompt: e.target.value }))}
                                         placeholder={t("images.addSpecificInstructionsForAIModel")}
-                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent resize-none shadow-sm"
+                                        className="w-full px-4 py-3 border border-border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none shadow-sm"
                                         rows="3"
                                     />
                                 </div>
 
                                 {/* Number of images */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                        <MdPhotoSizeSelectLarge size={20} className="text-[#7753ff]" />
+                                    <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                        <MdPhotoSizeSelectLarge size={20} className="text-gold-solid" />
                                         {t("images.numberOfImages") || "Number of images"}
                                     </label>
                                     <div className="flex flex-wrap items-center gap-3">
@@ -831,7 +831,7 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                             onChange={setNumImages}
                                             min={MIN_IMAGES}
                                             max={MAX_IMAGES}
-                                            primaryColor="#7753ff"
+                                            
                                         />
                                     </div>
                                 </div>
@@ -839,25 +839,25 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                 <DimensionsSelector
                                     selectedDimension={aiFormData.dimension}
                                     onDimensionChange={(dimension) => setAiFormData((prev) => ({ ...prev, dimension }))}
-                                    primaryColor="#7753ff"
+                                    
                                 />
 
                                 {/* Error Message */}
                                 {aiError && (
-                                    <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                                    <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
                                         <AlertCircle className="w-5 h-5 text-red-500" />
-                                        <p className="text-red-700 text-sm">
+                                        <p className="text-red-400 text-sm">
     {aiError}
 </p>
                                     </div>
                                 )}
 
                                 {/* Action Buttons */}
-                                <div className="pt-6 border-t border-[#e6e6e6] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <div className="pt-6 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                 <button
                                     type="button"
                                     onClick={() => router.back()}
-                                    className="flex items-center justify-center gap-3 px-6 py-3 text-[#7753ff] font-semibold hover:bg-[#7753ff]/10 rounded-xl transition-all duration-300 hover:scale-105 w-full sm:w-auto"
+                                    className="flex items-center justify-center gap-3 px-6 py-3 text-gold-solid font-semibold hover:bg-gold-solid/10 rounded-xl transition-all duration-300 hover:scale-105 w-full sm:w-auto"
                                 >
                                     <ChevronLeft className="w-5 h-5" />
                                     {t("common.back")}
@@ -866,9 +866,9 @@ const [aiUploadErrors, setAiUploadErrors] = useState({
                                     {showCostNote && numImages > 1 && (
                                         <div className="flex items-start gap-2 px-4 py-3 w-full sm:max-w-md
 bg-gray-100/80 
-border border-gray-200 
+border border-border 
 rounded-xl 
-text-gray-800 text-sm leading-snug">
+text-foreground text-sm leading-snug">
 
                                             <Coins className="w-5 h-5 text-amber-600 shrink-0" />
                                             <span>{t("images.creditsCost") || "Cost:"} {numImages * (creditSettings.credits_per_image_generation || 2)} {t("images.credits") || "credits"}. {t("images.clickGenerateAgainToConfirm") || "Click Generate again to confirm."}</span>
@@ -877,7 +877,7 @@ text-gray-800 text-sm leading-snug">
                                     <button
                                         type="submit"
                                         disabled={aiIsLoading}
-                                        className="flex items-center justify-center gap-3 px-8 py-3.5 bg-[#7753ff] hover:bg-[#6a47e6] text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-[#7753ff]/25 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+                                        className="flex items-center justify-center gap-3 px-8 py-3.5 bg-gold-gradient text-primary-foreground rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                                     >
                                         {aiIsLoading ? (
                                             <>
@@ -898,8 +898,8 @@ text-gray-800 text-sm leading-snug">
                             <form onSubmit={handleRealSubmit} className="space-y-6">
                                 {/* Model Image */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                        <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
+                                    <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                        <div className="w-2 h-2 bg-gold-solid rounded-full"></div>
                                         Model Image<span className="text-red-500 ml-1">*</span>
                                         {realUploadErrors.modelImage && (
   <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
@@ -912,8 +912,8 @@ text-gray-800 text-sm leading-snug">
                                     <div
   className={`border-2 border-dashed rounded-xl p-6 cursor-pointer ${
     realUploadErrors.modelImage
-      ? "border-red-500 bg-red-50"
-      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+      ? "border-red-500 bg-red-500/10"
+      : "border-border bg-secondary/30 hover:bg-accent"
   }`}
   onClick={() => document.getElementById("real-model-input")?.click()}
 >
@@ -934,15 +934,15 @@ text-gray-800 text-sm leading-snug">
                                                 <button
                                                     type="button"
                                                     onClick={removeRealModelImage}
-                                                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                                    className="absolute -top-2 -right-2 p-1 bg-red-500/100 text-white rounded-full hover:bg-red-600 transition-colors z-10"
                                                 >
                                                     <X size={14} />
                                                 </button>
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
-                                                <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#7753ff] transition-colors" />
-                                                <p className="text-sm text-gray-500">{t("images.uploadModelImage")}</p>
+                                                <Upload className="w-8 h-8 text-muted-foreground group-hover:text-gold-solid transition-colors" />
+                                                <p className="text-sm text-muted-foreground">{t("images.uploadModelImage")}</p>
                                             </div>
                                         )}
                                     </div>
@@ -950,10 +950,10 @@ text-gray-800 text-sm leading-snug">
 
                                 {/* Ornament Image */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2 flex-wrap">
-                                        <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
+                                    <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2 flex-wrap">
+                                        <div className="w-2 h-2 bg-gold-solid rounded-full"></div>
                                         {t("images.ornamentProductImage")}<span className="text-red-500 ml-1">*</span> <br />
-                                        <span className="text-xs text-gray-500 font-normal">upload the product image which is captured with the help of scale for better measurements.</span>
+                                        <span className="text-xs text-muted-foreground font-normal">upload the product image which is captured with the help of scale for better measurements.</span>
                                         <button type="button" onClick={(e) => { e.preventDefault(); setShowReferenceModal(true); }} className="text-xs text-blue-600 hover:underline font-medium">(View reference)</button>
                                         {realUploadErrors.ornamentImage && (
   <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
@@ -966,8 +966,8 @@ text-gray-800 text-sm leading-snug">
                                     <div
   className={`border-2 border-dashed rounded-xl p-6 cursor-pointer ${
     realUploadErrors.ornamentImage
-      ? "border-red-500 bg-red-50"
-      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+      ? "border-red-500 bg-red-500/10"
+      : "border-border bg-secondary/30 hover:bg-accent"
   }`}
   onClick={() => document.getElementById("real-ornament-input")?.click()}
 >
@@ -988,15 +988,15 @@ text-gray-800 text-sm leading-snug">
                                                 <button
                                                     type="button"
                                                     onClick={removeRealOrnamentImage}
-                                                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                                    className="absolute -top-2 -right-2 p-1 bg-red-500/100 text-white rounded-full hover:bg-red-600 transition-colors z-10"
                                                 >
                                                     <X size={14} />
                                                 </button>
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
-                                                <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#7753ff] transition-colors" />
-                                                <p className="text-sm text-gray-500">{t("images.uploadOrnamentProductImage")}</p>
+                                                <Upload className="w-8 h-8 text-muted-foreground group-hover:text-gold-solid transition-colors" />
+                                                <p className="text-sm text-muted-foreground">{t("images.uploadOrnamentProductImage")}</p>
                                             </div>
                                         )}
                                     </div>
@@ -1004,8 +1004,8 @@ text-gray-800 text-sm leading-snug">
 
                                 {/* Pose Style */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                        <div className="w-2 h-2 bg-[#7753ff] rounded-full"></div>
+                                    <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                        <div className="w-2 h-2 bg-gold-solid rounded-full"></div>
                                         {t("images.poseStyleReference")} ({t("common.optional")})
                                         {realUploadErrors.poseImage && (
   <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
@@ -1018,8 +1018,8 @@ text-gray-800 text-sm leading-snug">
                                     <div
   className={`border-2 border-dashed rounded-xl p-6 cursor-pointer ${
     realUploadErrors.poseImage
-      ? "border-red-500 bg-red-50"
-      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+      ? "border-red-500 bg-red-500/10"
+      : "border-border bg-secondary/30 hover:bg-accent"
   }`}
   onClick={() => document.getElementById("real-pose-input")?.click()}
 >
@@ -1040,15 +1040,15 @@ text-gray-800 text-sm leading-snug">
                                                 <button
                                                     type="button"
                                                     onClick={removeRealPoseImage}
-                                                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                                                    className="absolute -top-2 -right-2 p-1 bg-red-500/100 text-white rounded-full hover:bg-red-600 transition-colors z-10"
                                                 >
                                                     <X size={14} />
                                                 </button>
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center gap-3 text-center">
-                                                <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#7753ff] transition-colors" />
-                                                <p className="text-sm text-gray-500">{t("images.uploadReferencePoseOptional")}</p>
+                                                <Upload className="w-8 h-8 text-muted-foreground group-hover:text-gold-solid transition-colors" />
+                                                <p className="text-sm text-muted-foreground">{t("images.uploadReferencePoseOptional")}</p>
                                             </div>
                                         )}
                                     </div>
@@ -1064,8 +1064,8 @@ text-gray-800 text-sm leading-snug">
 
                                 {/* Additional Measurements */}
                                 {/* <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                        <Ruler className="w-4 h-4 text-[#7753ff]" />
+                                    <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                        <Ruler className="w-4 h-4 text-gold-solid" />
                                         Additional Measurements (Optional)
                                     </label>
                                     <input
@@ -1073,29 +1073,29 @@ text-gray-800 text-sm leading-snug">
                                         placeholder="E.g., Length: 5cm, Width: 3cm"
                                         value={realFormData.measurements}
                                         onChange={(e) => setRealFormData((prev) => ({ ...prev, measurements: e.target.value }))}
-                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all shadow-sm"
+                                        className="w-full px-4 py-3.5 border border-border rounded-xl bg-input text-foreground placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all shadow-sm"
                                     />
                                 </div> */}
 
                                 {/* Custom Prompt */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                        <Sparkles className="w-4 h-4 text-[#7753ff]" />
+                                    <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-gold-solid" />
                                         {t("images.customInstructions")} ({t("common.optional")})
                                     </label>
                                     <textarea
                                         value={realFormData.prompt}
                                         onChange={(e) => setRealFormData((prev) => ({ ...prev, prompt: e.target.value }))}
                                         placeholder={t("images.addSpecificInstructionsForPlacingOrnament")}
-                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent resize-none shadow-sm"
+                                        className="w-full px-4 py-3 border border-border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none shadow-sm"
                                         rows="3"
                                     />
                                 </div>
 
                                 {/* Number of images */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                        <MdPhotoSizeSelectLarge size={20} className="text-[#7753ff]" />
+                                    <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                        <MdPhotoSizeSelectLarge size={20} className="text-gold-solid" />
                                         {t("images.numberOfImages") || "Number of images"}
                                     </label>
                                     <div className="flex flex-wrap items-center gap-3">
@@ -1104,7 +1104,7 @@ text-gray-800 text-sm leading-snug">
                                             onChange={setNumImages}
                                             min={MIN_IMAGES}
                                             max={MAX_IMAGES}
-                                            primaryColor="#7753ff"
+                                            
                                         />
                                     </div>
                                 </div>
@@ -1112,25 +1112,25 @@ text-gray-800 text-sm leading-snug">
                                 <DimensionsSelector
                                     selectedDimension={realFormData.dimension}
                                     onDimensionChange={(dimension) => setRealFormData((prev) => ({ ...prev, dimension }))}
-                                    primaryColor="#7753ff"
+                                    
                                 />
 
                                 {/* Error Message */}
                                 {realError && (
-                                    <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                                    <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
                                         <AlertCircle className="w-5 h-5 text-red-500" />
-                                        <p className="text-red-700 text-sm">
+                                        <p className="text-red-400 text-sm">
     {realError}
 </p>
                                     </div>
                                 )}
 
                                 {/* Action Buttons */}
-                                <div className="pt-6 border-t border-[#e6e6e6] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <div className="pt-6 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                 <button
                                     type="button"
                                     onClick={() => router.back()}
-                                    className="flex items-center justify-center gap-3 px-6 py-3 text-[#7753ff] font-semibold hover:bg-[#7753ff]/10 rounded-xl transition-all duration-300 hover:scale-105 w-full sm:w-auto"
+                                    className="flex items-center justify-center gap-3 px-6 py-3 text-gold-solid font-semibold hover:bg-gold-solid/10 rounded-xl transition-all duration-300 hover:scale-105 w-full sm:w-auto"
                                 >
                                     <ChevronLeft className="w-5 h-5" />
                                     {t("common.back")}
@@ -1139,9 +1139,9 @@ text-gray-800 text-sm leading-snug">
                                     {showCostNote && numImages > 1 && (
                                         <div className="flex items-start gap-2 px-4 py-3 w-full sm:max-w-md
 bg-gray-100/80 
-border border-gray-200 
+border border-border 
 rounded-xl 
-text-gray-800 text-sm leading-snug">
+text-foreground text-sm leading-snug">
 
                                             <Coins className="w-5 h-5 text-amber-600 shrink-0" />
                                             <span>{t("images.creditsCost") || "Cost:"} {numImages * (creditSettings.credits_per_image_generation || 2)} {t("images.credits") || "credits"}. {t("images.clickGenerateAgainToConfirm") || "Click Generate again to confirm."}</span>
@@ -1150,7 +1150,7 @@ text-gray-800 text-sm leading-snug">
                                     <button
                                         type="submit"
                                         disabled={realIsLoading}
-                                        className="bg-[#7753ff] hover:bg-[#6a47e6] text-white px-8 py-3.5 rounded-xl flex items-center justify-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+                                        className="bg-gold-gradient text-primary-foreground px-8 py-3.5 rounded-xl flex items-center justify-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                                     >
                                         {realIsLoading ? (
                                             <>
@@ -1171,29 +1171,29 @@ text-gray-800 text-sm leading-snug">
                     </div>
 
                     {/* Result Preview */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
-                        <h3 className="text-2xl font-bold text-[#1a1a1a] mb-6 flex items-center gap-2">
-                            <CheckCircle className="w-6 h-6 text-[#7753ff]" />
+                    <div className="bg-card rounded-xl p-8 border border-border">
+                        <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                            <CheckCircle className="w-6 h-6 text-gold-solid" />
                             {activeTab === "ai_model" ? t("images.generatedAIModel") : t("images.generatedImage")}
                         </h3>
                         {currentState.isLoading ? (
                             <div className="flex flex-col items-center justify-center h-[500px] text-center">
-                                <Loader2 className="w-16 h-16 text-[#7753ff] animate-spin mb-4" />
-                                <p className="text-[#737373] text-lg">
+                                <Loader2 className="w-16 h-16 text-gold-solid animate-spin mb-4" />
+                                <p className="text-muted-foreground text-lg">
                                     {activeTab === "ai_model" ? t("images.generatingAIModel") : t("images.generatingRealisticModel")}
                                 </p>
-                                <p className="text-[#737373] text-sm mt-2">{t("images.mayTakeUpTo30Seconds")}</p>
+                                <p className="text-muted-foreground text-sm mt-2">{t("images.mayTakeUpTo30Seconds")}</p>
                             </div>
                         ) : currentState.result ? (
                             <div className="space-y-6">
                                 {currentState.result.images && currentState.result.images.length > 0 ? (
                                     <>
-                                        <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                                            <p className="text-green-700 font-semibold">✓ {activeTab === "ai_model" ? t("images.aiModelGeneratedSuccess") : t("images.realModelImageGeneratedSuccess")} ({currentState.result.images.length} {t("images.images") || "images"})</p>
+                                        <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+                                            <p className="text-green-400 font-semibold">✓ {activeTab === "ai_model" ? t("images.aiModelGeneratedSuccess") : t("images.realModelImageGeneratedSuccess")} ({currentState.result.images.length} {t("images.images") || "images"})</p>
                                         </div>
                                         <div className="flex flex-col gap-6">
                                             {currentState.result.images.map((img, idx) => (
-                                                <div key={img.mongo_id || idx} className="rounded-xl border-2 border-[#7753ff]/20 overflow-hidden bg-gray-50">
+                                                <div key={img.mongo_id || idx} className="rounded-xl border-2 border-gold-muted/20 overflow-hidden bg-secondary/30">
                                                     <div className="relative w-full h-[400px]">
                                                         <Image
                                                             src={img.generated_image_url}
@@ -1204,39 +1204,39 @@ text-gray-800 text-sm leading-snug">
                                                             className="object-contain"
                                                         />
                                                     </div>
-                                                    <div className="p-4 flex flex-wrap gap-3 justify-center border-t border-[#7753ff]/10 items-center">
-                                                        <span className="text-sm font-medium text-[#7753ff] bg-white/90 px-2 py-1 rounded border border-[#7753ff]/20">Image {idx + 1}</span>
-                                                        <button type="button" onClick={() => handleView(img)} className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 flex items-center gap-2"><Eye size={16} />{t("images.view")}</button>
-                                                        <button type="button" onClick={() => downloadImage(img.generated_image_url, `model-${idx + 1}.png`)} className="px-4 py-3 bg-[#7753ff] text-white rounded-xl font-semibold flex items-center gap-2"><Download size={16} />{t("images.download")}</button>
-                                                        <button type="button" onClick={() => (activeTab === "ai_model" ? setAiRegenerateModal({ isOpen: true, prompt: '', loading: false, error: null, image: { ...img, index: idx } }) : setRealRegenerateModal({ isOpen: true, prompt: '', loading: false, error: null, image: { ...img, index: idx } }))} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] rounded-xl font-semibold hover:bg-[#7753ff]/10 flex items-center gap-2"><RefreshCw size={16} />{t("images.regenerate")}</button>
+                                                    <div className="p-4 flex flex-wrap gap-3 justify-center border-t border-gold-muted/10 items-center">
+                                                        <span className="text-sm font-medium text-gold-solid bg-card px-2 py-1 rounded border border-gold-muted/20">Image {idx + 1}</span>
+                                                        <button type="button" onClick={() => handleView(img)} className="px-4 py-3 border-2 border-border text-foreground rounded-xl font-semibold hover:bg-secondary/30 flex items-center gap-2"><Eye size={16} />{t("images.view")}</button>
+                                                        <button type="button" onClick={() => downloadImage(img.generated_image_url, `model-${idx + 1}.png`)} className="px-4 py-3 bg-gold-solid text-white rounded-xl font-semibold flex items-center gap-2"><Download size={16} />{t("images.download")}</button>
+                                                        <button type="button" onClick={() => (activeTab === "ai_model" ? setAiRegenerateModal({ isOpen: true, prompt: '', loading: false, error: null, image: { ...img, index: idx } }) : setRealRegenerateModal({ isOpen: true, prompt: '', loading: false, error: null, image: { ...img, index: idx } }))} className="px-4 py-3 border-2 border-gold-muted text-gold-solid rounded-xl font-semibold hover:bg-gold-solid/10 flex items-center gap-2"><RefreshCw size={16} />{t("images.regenerate")}</button>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
-                                        <button type="button" onClick={() => { if (activeTab === "ai_model") { setAiResult(null); setAiFormData({ ornamentImage: null, poseImage: null, prompt: "", measurements: "", dimension: "1:1" }); setAiOrnamentType(""); setAiOrnamentMeasurements({}); setAiOrnamentPreview(null); setAiPosePreview(null); } else { setRealResult(null); setRealFormData({ modelImage: null, ornamentImage: null, poseImage: null, prompt: "", measurements: "", dimension: "1:1" }); setRealOrnamentType(""); setRealOrnamentMeasurements({}); setRealModelPreview(null); setRealOrnamentPreview(null); setRealPosePreview(null); } }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">{activeTab === "ai_model" ? t("images.newModel") : t("images.newImage")}</button>
+                                        <button type="button" onClick={() => { if (activeTab === "ai_model") { setAiResult(null); setAiFormData({ ornamentImage: null, poseImage: null, prompt: "", measurements: "", dimension: "1:1" }); setAiOrnamentType(""); setAiOrnamentMeasurements({}); setAiOrnamentPreview(null); setAiPosePreview(null); } else { setRealResult(null); setRealFormData({ modelImage: null, ornamentImage: null, poseImage: null, prompt: "", measurements: "", dimension: "1:1" }); setRealOrnamentType(""); setRealOrnamentMeasurements({}); setRealModelPreview(null); setRealOrnamentPreview(null); setRealPosePreview(null); } }} className="w-full px-4 py-3 border-2 border-border text-foreground rounded-xl font-semibold hover:bg-secondary/30">{activeTab === "ai_model" ? t("images.newModel") : t("images.newImage")}</button>
                                     </>
                                 ) : (
                                     <>
-                                        <div className="relative w-full h-[450px] rounded-2xl overflow-hidden border-2 border-[#7753ff]/20">
+                                        <div className="relative w-full h-[450px] rounded-2xl overflow-hidden border-2 border-gold-muted/20">
                                             <Image
                                                 src={currentState.result.generated_image_url}
                                                 alt={activeTab === "ai_model" ? "Generated AI Model" : "Generated Real Model"}
                                                 fill
                                                 sizes="100vw"
                                                 unoptimized
-                                                className="object-contain bg-gray-50"
+                                                className="object-contain bg-secondary/30"
                                             />
                                         </div>
                                         <div className="space-y-3">
-                                            <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                                                <p className="text-green-700 font-semibold">✓ {activeTab === "ai_model" ? t("images.aiModelGeneratedSuccess") : t("images.realModelImageGeneratedSuccess")}</p>
+                                            <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+                                                <p className="text-green-400 font-semibold">✓ {activeTab === "ai_model" ? t("images.aiModelGeneratedSuccess") : t("images.realModelImageGeneratedSuccess")}</p>
                                             </div>
                                             <div className="grid grid-cols-3 gap-3">
-                                                <button onClick={() => handleView(currentState.result)} className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"><Eye size={16} />{t("images.view")}</button>
-                                                <button onClick={() => downloadImage(currentState.result.generated_image_url, "model-generated.png")} className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"><Download size={16} />{t("images.download")}</button>
-                                                <button onClick={activeTab === "ai_model" ? handleAiRegenerate : handleRealRegenerate} className="px-4 py-3 border-2 border-[#7753ff] text-[#7753ff] hover:bg-[#7753ff]/10 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"><RefreshCw size={16} />{t("images.regenerate")}</button>
+                                                <button onClick={() => handleView(currentState.result)} className="px-4 py-3 border-2 border-border text-foreground rounded-xl font-semibold hover:bg-secondary/30 transition-all flex items-center justify-center gap-2"><Eye size={16} />{t("images.view")}</button>
+                                                <button onClick={() => downloadImage(currentState.result.generated_image_url, "model-generated.png")} className="px-4 py-3 bg-gold-gradient text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"><Download size={16} />{t("images.download")}</button>
+                                                <button onClick={activeTab === "ai_model" ? handleAiRegenerate : handleRealRegenerate} className="px-4 py-3 border-2 border-gold-muted text-gold-solid hover:bg-gold-solid/10 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"><RefreshCw size={16} />{t("images.regenerate")}</button>
                                             </div>
-                                            <button onClick={() => { if (activeTab === "ai_model") { setAiResult(null); setAiFormData({ ornamentImage: null, poseImage: null, prompt: "", measurements: "", dimension: "1:1" }); setAiOrnamentType(""); setAiOrnamentMeasurements({}); setAiOrnamentPreview(null); setAiPosePreview(null); } else { setRealResult(null); setRealFormData({ modelImage: null, ornamentImage: null, poseImage: null, prompt: "", measurements: "", dimension: "1:1" }); setRealOrnamentType(""); setRealOrnamentMeasurements({}); setRealModelPreview(null); setRealOrnamentPreview(null); setRealPosePreview(null); } }} className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">{activeTab === "ai_model" ? t("images.newModel") : t("images.newImage")}</button>
+                                            <button onClick={() => { if (activeTab === "ai_model") { setAiResult(null); setAiFormData({ ornamentImage: null, poseImage: null, prompt: "", measurements: "", dimension: "1:1" }); setAiOrnamentType(""); setAiOrnamentMeasurements({}); setAiOrnamentPreview(null); setAiPosePreview(null); } else { setRealResult(null); setRealFormData({ modelImage: null, ornamentImage: null, poseImage: null, prompt: "", measurements: "", dimension: "1:1" }); setRealOrnamentType(""); setRealOrnamentMeasurements({}); setRealModelPreview(null); setRealOrnamentPreview(null); setRealPosePreview(null); } }} className="w-full px-4 py-3 border-2 border-border text-foreground rounded-xl font-semibold hover:bg-secondary/30">{activeTab === "ai_model" ? t("images.newModel") : t("images.newImage")}</button>
                                             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                                 <p className="text-blue-700 text-sm flex items-center gap-2"><Sparkles className="w-4 h-4" />{activeTab === "ai_model" ? t("images.clickRegenerateToModifyAIModel") : t("images.clickRegenerateToModify")}</p>
                                             </div>
@@ -1246,17 +1246,17 @@ text-gray-800 text-sm leading-snug">
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center h-[500px] text-center">
-                                <div className="w-24 h-24 rounded-full flex items-center justify-center mb-4 bg-[#7753ff]/10">
+                                <div className="w-24 h-24 rounded-full flex items-center justify-center mb-4 bg-gold-solid/10">
                                     {activeTab === "ai_model" ? (
-                                        <Cpu className="w-12 h-12 text-[#7753ff]" />
+                                        <Cpu className="w-12 h-12 text-gold-solid" />
                                     ) : (
-                                        <Users className="w-12 h-12 text-[#7753ff]" />
+                                        <Users className="w-12 h-12 text-gold-solid" />
                                     )}
                                 </div>
-                                <p className="text-[#737373] text-lg">
+                                <p className="text-muted-foreground text-lg">
                                     {activeTab === "ai_model" ? t("images.aiModelWillAppear") : t("images.generatedImageWillAppear")}
                                 </p>
-                                <p className="text-[#737373] text-sm mt-2">
+                                <p className="text-muted-foreground text-sm mt-2">
                                     {activeTab === "ai_model"
                                         ? t("images.uploadOrnamentAndClickGenerate")
                                         : t("images.uploadModelAndOrnamentToStart")}
@@ -1273,39 +1273,39 @@ text-gray-800 text-sm leading-snug">
             {/* AI Model Regenerate Modal */}
             {aiRegenerateModal.isOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-                        <div className="flex-shrink-0 border-b border-gray-200 bg-white p-6 rounded-t-3xl z-10 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+                    <div className="bg-card rounded-xl border border-border shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+                        <div className="flex-shrink-0 border-b border-border bg-card p-6 rounded-t-xl z-10 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-[#7753ff] rounded-xl">
+                                    <div className="p-2 bg-gold-solid rounded-xl">
                                         <RefreshCw className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">{t("images.regenerateAIModel")}</h2>
-                                        <p className="text-sm text-gray-500">{t("images.modifyAndRegenerateAIModel")}</p>
+                                        <h2 className="text-2xl font-bold text-foreground">{t("images.regenerateAIModel")}</h2>
+                                        <p className="text-sm text-muted-foreground">{t("images.modifyAndRegenerateAIModel")}</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={closeAiRegenerateModal}
                                     disabled={aiRegenerateModal.loading}
-                                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50"
+                                    className="p-2 hover:bg-accent rounded-xl transition-colors disabled:opacity-50"
                                 >
-                                    <X className="w-6 h-6 text-gray-500" />
+                                    <X className="w-6 h-6 text-muted-foreground" />
                                 </button>
                             </div>
                         </div>
 
                         <div className="flex-1 overflow-y-auto min-h-0 p-6 space-y-6">
                             <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-3">{t("images.currentImage")}:</p>
-                                <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-gray-200">
+                                <p className="text-sm font-semibold text-foreground mb-3">{t("images.currentImage")}:</p>
+                                <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-border">
                                     <Image
                                         src={aiResult?.generated_image_url}
                                         alt="Current image"
                                         fill
                                         sizes="100vw"
                                         unoptimized
-                                        className="object-contain bg-gray-50"
+                                        className="object-contain bg-secondary/30"
                                     />
                                 </div>
                             </div>
@@ -1318,42 +1318,42 @@ text-gray-800 text-sm leading-snug">
                             )} */}
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-[#7753ff]" />
+                                <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-gold-solid" />
                                     {t("images.whatWouldYouLikeToChange")}
                                 </label>
                                 <textarea
                                     value={aiRegenerateModal.prompt}
                                     onChange={(e) => setAiRegenerateModal(prev => ({ ...prev, prompt: e.target.value }))}
                                     placeholder={t("images.regenerateAIModelPlaceholder")}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent resize-none"
+                                    className="w-full px-4 py-3 border border-border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
                                     rows="4"
                                     disabled={aiRegenerateModal.loading}
                                 />
-                                <p className="text-xs text-gray-500 mt-2">
+                                <p className="text-xs text-muted-foreground mt-2">
                                     💡 {t("images.modificationWillBeAppliedToAIModel")}
                                 </p>
                             </div>
 
                             {aiRegenerateModal.error && (
-                                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                                <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                    <p className="text-red-700 text-sm">{aiRegenerateModal.error}</p>
+                                    <p className="text-red-400 text-sm">{aiRegenerateModal.error}</p>
                                 </div>
                             )}
 
-                            <div className="flex gap-3 pt-4 border-t border-gray-200">
+                            <div className="flex gap-3 pt-4 border-t border-border">
                                 <button
                                     onClick={closeAiRegenerateModal}
                                     disabled={aiRegenerateModal.loading}
-                                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
+                                    className="flex-1 px-6 py-3 border-2 border-border text-foreground rounded-xl font-semibold hover:bg-secondary/30 transition-all disabled:opacity-50"
                                 >
                                     {t("common.cancel")}
                                 </button>
                                 <button
                                     onClick={submitAiRegenerate}
                                     disabled={aiRegenerateModal.loading || !aiRegenerateModal.prompt.trim()}
-                                    className="flex-1 px-6 py-3 bg-[#7753ff] text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                                    className="flex-1 px-6 py-3 bg-gold-solid text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
                                 >
                                     {aiRegenerateModal.loading ? (
                                         <>
@@ -1384,39 +1384,39 @@ text-gray-800 text-sm leading-snug">
             {/* Real Model Regenerate Modal */}
             {realRegenerateModal.isOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-                        <div className="flex-shrink-0 border-b border-gray-200 bg-white p-6 rounded-t-3xl z-10 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+                    <div className="bg-card rounded-xl border border-border shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+                        <div className="flex-shrink-0 border-b border-border bg-card p-6 rounded-t-xl z-10 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-[#7753ff] rounded-xl">
+                                    <div className="p-2 bg-gold-solid rounded-xl">
                                         <RefreshCw className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">{t("images.regenerateRealModelImage")}</h2>
-                                        <p className="text-sm text-gray-500">{t("images.modifyAndRegenerateRealModel")}</p>
+                                        <h2 className="text-2xl font-bold text-foreground">{t("images.regenerateRealModelImage")}</h2>
+                                        <p className="text-sm text-muted-foreground">{t("images.modifyAndRegenerateRealModel")}</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={closeRealRegenerateModal}
                                     disabled={realRegenerateModal.loading}
-                                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50"
+                                    className="p-2 hover:bg-accent rounded-xl transition-colors disabled:opacity-50"
                                 >
-                                    <X className="w-6 h-6 text-gray-500" />
+                                    <X className="w-6 h-6 text-muted-foreground" />
                                 </button>
                             </div>
                         </div>
 
                         <div className="flex-1 overflow-y-auto min-h-0 p-6 space-y-6">
                             <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-3">{t("images.currentImage")}:</p>
-                                <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-gray-200">
+                                <p className="text-sm font-semibold text-foreground mb-3">{t("images.currentImage")}:</p>
+                                <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-border">
                                     <Image
                                         src={realResult?.generated_image_url}
                                         alt="Current image"
                                         fill
                                         sizes="100vw"
                                         unoptimized
-                                        className="object-contain bg-gray-50"
+                                        className="object-contain bg-secondary/30"
                                     />
                                 </div>
                             </div>
@@ -1429,42 +1429,42 @@ text-gray-800 text-sm leading-snug">
                             )} */}
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-[#7753ff]" />
+                                <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-gold-solid" />
                                     {t("images.whatWouldYouLikeToChange")}
                                 </label>
                                 <textarea
                                     value={realRegenerateModal.prompt}
                                     onChange={(e) => setRealRegenerateModal(prev => ({ ...prev, prompt: e.target.value }))}
                                     placeholder={t("images.regenerateRealModelPlaceholder")}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7753ff] focus:border-transparent resize-none"
+                                    className="w-full px-4 py-3 border border-border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
                                     rows="4"
                                     disabled={realRegenerateModal.loading}
                                 />
-                                <p className="text-xs text-gray-500 mt-2">
+                                <p className="text-xs text-muted-foreground mt-2">
                                     💡 {t("images.modificationWillBeAppliedToRealModel")}
                                 </p>
                             </div>
 
                             {realRegenerateModal.error && (
-                                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                                <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                    <p className="text-red-700 text-sm">{realRegenerateModal.error}</p>
+                                    <p className="text-red-400 text-sm">{realRegenerateModal.error}</p>
                                 </div>
                             )}
 
-                            <div className="flex gap-3 pt-4 border-t border-gray-200">
+                            <div className="flex gap-3 pt-4 border-t border-border">
                                 <button
                                     onClick={closeRealRegenerateModal}
                                     disabled={realRegenerateModal.loading}
-                                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
+                                    className="flex-1 px-6 py-3 border-2 border-border text-foreground rounded-xl font-semibold hover:bg-secondary/30 transition-all disabled:opacity-50"
                                 >
                                     {t("common.cancel")}
                                 </button>
                                 <button
                                     onClick={submitRealRegenerate}
                                     disabled={realRegenerateModal.loading || !realRegenerateModal.prompt.trim()}
-                                    className="flex-1 px-6 py-3 bg-[#7753ff] text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                                    className="flex-1 px-6 py-3 bg-gold-solid text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
                                 >
                                     {realRegenerateModal.loading ? (
                                         <>

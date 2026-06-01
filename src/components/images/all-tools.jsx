@@ -4,6 +4,7 @@
 import { Zap, ImageIcon, Wand2, Users, Camera, ArrowRight } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useLanguage } from "@/context/LanguageContext"
+import { Button } from "@/components/ui/button"
 
 export function AllTools() {
     const router = useRouter()
@@ -15,7 +16,6 @@ export function AllTools() {
             title: t("images.plainBackground"),
             description: t("images.cleanProductShots"),
             status: "active",
-            gradient: "from-purple-500 to-pink-500",
             path: "/dashboard/images/white-bg"
         },
         {
@@ -23,7 +23,6 @@ export function AllTools() {
             title: t("images.backgroundReplace"),
             description: t("images.aiPoweredTransformation"),
             status: "active",
-            gradient: "from-blue-500 to-cyan-500",
             path: "/dashboard/images/replace-bg"
         },
         {
@@ -31,7 +30,6 @@ export function AllTools() {
             title: t("images.aiModel"),
             description: t("images.generateWithAIModel"),
             status: "active",
-            gradient: "from-green-500 to-emerald-500",
             path: "/dashboard/images/ai-model"
         },
         {
@@ -39,7 +37,6 @@ export function AllTools() {
             title: t("images.realModel"),
             description: t("images.lifestyleShot"),
             status: "active",
-            gradient: "from-orange-500 to-red-500",
             path: "/dashboard/images/real-model"
         },
         {
@@ -47,16 +44,15 @@ export function AllTools() {
             title: t("images.campaignShots"),
             description: t("images.marketingReady"),
             status: "active",
-            gradient: "from-indigo-500 to-purple-500",
             path: "/dashboard/images/campaign"
         },
     ]
 
     const getStatusBadge = (status) => {
         const styles = {
-            active: "bg-green-50 text-green-700 border-green-200",
-            new: "bg-blue-50 text-blue-700 border-blue-200",
-            coming: "bg-gray-50 text-gray-700 border-gray-200"
+            active: "bg-green-500/10 text-green-400 border-green-500/30",
+            new: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+            coming: "bg-secondary text-muted-foreground border-border"
         }
 
         const labels = {
@@ -75,37 +71,43 @@ export function AllTools() {
     return (
         <div>
             <div className="flex items-center justify-between mb-6 fade-in">
-                <h2 className="text-2xl font-extrabold bg-gradient-to-r from-[#7753ff] to-[#ec4899] bg-clip-text text-transparent">{t("images.allTools")}</h2>
-                <button className="flex items-center gap-2 text-sm font-bold bg-gradient-to-r from-[#7753ff] to-[#ec4899] bg-clip-text text-transparent hover:from-[#884cff] hover:to-[#f472b6] transition-all group">
+                <h2 className="text-2xl font-extrabold text-foreground">{t("images.allTools")}</h2>
+                <button className="flex items-center gap-2 text-sm font-bold text-gold-solid hover:brightness-110 transition-all group">
                     {t("images.viewAllTools")}
-                    <ArrowRight size={18} className="text-[#7753ff] group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>
             <div className="grid grid-cols-3 gap-6">
                 {tools.map((tool, idx) => (
                     <div
                         key={idx}
-                        className="bg-white/80 backdrop-blur-sm rounded-3xl p-7 border-2 border-purple-100 hover:border-purple-300 transition-all duration-300 hover-lift cursor-pointer group scale-in"
+                        className="bg-card rounded-xl p-7 border border-border hover:border-gold-muted transition-all duration-300 cursor-pointer group scale-in"
                         style={{ animationDelay: `${idx * 100}ms` }}
                     >
                         <div className="flex items-start justify-between mb-5">
-                            <div className={`p-4 bg-gradient-to-br ${tool.gradient} rounded-2xl text-white shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
+                            <div className="p-4 bg-gold-gradient rounded-2xl text-primary-foreground shadow-lg group-hover:scale-110 transition-all duration-300">
                                 <tool.icon size={28} strokeWidth={2} />
                             </div>
                             {getStatusBadge(tool.status)}
                         </div>
-                        <h3 className="font-extrabold text-[#1a1a1a] mb-3 text-xl group-hover:text-[#7753ff] transition-colors">{tool.title}</h3>
-                        <p className="text-sm text-[#737373] mb-5 leading-relaxed font-medium">{tool.description}</p>
-                        <button
-                            onClick={() => tool.path && router.push(tool.path)}
-                            disabled={tool.status === 'coming'}
-                            className={`w-full py-3 px-5 rounded-xl text-sm font-bold transition-all duration-300 ${tool.status === 'coming'
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-purple-50 to-pink-50 text-[#7753ff] border-2 border-purple-200 hover:from-[#7753ff] hover:to-[#a855f7] hover:text-white hover:border-transparent shadow-sm hover:shadow-lg hover:-translate-y-0.5'
-                                }`}
-                        >
-                            {tool.status === 'coming' ? t("images.comingSoon") : t("images.getStarted")}
-                        </button>
+                        <h3 className="font-extrabold text-foreground mb-3 text-xl group-hover:text-gold-solid transition-colors">{tool.title}</h3>
+                        <p className="text-sm text-muted-foreground mb-5 leading-relaxed font-medium">{tool.description}</p>
+                        {tool.status === "coming" ? (
+                            <button
+                                disabled
+                                className="w-full py-3 px-5 rounded-xl text-sm font-bold bg-secondary text-muted-foreground cursor-not-allowed border border-border"
+                            >
+                                {t("images.comingSoon")}
+                            </button>
+                        ) : (
+                            <Button
+                                variant="brand"
+                                className="w-full py-3 h-auto rounded-xl text-sm"
+                                onClick={() => tool.path && router.push(tool.path)}
+                            >
+                                {t("images.getStarted")}
+                            </Button>
+                        )}
                     </div>
                 ))}
             </div>

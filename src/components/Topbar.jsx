@@ -196,14 +196,14 @@ export function Topbar({ collapsed }) {
     /* ======================= JSX ======================= */
     return (
         <header
-            className={`fixed top-0 right-0 z-30 h-16 flex items-center bg-white border-b shadow px-6 transition-all ${
+            className={`fixed top-0 right-0 z-30 h-16 flex items-center bg-card/90 backdrop-blur-md border-b border-border text-foreground px-6 transition-all ${
                 collapsed ? "left-16" : "left-64"
             }`}
         >
             {/* Organization */}
             {!loadingOrg && organizationInfo && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 border rounded-lg">
-                    <Building2 className="text-indigo-600" />
+                <div className="flex items-center gap-2 px-4 py-2 bg-secondary/80 border border-border rounded-lg">
+                    <Building2 className="text-gold-solid" />
                     <span className="font-semibold">{organizationInfo.name}</span>
                     <Badge className={getRoleBadgeColor(organizationInfo.role)}>
                         {organizationInfo.role}
@@ -220,7 +220,7 @@ export function Topbar({ collapsed }) {
                 <div className="relative" ref={notificationRef}>
                     <button
                         onClick={() => setShowNotifications(!showNotifications)}
-                        className="relative p-2 hover:bg-gray-100 rounded"
+                        className="relative p-2 hover:bg-accent rounded-md text-muted-foreground hover:text-foreground"
                         aria-label="Open notifications"
                     >
                         <Bell />
@@ -232,43 +232,43 @@ export function Topbar({ collapsed }) {
                     </button>
 
                     {showNotifications && (
-                        <div className="absolute right-0 mt-2 w-96 bg-white border rounded-lg shadow z-50 overflow-hidden">
-                            <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+                        <div className="absolute right-0 mt-2 w-96 bg-card border border-border rounded-lg shadow-lg z-50 overflow-hidden">
+                            <div className="px-4 py-3 border-b border-border bg-secondary/50 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <Mail className="w-4 h-4 text-indigo-600" />
+                                    <Mail className="w-4 h-4 text-gold-solid" />
                                     <span className="font-semibold text-sm">Project Invites</span>
                                 </div>
-                                <Badge className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+                                <Badge variant="brand">
                                     {pendingCount}
                                 </Badge>
                             </div>
 
                             <div className="max-h-80 overflow-y-auto">
                                 {loading ? (
-                                    <div className="p-4 flex items-center gap-2 text-sm text-gray-600">
+                                    <div className="p-4 flex items-center gap-2 text-sm text-muted-foreground">
                                         <Loader2 className="w-4 h-4 animate-spin" />
                                         Loading invites...
                                     </div>
                                 ) : invites.length === 0 ? (
-                                    <div className="p-4 text-sm text-gray-600">
+                                    <div className="p-4 text-sm text-muted-foreground">
                                         No pending invites.
                                     </div>
                                 ) : (
                                     invites.map((invite) => (
-                                        <div key={invite.invite_id || invite.id || `${invite.project_id}-${invite.created_at}`} className="p-4 border-b last:border-b-0">
+                                        <div key={invite.invite_id || invite.id || `${invite.project_id}-${invite.created_at}`} className="p-4 border-b border-border last:border-b-0">
                                             <div className="flex items-start justify-between gap-3">
                                                 <div className="space-y-1">
-                                                    <p className="text-sm font-semibold text-gray-900">
+                                                    <p className="text-sm font-semibold text-foreground">
                                                         {invite.project_name || "Project invite"}
                                                     </p>
-                                                    <p className="text-xs text-gray-600">
+                                                    <p className="text-xs text-muted-foreground">
                                                         Role: <span className="font-medium">{invite.role || "viewer"}</span>
                                                     </p>
-                                                    <p className="text-xs text-gray-500">
+                                                    <p className="text-xs text-muted-foreground">
                                                         From {invite.inviter_name || invite.inviter_email || "Team member"}
                                                     </p>
                                                     {invite.created_at && (
-                                                        <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                        <p className="text-xs text-muted-foreground flex items-center gap-1">
                                                             <Clock className="w-3 h-3" />
                                                             {getTimeAgo(invite.created_at)}
                                                         </p>
@@ -310,13 +310,13 @@ export function Topbar({ collapsed }) {
 
                 {/* Live credits */}
                 {token && (
-                    <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-center gap-2 px-3 py-2 bg-card/50 border border-gold-muted rounded-lg">
                         {creditsLoading ? (
-                            <Loader2 className="w-4 h-4 text-amber-600 animate-spin" />
+                            <Loader2 className="w-4 h-4 text-gold-solid animate-spin" />
                         ) : (
                             <>
-                                <Coins className="w-4 h-4 text-amber-600" />
-                                <span className="text-sm font-semibold text-amber-800">
+                                <Coins className="w-4 h-4 text-gold-solid" />
+                                <span className="text-sm font-semibold text-gold-solid">
                                     {liveCredits != null ? liveCredits.toLocaleString() : "—"} credits
                                 </span>
                             </>
@@ -328,48 +328,48 @@ export function Topbar({ collapsed }) {
                 <div className="relative" ref={profileRef}>
                 <button
                         onClick={() => setShowProfileMenu(!showProfileMenu)} 
-                        className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
+                        className="flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors"
                         
                     >
-                        <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-sm font-semibold text-white">
+                        <div className="w-8 h-8 bg-gold-gradient rounded-full flex items-center justify-center text-sm font-semibold text-primary-foreground">
                             {getUserInitials()}
                         </div>
-                        <span className="text-gray-900 text-sm hidden md:inline">
+                        <span className="text-foreground text-sm hidden md:inline">
                             {getUserDisplayName()}
                         </span>
-                        <ChevronDown className="w-4 h-4 text-gray-600" />
+                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
                     </button>
 
                     {showProfileMenu && (
-                        <div className="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow z-50">
-                            <div className="px-4 py-3 border-b bg-gray-50"> 
+                        <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-lg z-50">
+                            <div className="px-4 py-3 border-b border-border bg-secondary/50"> 
                                 <p className="font-semibold">{getUserDisplayName()}</p>
-                                <p className="text-xs text-gray-500">{user?.email}</p>
+                                <p className="text-xs text-muted-foreground">{user?.email}</p>
                             </div>
 
                             <button
                                 onClick={() => router.push("/dashboard/my-account/profile")}
-                                className="w-full px-4 py-2 flex items-center gap-2 hover:bg-indigo-50"
+                                className="w-full px-4 py-2 flex items-center gap-2 hover:bg-accent text-foreground"
                             >
-                                <User className="w-4 h-4 text-indigo-600" />
+                                <User className="w-4 h-4 text-gold-solid" />
                                 Profile
                             </button>
 
                             {organizationInfo && isOrganizationOwner(user) && (
                                 <button
                                 onClick={switchToOrganizationPortal}
-                                    className="w-full px-4 py-2 flex items-center gap-2 hover:bg-purple-50"
+                                    className="w-full px-4 py-2 flex items-center gap-2 hover:bg-accent text-foreground"
                                 >
-                                    <Building2  className="w-4 h-4 text-purple-600" />
+                                    <Building2  className="w-4 h-4 text-gold-solid" />
                                     Organization Panel
                                 </button>
                             )}
                             
                             <button
                                 onClick={() => !isGenerating && logout()}
-                                className="w-full px-4 py-2 flex items-center gap-2 hover:bg-red-50"
+                                className="w-full px-4 py-2 flex items-center gap-2 hover:bg-destructive/10"
                             >
-                                <LogOut className="w-4 h-4 text-red-600" /> <span>{t("dashboard.logout")}</span>
+                                <LogOut className="w-4 h-4 text-destructive" /> <span>{t("dashboard.logout")}</span>
                             </button>
                         </div>
                     )}

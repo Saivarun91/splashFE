@@ -380,8 +380,8 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                 onClick={() => (isActive ? closeComments() : openComments(fieldKey))}
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors ${
                     commentsCount > 0
-                        ? "text-red-600 hover:bg-red-50"
-                        : "text-[#884cff] hover:bg-[#f3efff]"
+                        ? "text-red-400 hover:bg-red-500/10"
+                        : "text-gold-solid hover:bg-gold-solid/10"
                 }`}
                 aria-label="Open comments"
                 title="Open comments"
@@ -558,12 +558,12 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
     return (
         <>
       <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
-                    <SwatchBook className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-gold-gradient rounded-lg flex items-center justify-center">
+                    <SwatchBook className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
-                    <h3 className="font-bold text-[#1a1a1a] text-2xl">Moodboard Setup</h3>
-                    <p className="text-sm text-[#708090]">Select themes, backgrounds, poses, and locations for your project</p>
+                    <h3 className="font-bold text-foreground text-2xl">Moodboard Setup</h3>
+                    <p className="text-sm text-muted-foreground">Select themes, backgrounds, poses, and locations for your project</p>
                 </div>
             </div>
 
@@ -576,24 +576,24 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
             <div
     className={`border-2 border-dashed rounded-lg p-6 transition-colors
       ${uploadErrors.themes
-        ? "border-red-500 bg-red-50"
-        : "border-[#b0bec5]"
+        ? "border-red-500 bg-red-500/10"
+        : "border-gold-muted bg-card/40"
       }`}
   >
     
 
                 <div>
                     <div className="flex items-center justify-between gap-2">
-                        <h3 className="font-bold text-[#1a1a1a] text-lg mb-1">Themes</h3>
+                        <h3 className="font-bold text-foreground text-lg mb-1">Themes</h3>
                         {renderCommentButton("themes")}
                     </div>
-                    <p className="text-sm text-[#708090]">Define project vision and upload inspiration</p>
+                    <p className="text-sm text-muted-foreground">Define project vision and upload inspiration</p>
                 </div>
 
                 {showSuggestions && aiSuggestions.themes.length > 0 && (
                     <div className="space-y-3">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
-                            <p className="text-blue-600 text-sm font-medium">AI Suggested Themes</p>
+                        <div className="bg-gold-solid/10 border border-gold-muted rounded-lg p-3 mb-3">
+                            <p className="text-gold-solid text-sm font-medium">AI Suggested Themes</p>
                         </div>
                         <MultiSelect
                             options={aiSuggestions.themes}
@@ -607,11 +607,11 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
 
                 <div className="space-y-3">
                     {showSuggestions && aiSuggestions.themes.length > 0 && (
-                        <p className="text-sm text-[#708090] text-center">Or</p>
+                        <p className="text-sm text-muted-foreground text-center">Or</p>
                     )}
 
     {uploadErrors.themes && (
-      <p className="text-xs text-red-600">
+      <p className="text-xs text-red-400">
         {uploadErrors.themes}
       </p>
     )}
@@ -630,7 +630,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
 
                     <Button
                         variant="outline"
-                        className="w-full bg-transparent"
+                        className="w-full border-border text-foreground hover:bg-secondary hover:text-foreground"
                         disabled={!canEdit || uploading.themes}
                         onClick={() => triggerFileInput('themes')}
                     >
@@ -641,7 +641,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                     {/* Uploaded images preview */}
                     {uploadedImages.themes.length > 0 && (
                         <div className="space-y-2">
-                            <p className="text-xs text-[#708090]">
+                            <p className="text-xs text-muted-foreground">
                                 {uploadedImages.themes.length} file(s) selected
                             </p>
                             <div className="grid grid-cols-2 gap-2">
@@ -682,7 +682,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
 
             {/* Backgrounds */}
             {/* {uploadErrors.themes && (
-  <div className="flex items-center gap-2 text-sm text-red-600">
+  <div className="flex items-center gap-2 text-sm text-red-400">
     <X className="w-4 h-4" />
     {uploadErrors.backgrounds}
   </div>
@@ -692,23 +692,23 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
             
   className={`border-2 border-dashed rounded-lg p-6 space-y-4 transition-all ${
     uploadErrors.backgrounds
-      ? "border-red-500 bg-red-50"
-      : "border-[#b0bec5]"
+      ? "border-red-500 bg-red-500/10"
+      : "border-gold-muted bg-card/40"
   }`}
 >
 
                 <div>
                     <div className="flex items-center justify-between gap-2">
-                        <h3 className="font-bold text-[#1a1a1a] text-lg mb-1">Backgrounds</h3>
+                        <h3 className="font-bold text-foreground text-lg mb-1">Backgrounds</h3>
                         {renderCommentButton("backgrounds")}
                     </div>
-                    <p className="text-sm text-[#708090]">Define project vision and upload inspiration</p>
+                    <p className="text-sm text-muted-foreground">Define project vision and upload inspiration</p>
                 </div>
 
                 {showSuggestions && aiSuggestions.backgrounds.length > 0 && (
                     <div className="space-y-3">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
-                            <p className="text-blue-600 text-sm font-medium">AI Suggested Backgrounds</p>
+                        <div className="bg-gold-solid/10 border border-gold-muted rounded-lg p-3 mb-3">
+                            <p className="text-gold-solid text-sm font-medium">AI Suggested Backgrounds</p>
                         </div>
                         <MultiSelect
                             options={aiSuggestions.backgrounds}
@@ -722,10 +722,10 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
 
                 <div className="space-y-3">
                     {showSuggestions && aiSuggestions.backgrounds.length > 0 && (
-                        <p className="text-sm text-[#708090] text-center">Or</p>
+                        <p className="text-sm text-muted-foreground text-center">Or</p>
                     )}
 {uploadErrors.backgrounds && (
-      <p className="text-xs text-red-600">
+      <p className="text-xs text-red-400">
         {uploadErrors.backgrounds}
       </p>
     )}
@@ -743,7 +743,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
 
                     <Button
                         variant="outline"
-                        className="w-full bg-transparent"
+                        className="w-full border-border text-foreground hover:bg-secondary hover:text-foreground"
                         disabled={!canEdit || uploading.backgrounds}
                         onClick={() => triggerFileInput('backgrounds')}
                     >
@@ -754,7 +754,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                     {/* Uploaded images preview */}
                     {uploadedImages.backgrounds.length > 0 && (
                         <div className="space-y-2">
-                            <p className="text-xs text-[#708090]">
+                            <p className="text-xs text-muted-foreground">
                                 {uploadedImages.backgrounds.length} file(s) selected
                             </p>
                             <div className="grid grid-cols-2 gap-2">
@@ -797,25 +797,25 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
             <div
   className={`border-2 border-dashed rounded-lg p-6 space-y-4 transition-all ${
     uploadErrors.poses
-      ? "border-red-500 bg-red-50"
-      : "border-[#b0bec5]"
+      ? "border-red-500 bg-red-500/10"
+      : "border-gold-muted bg-card/40"
   }`}
 >
 
                 <div>
                     <div className="flex items-center justify-between gap-2">
-                        <h3 className="font-bold text-[#1a1a1a] text-lg mb-1">Sample Poses</h3>
+                        <h3 className="font-bold text-foreground text-lg mb-1">Sample Poses</h3>
                         {renderCommentButton("poses")}
                     </div>
-                    <p className="text-sm text-[#708090]">Define project vision and upload inspiration</p>
+                    <p className="text-sm text-muted-foreground">Define project vision and upload inspiration</p>
                     
                 </div>
                 
 
                 {showSuggestions && aiSuggestions.poses.length > 0 && (
                     <div className="space-y-3">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
-                            <p className="text-blue-600 text-sm font-medium">AI Suggested Poses</p>
+                        <div className="bg-gold-solid/10 border border-gold-muted rounded-lg p-3 mb-3">
+                            <p className="text-gold-solid text-sm font-medium">AI Suggested Poses</p>
                         </div>
                         <MultiSelect
                             options={aiSuggestions.poses}
@@ -829,10 +829,10 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
 
                 <div className="space-y-3">
                     {showSuggestions && aiSuggestions.poses.length > 0 && (
-                        <p className="text-sm text-[#708090] text-center">Or</p>
+                        <p className="text-sm text-muted-foreground text-center">Or</p>
                     )}
                     {uploadErrors.poses && (
-      <p className="text-xs text-red-600">
+      <p className="text-xs text-red-400">
         {uploadErrors.poses}
       </p>
     )}
@@ -851,7 +851,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
 
                     <Button
                         variant="outline"
-                        className="w-full bg-transparent"
+                        className="w-full border-border text-foreground hover:bg-secondary hover:text-foreground"
                         disabled={!canEdit || uploading.poses}
                         onClick={() => triggerFileInput('poses')}
                     >
@@ -862,7 +862,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                     {/* Uploaded images preview */}
                     {uploadedImages.poses.length > 0 && (
                         <div className="space-y-2">
-                            <p className="text-xs text-[#708090]">
+                            <p className="text-xs text-muted-foreground">
                                 {uploadedImages.poses.length} file(s) selected
                             </p>
                             <div className="grid grid-cols-2 gap-2">
@@ -904,23 +904,23 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
             {/* Location Inspiration */}<div
   className={`border-2 border-dashed rounded-lg p-6 space-y-4 transition-all ${
     uploadErrors.locations
-      ? "border-red-500 bg-red-50"
-      : "border-[#b0bec5]"
+      ? "border-red-500 bg-red-500/10"
+      : "border-gold-muted bg-card/40"
   }`}
 >
 
                 <div>
                     <div className="flex items-center justify-between gap-2">
-                        <h3 className="font-bold text-[#1a1a1a] text-lg mb-1">Location Inspiration</h3>
+                        <h3 className="font-bold text-foreground text-lg mb-1">Location Inspiration</h3>
                         {renderCommentButton("locations")}
                     </div>
-                    <p className="text-sm text-[#708090]">Define project vision and upload inspiration</p>
+                    <p className="text-sm text-muted-foreground">Define project vision and upload inspiration</p>
                 </div>
 
                 {showSuggestions && aiSuggestions.locations.length > 0 && (
                     <div className="space-y-3">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
-                            <p className="text-blue-600 text-sm font-medium">AI Suggested Locations</p>
+                        <div className="bg-gold-solid/10 border border-gold-muted rounded-lg p-3 mb-3">
+                            <p className="text-gold-solid text-sm font-medium">AI Suggested Locations</p>
                         </div>
                         <MultiSelect
                             options={aiSuggestions.locations}
@@ -934,10 +934,10 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
 
                 <div className="space-y-3">
                     {showSuggestions && aiSuggestions.locations.length > 0 && (
-                        <p className="text-sm text-[#708090] text-center">Or</p>
+                        <p className="text-sm text-muted-foreground text-center">Or</p>
                     )}
 {uploadErrors.locations && (
-      <p className="text-xs text-red-600">
+      <p className="text-xs text-red-400">
         {uploadErrors.locations}
       </p>
     )}
@@ -955,7 +955,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
 
                     <Button
                         variant="outline"
-                        className="w-full bg-transparent"
+                        className="w-full border-border text-foreground hover:bg-secondary hover:text-foreground"
                         disabled={!canEdit || uploading.locations}
                         onClick={() => triggerFileInput('locations')}
                     >
@@ -966,7 +966,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                     {/* Uploaded images preview */}
                     {uploadedImages.locations.length > 0 && (
                         <div className="space-y-2">
-                            <p className="text-xs text-[#708090]">
+                            <p className="text-xs text-muted-foreground">
                                 {uploadedImages.locations.length} file(s) selected
                             </p>
                             <div className="grid grid-cols-2 gap-2">
@@ -1006,40 +1006,40 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
             </div>
             {activeCommentField && (
                 <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-                    <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-[#e6e6e6]">
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-[#e6e6e6]">
-                            <h4 className="text-sm font-semibold text-[#1a1a1a]">{activeCommentConfig?.title} Comments</h4>
+                    <div className="w-full max-w-md bg-card rounded-xl shadow-2xl border border-border">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                            <h4 className="text-sm font-semibold text-foreground">{activeCommentConfig?.title} Comments</h4>
                             <button
                                 type="button"
                                 onClick={closeComments}
                                 className="p-1 rounded hover:bg-gray-100"
                                 aria-label="Close comments"
                             >
-                                <X className="w-4 h-4 text-[#666]" />
+                                <X className="w-4 h-4 text-muted-foreground" />
                             </button>
                         </div>
 
                         <div className="p-4 space-y-3">
                             <div className="max-h-48 overflow-y-auto space-y-2">
                                 {currentComments.length === 0 ? (
-                                    <p className="text-xs text-[#708090]">No comments yet.</p>
+                                    <p className="text-xs text-muted-foreground">No comments yet.</p>
                                 ) : (
                                     currentComments.map((comment) => (
-                                        <div key={comment.id} className="border border-[#e6e6e6] rounded-md p-2 bg-[#fafafa]">
+                                        <div key={comment.id} className="border border-border rounded-md p-2 bg-muted">
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="min-w-0">
-                                                    <p className="text-xs font-medium text-[#444]">
+                                                    <p className="text-xs font-medium text-muted-foreground">
                                                         {(comment.authorName || "Member")} • {formatRelativeCommentTime(comment.createdAt, nowMs)}
                                                     </p>
-                                                    <p className="text-sm text-[#1a1a1a] break-words">{comment.comment}</p>
+                                                    <p className="text-sm text-foreground break-words">{comment.comment}</p>
                                                     {Array.isArray(comment.replies) && comment.replies.length > 0 && (
-                                                        <div className="mt-2 pl-3 border-l border-[#e6e6e6] space-y-2">
+                                                        <div className="mt-2 pl-3 border-l border-border space-y-2">
                                                             {comment.replies.map((reply) => (
-                                                                <div key={reply.id} className="bg-white border border-[#f0f0f0] rounded p-2">
-                                                                    <p className="text-xs font-medium text-[#555]">
+                                                                <div key={reply.id} className="bg-muted border border-border rounded p-2">
+                                                                    <p className="text-xs font-medium text-muted-foreground">
                                                                         {(reply.authorName || "Member")} • {formatRelativeCommentTime(reply.createdAt, nowMs)}
                                                                     </p>
-                                                                    <p className="text-sm text-[#1a1a1a] break-words">{reply.comment}</p>
+                                                                    <p className="text-sm text-foreground break-words">{reply.comment}</p>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -1049,7 +1049,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleStartReply(comment.id)}
-                                                                className="text-xs text-[#884cff] hover:text-[#7a3ff0]"
+                                                                className="text-xs text-gold-solid hover:brightness-110"
                                                             >
                                                                 {replyingToCommentId === comment.id ? "Replying..." : "Reply"}
                                                             </button>
@@ -1061,13 +1061,13 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                                                                 value={replyDraftByCommentId[comment.id] || ""}
                                                                 onChange={(e) => handleReplyDraftChange(comment.id, e.target.value)}
                                                                 placeholder="Write a reply..."
-                                                                className="w-full h-16 px-2 py-1.5 border border-[#e6e6e6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#884cff] resize-none text-sm"
+                                                                className="w-full h-16 px-2 py-1.5 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm"
                                                             />
                                                             <div className="flex items-center justify-end gap-2">
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => setReplyingToCommentId(null)}
-                                                                    className="px-2 py-1 text-xs rounded-md border border-[#dcdcdc] text-[#555] hover:bg-gray-50"
+                                                                    className="px-2 py-1 text-xs rounded-md border border-border text-muted-foreground hover:bg-secondary"
                                                                 >
                                                                     Cancel
                                                                 </button>
@@ -1075,7 +1075,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                                                                     type="button"
                                                                     onClick={() => handleAddReply(comment.id)}
                                                                     disabled={savingComments || !(replyDraftByCommentId[comment.id] || "").trim()}
-                                                                    className="px-2 py-1 text-xs rounded-md bg-[#884cff] text-white hover:bg-[#7a3ff0] disabled:opacity-60"
+                                                                    className="px-2 py-1 text-xs rounded-md bg-gold-gradient text-white hover:brightness-110 disabled:opacity-60"
                                                                 >
                                                                     {savingComments ? "Submitting..." : "Submit reply"}
                                                                 </button>
@@ -1087,7 +1087,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                                                     <button
                                                         type="button"
                                                         onClick={() => handleDeleteComment(comment.id)}
-                                                        className="text-red-500 hover:text-red-600 p-1"
+                                                        className="text-red-500 hover:text-red-400 p-1"
                                                         aria-label="Delete comment"
                                                     >
                                                         <Trash2 className="w-3.5 h-3.5" />
@@ -1105,7 +1105,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                                         value={draftComment}
                                         onChange={(e) => setDraftComment(e.target.value)}
                                         placeholder="Write a comment..."
-                                        className="w-full h-20 px-3 py-2 border border-[#e6e6e6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#884cff] resize-none text-sm"
+                                        className="w-full h-20 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm"
                                     />
 
                                     <div className="flex items-center justify-end gap-2">
@@ -1113,7 +1113,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                                             type="button"
                                             onClick={handleAddComment}
                                             disabled={savingComments || !draftComment.trim()}
-                                            className="px-3 py-1.5 text-sm rounded-md bg-[#884cff] text-white hover:bg-[#7a3ff0] disabled:opacity-60"
+                                            className="px-3 py-1.5 text-sm rounded-md bg-gold-gradient text-white hover:brightness-110 disabled:opacity-60"
                                         >
                                             {savingComments ? "Submitting..." : "Submit"}
                                         </button>
@@ -1121,7 +1121,7 @@ export function ThemesAndBackgrounds({ showSuggestions = false, collectionData, 
                                 </>
                             )}
 
-                            {commentError && <p className="text-xs text-red-600">{commentError}</p>}
+                            {commentError && <p className="text-xs text-red-400">{commentError}</p>}
                             {commentMessage && <p className="text-xs text-green-600">{commentMessage}</p>}
                         </div>
                     </div>

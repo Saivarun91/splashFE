@@ -1,5 +1,7 @@
 "use client"
 
+const GOLD = "#cd9639"
+
 /**
  * Segmented control for choosing how many images to generate (e.g. 1, 2, 3).
  * Selected state: colored border only (no fill).
@@ -9,7 +11,7 @@ export function NumberOfImagesSelector({
     onChange,
     min = 1,
     max = 3,
-    primaryColor = "#7753ff",
+    primaryColor = GOLD,
     className = "",
     buttonClassName = "",
 }) {
@@ -27,10 +29,10 @@ export function NumberOfImagesSelector({
                         key={n}
                         type="button"
                         onClick={() => onChange(n)}
-                        className={`min-w-[3rem] px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 border-2 bg-white text-[#1a1a1a] ${buttonClassName} ${
+                        className={`min-w-[3rem] px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 border-2 bg-input text-foreground ${buttonClassName} ${
                             selected
                                 ? ""
-                                : "border-[#e6e6e6] hover:border-[#7753ff]/35 hover:bg-[#faf9ff]"
+                                : "border-border hover:border-gold-muted hover:bg-accent"
                         }`}
                         style={
                             selected

@@ -10,6 +10,7 @@ import { useLanguage } from "@/context/LanguageContext"
 import { OrnamentSelection } from "@/components/images/OrnamentSelection"
 import { DimensionsSelector } from "@/components/images/DimensionsSelector"
 import toast from "react-hot-toast"
+import { Badge } from "@/components/ui/badge"
 const MAX_IMAGE_MB = 10;
 const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -222,36 +223,36 @@ export default function AIModelForm() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#fcfcfc] via-[#f8f7ff] to-[#f5f3ff] p-8">
+        <div className="min-h-screen">
             <div className="max-w-6xl mx-auto">
                 {/* Enhanced Header */}
                 <div className="mb-12">
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="p-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl shadow-lg">
+                        <div className="p-3 bg-gold-gradient rounded-2xl shadow-lg">
                             <Cpu className="w-8 h-8 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-purple-600 bg-clip-text text-transparent">
+                            <h1 className="text-4xl font-bold text-foreground">
                                 {t("images.aiModelGeneration")}
                             </h1>
-                            <p className="text-[#737373] mt-2">{t("images.generateAIModelsWearingProducts")}</p>
+                            <p className="text-muted-foreground mt-2">{t("images.generateAIModelsWearingProducts")}</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-full w-fit border border-purple-200">
-                        <Sparkles className="w-4 h-4 text-purple-600" />
-                        <span className="text-sm font-medium text-purple-600">{t("images.aiPowered")}</span>
-                    </div>
+                    <Badge variant="brand" className="gap-2 px-4 py-2 rounded-full text-sm">
+                        <Sparkles className="w-4 h-4" />
+                        {t("images.aiPowered")}
+                    </Badge>
                 </div>
 
                 {/* Form and Result Container */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Form */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
+                    <div className="bg-card rounded-xl p-8 border border-border">
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Ornament Image */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full"></div>
+                                <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-gold-gradient rounded-full"></div>
                                     {t("images.ornamentProductImage")}<span className="text-red-500 ml-1">*</span>
                                     {uploadErrors.ornamentImage && (
   <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
@@ -264,8 +265,8 @@ export default function AIModelForm() {
                                 <div
   className={`border-2 border-dashed rounded-xl p-6 transition-colors group cursor-pointer ${
     uploadErrors.ornamentImage
-      ? "border-red-500 bg-red-50"
-      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+      ? "border-red-500 bg-red-500/10"
+      : "border-border bg-secondary/30 hover:bg-accent"
   }`}
   onClick={() => document.getElementById("ornament-input")?.click()}
 >
@@ -286,8 +287,8 @@ export default function AIModelForm() {
                                         </div>
                                     ) : (
                                         <div className="flex flex-col items-center justify-center gap-3 text-center">
-                                            <Upload className="w-8 h-8 text-gray-400 group-hover:text-purple-500 transition-colors" />
-                                            <p className="text-sm text-gray-500">{t("images.pngJpgWebpUpTo15MB")}</p>
+                                            <Upload className="w-8 h-8 text-muted-foreground group-hover:text-gold-solid transition-colors" />
+                                            <p className="text-sm text-muted-foreground">{t("images.pngJpgWebpUpTo15MB")}</p>
                                         </div>
                                     )}
                                 </div>
@@ -295,8 +296,8 @@ export default function AIModelForm() {
 
                             {/* Pose Style */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full"></div>
+                                <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-gold-gradient rounded-full"></div>
                                     Pose Style Reference (Optional)
                                     {uploadErrors.poseImage && (
   <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
@@ -309,8 +310,8 @@ export default function AIModelForm() {
                                 <div
   className={`border-2 border-dashed rounded-xl p-6 transition-colors group cursor-pointer ${
     uploadErrors.poseImage
-      ? "border-red-500 bg-red-50"
-      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+      ? "border-red-500 bg-red-500/10"
+      : "border-border bg-secondary/30 hover:bg-accent"
   }`}
   onClick={() => document.getElementById("pose-input")?.click()}
 >
@@ -331,8 +332,8 @@ export default function AIModelForm() {
                                         </div>
                                     ) : (
                                         <div className="flex flex-col items-center justify-center gap-3 text-center">
-                                            <Upload className="w-8 h-8 text-gray-400 group-hover:text-purple-500 transition-colors" />
-                                            <p className="text-sm text-gray-500">{t("images.uploadReferencePoseImage")}</p>
+                                            <Upload className="w-8 h-8 text-muted-foreground group-hover:text-gold-solid transition-colors" />
+                                            <p className="text-sm text-muted-foreground">{t("images.uploadReferencePoseImage")}</p>
                                         </div>
                                     )}
                                 </div>
@@ -348,8 +349,8 @@ export default function AIModelForm() {
 
                             {/* Legacy Measurements (Optional) */}
                             {/* <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Ruler className="w-4 h-4 text-purple-600" />
+                                <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                    <Ruler className="w-4 h-4 text-gold-solid" />
                                     Additional Measurements (Optional)
                                 </label>
                                 <input
@@ -357,21 +358,21 @@ export default function AIModelForm() {
                                     placeholder="E.g., Length: 5cm, Width: 3cm"
                                     value={formData.measurements}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, measurements: e.target.value }))}
-                                    className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all shadow-sm"
+                                    className="w-full px-4 py-3.5 border border-border rounded-xl bg-input text-foreground placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all shadow-sm"
                                 />
                             </div> */}
 
                             {/* Custom Prompt */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-purple-600" />
+                                <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-gold-solid" />
                                     {t("images.customInstructions")} ({t("common.optional")})
                                 </label>
                                 <textarea
                                     value={formData.prompt}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, prompt: e.target.value }))}
                                     placeholder={t("images.addSpecificInstructionsForAIModel")}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none shadow-sm"
+                                    className="w-full px-4 py-3 border border-border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none shadow-sm"
                                     rows="3"
                                 />
                             </div>
@@ -380,23 +381,22 @@ export default function AIModelForm() {
                             <DimensionsSelector
                                 selectedDimension={formData.dimension}
                                 onDimensionChange={(dimension) => setFormData((prev) => ({ ...prev, dimension }))}
-                                primaryColor="#9333ea"
                             />
 
                             {/* Error Message */}
                             {error && (
-                                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                                <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500" />
-                                    <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
+                                    <p className="text-red-400 text-sm">{t("common.somethingWentWrong")}</p>
                                 </div>
                             )}
 
                             {/* Action Buttons */}
-                            <div className="flex items-center justify-between pt-8 border-t border-gray-200">
+                            <div className="flex items-center justify-between pt-8 border-t border-border">
                                 <button
                                     type="button"
                                     onClick={() => router.back()}
-                                    className="flex items-center gap-2 text-purple-600 font-semibold hover:text-purple-700 transition-colors group"
+                                    className="flex items-center gap-2 text-gold-solid font-semibold hover:text-gold-solid transition-colors group"
                                 >
                                     <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
                                     {t("common.back")}
@@ -404,7 +404,7 @@ export default function AIModelForm() {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-3 rounded-xl flex items-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="bg-gold-gradient hover:brightness-110 text-white px-8 py-3 rounded-xl flex items-center gap-3 font-semibold shadow-lg hover:shadow-xl transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isLoading ? (
                                         <>
@@ -423,30 +423,30 @@ export default function AIModelForm() {
                     </div>
 
                     {/* Result Preview */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
-                        <h3 className="text-2xl font-bold text-[#1a1a1a] mb-6 flex items-center gap-2">
-                            <CheckCircle className="w-6 h-6 text-purple-600" />
+                    <div className="bg-card rounded-xl p-8 border border-border">
+                        <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                            <CheckCircle className="w-6 h-6 text-gold-solid" />
                             {t("images.generatedModel")}
                         </h3>
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center h-[500px] text-center">
-                                <Loader2 className="w-16 h-16 text-purple-600 animate-spin mb-4" />
-                                <p className="text-[#737373] text-lg">{t("images.generatingAIModel")}</p>
-                                <p className="text-[#737373] text-sm mt-2">{t("images.mayTakeUpTo30Seconds")}</p>
+                                <Loader2 className="w-16 h-16 text-gold-solid animate-spin mb-4" />
+                                <p className="text-muted-foreground text-lg">{t("images.generatingAIModel")}</p>
+                                <p className="text-muted-foreground text-sm mt-2">{t("images.mayTakeUpTo30Seconds")}</p>
                             </div>
                         ) : result ? (
                             <div className="space-y-6">
-                                <div className="relative w-full h-[450px] rounded-2xl overflow-hidden border-2 border-purple-200">
+                                <div className="relative w-full h-[450px] rounded-2xl overflow-hidden border-2 border-gold-muted">
                                     <Image
                                         src={result.generated_image_url}
                                         alt="Generated AI Model"
                                         fill
-                                        className="object-contain bg-gray-50"
+                                        className="object-contain bg-secondary/30"
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                                        <p className="text-green-700 font-semibold">✓ {t("images.aiModelGeneratedSuccess")}</p>
+                                    <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+                                        <p className="text-green-400 font-semibold">✓ {t("images.aiModelGeneratedSuccess")}</p>
                                         {result.mongo_id && (
                                             <p className="text-green-600 text-xs mt-1">{t("images.imageId")}: {result.mongo_id}</p>
                                         )}
@@ -457,7 +457,7 @@ export default function AIModelForm() {
                                             onClick={() =>
                                                 downloadImage(result.generated_image_url, "ai-model-generated.png")
                                             }
-                                            className="px-4 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
+                                            className="px-4 py-3 bg-gold-gradient text-white rounded-xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2"
                                         >
                                             <Download size={16} />
                                             {t("images.download")}
@@ -465,7 +465,7 @@ export default function AIModelForm() {
 
                                             <button
                                                 onClick={handleRegenerate}
-                                                className="px-4 py-3 border-2 border-purple-600 text-purple-600 rounded-xl font-semibold hover:bg-purple-50 transition-all flex items-center justify-center gap-2"
+                                                className="px-4 py-3 border-2 border-gold-muted text-gold-solid rounded-xl font-semibold hover:bg-accent transition-all flex items-center justify-center gap-2"
                                             >
                                                 <RefreshCw size={16} />
                                                 {t("images.regenerate")}
@@ -486,7 +486,7 @@ export default function AIModelForm() {
                                                 setOrnamentPreview(null)
                                                 setPosePreview(null)
                                             }}
-                                            className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
+                                            className="w-full px-4 py-3 border-2 border-border text-foreground rounded-xl font-semibold hover:bg-secondary/30 transition-all"
                                         >
                                             {t("images.newModel")}
                                         </button>
@@ -501,11 +501,11 @@ export default function AIModelForm() {
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center h-[500px] text-center">
-                                <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mb-4">
-                                    <Cpu className="w-12 h-12 text-purple-600" />
+                                <div className="w-24 h-24 bg-accent rounded-full flex items-center justify-center mb-4 border border-gold-muted">
+                                    <Cpu className="w-12 h-12 text-gold-solid" />
                                 </div>
-                                <p className="text-[#737373] text-lg">{t("images.aiModelWillAppear")}</p>
-                                <p className="text-[#737373] text-sm mt-2">{t("images.uploadOrnamentAndClickGenerate")}</p>
+                                <p className="text-muted-foreground text-lg">{t("images.aiModelWillAppear")}</p>
+                                <p className="text-muted-foreground text-sm mt-2">{t("images.uploadOrnamentAndClickGenerate")}</p>
                             </div>
                         )}
                     </div>
@@ -515,25 +515,25 @@ export default function AIModelForm() {
             {/* Regenerate Modal */}
             {regenerateModal.isOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+                    <div className="bg-card rounded-xl border border-border shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
                         {/* Modal Header */}
-                        <div className="flex-shrink-0 border-b border-gray-200 bg-white p-6 rounded-t-3xl z-10 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+                        <div className="flex-shrink-0 border-b border-border bg-card p-6 rounded-t-xl z-10 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl">
+                                    <div className="p-2 bg-gold-gradient rounded-xl">
                                         <RefreshCw className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">{t("images.regenerateAIModel")}</h2>
-                                        <p className="text-sm text-gray-500">{t("images.modifyAndRegenerateAIModel")}</p>
+                                        <h2 className="text-2xl font-bold text-foreground">{t("images.regenerateAIModel")}</h2>
+                                        <p className="text-sm text-muted-foreground">{t("images.modifyAndRegenerateAIModel")}</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={closeRegenerateModal}
                                     disabled={regenerateModal.loading}
-                                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50"
+                                    className="p-2 hover:bg-accent rounded-xl transition-colors disabled:opacity-50"
                                 >
-                                    <X className="w-6 h-6 text-gray-500" />
+                                    <X className="w-6 h-6 text-muted-foreground" />
                                 </button>
                             </div>
                         </div>
@@ -542,13 +542,13 @@ export default function AIModelForm() {
                         <div className="flex-1 overflow-y-auto min-h-0 p-6 space-y-6">
                             {/* Current Image */}
                             <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-3">{t("images.currentImage")}:</p>
-                                <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-gray-200">
+                                <p className="text-sm font-semibold text-foreground mb-3">{t("images.currentImage")}:</p>
+                                <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-border">
                                     <Image
                                         src={result.generated_image_url}
                                         alt="Current image"
                                         fill
-                                        className="object-contain bg-gray-50"
+                                        className="object-contain bg-secondary/30"
                                     />
                                 </div>
                             </div>
@@ -563,44 +563,44 @@ export default function AIModelForm() {
 
                             {/* New Prompt Input */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-purple-600" />
+                                <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-gold-solid" />
                                     {t("images.whatWouldYouLikeToChange")}
                                 </label>
                                 <textarea
                                     value={regenerateModal.prompt}
                                     onChange={(e) => setRegenerateModal(prev => ({ ...prev, prompt: e.target.value }))}
                                     placeholder={t("images.regenerateAIModelPlaceholder")}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent resize-none"
+                                    className="w-full px-4 py-3 border border-border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
                                     rows="4"
                                     disabled={regenerateModal.loading}
                                 />
-                                <p className="text-xs text-gray-500 mt-2">
+                                <p className="text-xs text-muted-foreground mt-2">
                                     💡 {t("images.modificationWillBeAppliedToAIModel")}
                                 </p>
                             </div>
 
                             {/* Error Message */}
                             {regenerateModal.error && (
-                                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                                <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                    <p className="text-red-700 text-sm">{t("common.somethingWentWrong")}</p>
+                                    <p className="text-red-400 text-sm">{t("common.somethingWentWrong")}</p>
                                 </div>
                             )}
 
                             {/* Action Buttons */}
-                            <div className="flex gap-3 pt-4 border-t border-gray-200">
+                            <div className="flex gap-3 pt-4 border-t border-border">
                                 <button
                                     onClick={closeRegenerateModal}
                                     disabled={regenerateModal.loading}
-                                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
+                                    className="flex-1 px-6 py-3 border-2 border-border text-foreground rounded-xl font-semibold hover:bg-secondary/30 transition-all disabled:opacity-50"
                                 >
                                     {t("common.cancel")}
                                 </button>
                                 <button
                                     onClick={submitRegenerate}
                                     disabled={regenerateModal.loading || !regenerateModal.prompt.trim()}
-                                    className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                                    className="flex-1 px-6 py-3 bg-gold-gradient text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
                                 >
                                     {regenerateModal.loading ? (
                                         <>

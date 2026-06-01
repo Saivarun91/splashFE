@@ -243,12 +243,12 @@ export default function GalleryPage() {
 
 
     return (
-        <div className="min-h-screen bg-[#fcfcfc] p-8">
+        <div className="min-h-screen">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-4">
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-[#1a1a1a] to-[#884cff] bg-clip-text text-transparent">{t("dashboard.myImages")}</h1>
-                    <p className="text-[#737373] text-lg">{t("images.allVisualsInOnePlace")}</p>
+                    <h1 className="text-4xl font-bold text-foreground">{t("dashboard.myImages")}</h1>
+                    <p className="text-muted-foreground text-lg">{t("images.allVisualsInOnePlace")}</p>
                 </div>
 
                 {/* Filter Buttons */}
@@ -260,8 +260,8 @@ export default function GalleryPage() {
                         }}
                         className={`px-6 py-2 rounded-lg font-medium transition-all ${
                             filter === "all"
-                                ? "bg-[#884cff] text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                ? "bg-gold-gradient text-primary-foreground"
+                                : "bg-secondary text-foreground hover:bg-accent border border-border"
                         }`}
                     >
                         {t("images.all")}
@@ -273,8 +273,8 @@ export default function GalleryPage() {
                         }}
                         className={`px-6 py-2 rounded-lg font-medium transition-all ${
                             filter === "plain"
-                                ? "bg-[#884cff] text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                ? "bg-gold-gradient text-primary-foreground"
+                                : "bg-secondary text-foreground hover:bg-accent border border-border"
                         }`}
                     >
                         {t("images.plain")}
@@ -286,8 +286,8 @@ export default function GalleryPage() {
                         }}
                         className={`px-6 py-2 rounded-lg font-medium transition-all ${
                             filter === "themed"
-                                ? "bg-[#884cff] text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                ? "bg-gold-gradient text-primary-foreground"
+                                : "bg-secondary text-foreground hover:bg-accent border border-border"
                         }`}
                     >
                         {t("images.themed")}
@@ -299,8 +299,8 @@ export default function GalleryPage() {
                         }}
                         className={`px-6 py-2 rounded-lg font-medium transition-all ${
                             filter === "model"
-                                ? "bg-[#884cff] text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                ? "bg-gold-gradient text-primary-foreground"
+                                : "bg-secondary text-foreground hover:bg-accent border border-border"
                         }`}
                     >
                         {t("images.model")}
@@ -312,8 +312,8 @@ export default function GalleryPage() {
                         }}
                         className={`px-6 py-2 rounded-lg font-medium transition-all ${
                             filter === "campaign"
-                                ? "bg-[#884cff] text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                ? "bg-gold-gradient text-primary-foreground"
+                                : "bg-secondary text-foreground hover:bg-accent border border-border"
                         }`}
                     >
                         {t("images.campaign")}
@@ -324,24 +324,24 @@ export default function GalleryPage() {
                 {loading ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
-                            <Loader2 className="w-12 h-12 text-[#884cff] animate-spin mx-auto mb-4" />
-                            <p className="text-[#737373]">{t("images.loadingImages")}</p>
+                            <Loader2 className="w-12 h-12 text-gold-solid animate-spin mx-auto mb-4" />
+                            <p className="text-muted-foreground">{t("images.loadingImages")}</p>
                         </div>
                     </div>
                 ) : filteredImages.length === 0 ? (
-                    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-16 shadow-xl border border-white/20 text-center">
-                        <div className="w-24 h-24 bg-gradient-to-br from-[#884cff]/10 to-[#5a2fcf]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <Grid className="w-12 h-12 text-[#884cff]" />
+                    <div className="bg-card rounded-xl p-16 border border-border text-center">
+                        <div className="w-24 h-24 bg-gradient-to-br from-gold-from/10 to-gold-to/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Grid className="w-12 h-12 text-gold-solid" />
                         </div>
-                        <h3 className="text-2xl font-bold text-[#1a1a1a] mb-3">No Images Yet</h3>
-                        <p className="text-[#737373] mb-6">
+                        <h3 className="text-2xl font-bold text-foreground mb-3">No Images Yet</h3>
+                        <p className="text-muted-foreground mb-6">
                             {filter === "all"
                                 ? "Start generating images to see them here"
                                 : t("images.noImagesFound")}
                         </p>
                         <button
                             onClick={() => router.push("/dashboard/")}
-                            className="px-8 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg"
+                            className="px-8 py-3 bg-gold-gradient text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg"
                         >
                             Start Creating
                         </button>
@@ -376,8 +376,8 @@ export default function GalleryPage() {
             absolute top-2 right-2 z-10
             opacity-0 group-hover:opacity-100
             p-2 rounded-full
-            bg-white/90 hover:bg-red-50
-            text-red-600 hover:text-red-700
+            bg-card hover:bg-red-500/10 border border-border
+            text-red-600 hover:text-red-400
             shadow-md transition-all
         "
         title={t("images.delete") || "Delete"}
@@ -392,7 +392,7 @@ export default function GalleryPage() {
                 e.stopPropagation()
                 handleView(image)
             }}
-            className="p-2 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-[#884cff] shadow-md transition-all"
+            className="p-2 rounded-full bg-card hover:bg-accent text-foreground hover:text-gold-solid border border-border shadow-md transition-all"
             title={t("images.view") || "View"}
         >
             <Eye size={18} />
@@ -402,7 +402,7 @@ export default function GalleryPage() {
                 e.stopPropagation()
                 handleDownload(image)
             }}
-            className="p-2 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-[#884cff] shadow-md transition-all"
+            className="p-2 rounded-full bg-card hover:bg-accent text-foreground hover:text-gold-solid border border-border shadow-md transition-all"
             title={t("images.download") || "Download"}
         >
             <Download size={18} />
@@ -412,7 +412,7 @@ export default function GalleryPage() {
                 e.stopPropagation()
                 handleRegenerate(image)
             }}
-            className="p-2 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-[#884cff] shadow-md transition-all"
+            className="p-2 rounded-full bg-card hover:bg-accent text-foreground hover:text-gold-solid border border-border shadow-md transition-all"
             title={t("images.regenerate") || "Regenerate"}
         >
             <RefreshCw size={18} />
@@ -430,11 +430,11 @@ export default function GalleryPage() {
 
 
                                     {/* Details */}
-                                    <div className="bg-white rounded-lg p-2">
-                                        <p className="text-sm font-medium text-gray-700 mb-1">
+                                    <div className="bg-card rounded-lg p-2 border border-border">
+                                        <p className="text-sm font-medium text-foreground mb-1">
                                             {getImageCategory(image.type)}
                                         </p>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-muted-foreground">
                                             Generated {getDaysAgo(image.created_at)}
                                         </p>
                                     </div>
@@ -448,17 +448,17 @@ export default function GalleryPage() {
                                 <button
                                     onClick={() => setPage(p => Math.max(1, p - 1))}
                                     disabled={page === 1}
-                                    className="px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-4 py-2 border border-border rounded-xl text-foreground hover:bg-secondary/30 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Previous
                                 </button>
-                                <span className="px-4 py-2 text-gray-700 font-medium">
+                                <span className="px-4 py-2 text-foreground font-medium">
                                     Page {page} of {totalPages}
                                 </span>
                                 <button
                                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                                     disabled={page === totalPages}
-                                    className="px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-4 py-2 border border-border rounded-xl text-foreground hover:bg-secondary/30 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Next
                                 </button>
@@ -468,12 +468,12 @@ export default function GalleryPage() {
                 )}
 
                 {/* Info Note */}
-                <div className="mt-12 bg-green-50 border border-green-200 rounded-2xl p-6">
+                <div className="mt-12 bg-green-500/10 border border-green-500/30 rounded-2xl p-6">
                     <h4 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
                         <Sparkles className="w-5 h-5" />
                         ✨ Regeneration Feature
                     </h4>
-                    <p className="text-green-700 text-sm">
+                    <p className="text-green-400 text-sm">
                         Click the "Regen" button on any image to regenerate it with modifications. The system will combine your original prompt with the new one to maintain context while applying your changes!
                     </p>
                 </div>
@@ -482,25 +482,25 @@ export default function GalleryPage() {
             {/* Regenerate Modal */}
             {regenerateModal.isOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+                    <div className="bg-card rounded-xl border border-border shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
                         {/* Modal Header */}
-                        <div className="flex-shrink-0 border-b border-gray-200 bg-white p-6 rounded-t-3xl z-10 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+                        <div className="flex-shrink-0 border-b border-border bg-card p-6 rounded-t-xl z-10 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] rounded-xl">
+                                    <div className="p-2 bg-gold-gradient rounded-xl">
                                         <RefreshCw className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-[#1a1a1a]">{t("images.regenerateImage")}</h2>
-                                        <p className="text-sm text-gray-500">Modify and regenerate this image</p>
+                                        <h2 className="text-2xl font-bold text-foreground">{t("images.regenerateImage")}</h2>
+                                        <p className="text-sm text-muted-foreground">Modify and regenerate this image</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={closeRegenerateModal}
                                     disabled={regenerateModal.loading}
-                                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50"
+                                    className="p-2 hover:bg-accent rounded-xl transition-colors disabled:opacity-50"
                                 >
-                                    <X className="w-6 h-6 text-gray-500" />
+                                    <X className="w-6 h-6 text-muted-foreground" />
                                 </button>
                             </div>
                         </div>
@@ -509,13 +509,13 @@ export default function GalleryPage() {
                         <div className="flex-1 overflow-y-auto min-h-0 p-6 space-y-6">
                             {/* Current Image */}
                             <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-3">Current Image:</p>
-                                <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-gray-200">
+                                <p className="text-sm font-semibold text-foreground mb-3">Current Image:</p>
+                                <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-border">
                                     <Image
                                         src={regenerateModal.image.generated_image_url}
                                         alt="Current image"
                                         fill
-                                        className="object-contain bg-gray-50"
+                                        className="object-contain bg-secondary/30"
                                     />
                                 </div>
                             </div>
@@ -532,44 +532,44 @@ export default function GalleryPage() {
 
                             {/* New Prompt Input */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-[#884cff]" />
+                                <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-gold-solid" />
                                     What would you like to change?
                                 </label>
                                 <textarea
                                     value={regenerateModal.prompt}
                                     onChange={(e) => setRegenerateModal(prev => ({ ...prev, prompt: e.target.value }))}
                                     placeholder={t("images.regeneratePromptPlaceholder")}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#884cff] focus:border-transparent resize-none"
+                                    className="w-full px-4 py-3 border border-border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
                                     rows="4"
                                     disabled={regenerateModal.loading}
                                 />
-                                <p className="text-xs text-gray-500 mt-2">
+                                <p className="text-xs text-muted-foreground mt-2">
                                     💡 Your modification will be combined with the original prompt to maintain context
                                 </p>
                             </div>
 
                             {/* Error Message */}
                             {regenerateModal.error && (
-                                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                                <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                    <p className="text-red-700 text-sm">{regenerateModal.error}</p>
+                                    <p className="text-red-400 text-sm">{regenerateModal.error}</p>
                                 </div>
                             )}
 
                             {/* Action Buttons */}
-                            <div className="flex gap-3 pt-4 border-t border-gray-200">
+                            <div className="flex gap-3 pt-4 border-t border-border">
                                 <button
                                     onClick={closeRegenerateModal}
                                     disabled={regenerateModal.loading}
-                                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
+                                    className="flex-1 px-6 py-3 border-2 border-border text-foreground rounded-xl font-semibold hover:bg-secondary/30 transition-all disabled:opacity-50"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={submitRegenerate}
                                     disabled={regenerateModal.loading || !regenerateModal.prompt.trim()}
-                                    className="flex-1 px-6 py-3 bg-gradient-to-r from-[#884cff] to-[#5a2fcf] text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                                    className="flex-1 px-6 py-3 bg-gold-gradient text-white rounded-xl font-semibold hover:scale-105 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
                                 >
                                     {regenerateModal.loading ? (
                                         <>

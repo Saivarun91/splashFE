@@ -621,14 +621,14 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
 
     return (
         <aside
-            className={`fixed left-0 top-0 z-40 h-screen border-r border-gray-700 backdrop-blur-md bg-gray-900 text-white transition-all duration-300 
+            className={`fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border backdrop-blur-md bg-sidebar text-sidebar-foreground transition-all duration-300 
                 ${isExpanded ? "w-64" : "w-20"}
             `}
             onMouseEnter={() => setHovered && setHovered(true)}
             onMouseLeave={() => setHovered && setHovered(false)}
         >
             {/* Header */}
-            <div className="flex items-center h-16 px-3 border-b border-gray-800">
+            <div className="flex items-center h-16 px-3 border-b border-sidebar-border">
                 
                 
                     <>
@@ -652,7 +652,7 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                     </>
                     <button
                     onClick={() => setCollapsed && setCollapsed(!collapsed)}
-                    className="ml-2 flex items-center justify-center w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 transition"
+                    className="ml-2 flex items-center justify-center w-9 h-9 rounded-lg bg-secondary hover:bg-sidebar-accent transition"
                 >
                     {collapsed ? (
                         <ChevronRight className="w-6 h-6 text-white" />
@@ -673,8 +673,8 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                                     className={`w-full flex items-center cursor-pointer ${isExpanded ? "gap-3" : "justify-center"} 
               px-3 py-2 rounded-md text-sm font-medium transition-colors 
               ${isActive(item.path, true)
-                                            ? "bg-white/10 backdrop-blur-md border border-white/10 text-white shadow-md"
-                                            : "text-gray-300 hover:bg-white/10 hover:text-white"
+                                            ? "bg-sidebar-accent border border-sidebar-border text-gold-solid shadow-md"
+                                            : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
                                         } ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <item.icon className={`${isExpanded ? "w-5 h-5" : "w-7 h-7"} transition-all`} />
@@ -699,8 +699,8 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                                                     key={child.path}
                                                     className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors cursor-not-allowed
                                                         ${isActive(child.path)
-                                                            ? "bg-white/10 backdrop-blur-md border border-white/10 text-white shadow-md"
-                                                            : "text-gray-400"
+                                                            ? "bg-sidebar-accent border border-sidebar-border text-gold-solid shadow-md"
+                                                            : "text-muted-foreground"
                                                         }`}
                                                 >
                                                     <child.icon className="w-4 h-4" />
@@ -715,8 +715,8 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                                                     prefetch={true}
                                                     className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors
                                                         ${isActive(child.path)
-                                                            ? "bg-white/10 backdrop-blur-md border border-white/10 text-white shadow-md"
-                                                            : "text-gray-400 hover:text-white hover:bg-white/10"
+                                                            ? "bg-sidebar-accent border border-sidebar-border text-gold-solid shadow-md"
+                                                            : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
                                                         }`}
                                                 >
                                                     <child.icon className="w-4 h-4" />
@@ -733,8 +733,8 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                                     className={`flex items-center ${isExpanded ? "gap-3" : "justify-center my-3"} 
                                         px-3 py-2 rounded-md text-sm font-medium transition-colors my-3 cursor-not-allowed opacity-50
                                         ${isActive(item.path)
-                                            ? "bg-white/10 backdrop-blur-md border border-white/10 text-white shadow-md"
-                                            : "text-gray-300"
+                                            ? "bg-sidebar-accent border border-sidebar-border text-gold-solid shadow-md"
+                                            : "text-muted-foreground"
                                         }`}
                                 >
                                     <item.icon className={`transition-all w-5 h-5 ${isExpanded ? "" : "my-3"}`} />
@@ -749,8 +749,8 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                                     className={`flex items-center ${isExpanded ? "gap-3" : "justify-center my-3"} 
                                         px-3 py-2 rounded-md text-sm font-medium transition-colors my-3
                                         ${isActive(item.path)
-                                            ? "bg-white/10 backdrop-blur-md border border-white/10 text-white shadow-md"
-                                            : "text-gray-300 hover:bg-white/10 hover:text-white"
+                                            ? "bg-sidebar-accent border border-sidebar-border text-gold-solid shadow-md"
+                                            : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
                                         }`}
                                 >
                                     <item.icon className={`transition-all w-5 h-5 ${isExpanded ? "" : "my-3"}`} />
@@ -763,14 +763,14 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
             </nav>
 
             {/* Footer (always visible) */}
-            <div className="absolute bottom-0 left-0 w-full border-t border-gray-800 bg-gray-900/80 backdrop-blur-md">
+            <div className="absolute bottom-0 left-0 w-full border-t border-sidebar-border bg-sidebar/80 backdrop-blur-md">
                 <div className="flex flex-col items-center justify-center gap-2 py-3 px-4">
                     {/* Logout button - visible both in collapsed and expanded */}
                     <button
                         onClick={() => !isGenerating && logout()}
                         disabled={isGenerating}
                         className={`flex items-center ${isExpanded ? "gap-3 w-full text-left" : "justify-center"} 
-                            text-gray-300 hover:text-white px-3 py-2 rounded-md hover:bg-white/10 transition ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            text-muted-foreground hover:text-sidebar-foreground px-3 py-2 rounded-md hover:bg-sidebar-accent transition ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         <LogOut className="w-5 h-5" />
                         {isExpanded && <span>{t("dashboard.logout")}</span>}
@@ -779,15 +779,15 @@ export function Sidebar({ collapsed, setCollapsed, hovered, setHovered }) {
                     {/* Footer icons (hidden when collapsed) */}
                     {isExpanded && (
                         <div className="flex justify-around w-full mt-2">
-                            <button className="p-2 rounded-md hover:bg-white/10">
-                                <MessageCircle className="w-5 h-5 text-gray-300 hover:text-white" />
+                            <button className="p-2 rounded-md hover:bg-sidebar-accent">
+                                <MessageCircle className="w-5 h-5 text-muted-foreground hover:text-sidebar-foreground" />
                             </button>
-                            <button className="p-2 rounded-md hover:bg-white/10 relative">
-                                <Bell className="w-5 h-5 text-gray-300 hover:text-white" />
-                                <span className="absolute top-2 right-2 w-2 h-2 bg-amber-400 rounded-full" />
+                            <button className="p-2 rounded-md hover:bg-sidebar-accent relative">
+                                <Bell className="w-5 h-5 text-muted-foreground hover:text-sidebar-foreground" />
+                                <span className="absolute top-2 right-2 w-2 h-2 bg-gold-solid rounded-full" />
                             </button>
-                            <button className="p-2 rounded-md hover:bg-white/10">
-                                <Settings className="w-5 h-5 text-gray-300 hover:text-white" />
+                            <button className="p-2 rounded-md hover:bg-sidebar-accent">
+                                <Settings className="w-5 h-5 text-muted-foreground hover:text-sidebar-foreground" />
                             </button>
                         </div>
                     )}

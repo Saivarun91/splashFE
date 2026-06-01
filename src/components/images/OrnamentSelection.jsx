@@ -263,8 +263,8 @@ export function OrnamentSelection({
         <div className={`space-y-4 ${className}`}>
             {/* Ornament Type Selection - same expand-on-click UI everywhere */}
             <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-600" />
+                <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-gold-solid" />
                     Ornament Type <span className="text-red-500">*</span>
                 </label>
                 <OrnamentTypeSelect
@@ -278,17 +278,17 @@ export function OrnamentSelection({
             {/* Measurements */}
             {selectedOrnament && (
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                        <Ruler className="w-4 h-4 text-purple-600" />
+                    <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                        <Ruler className="w-4 h-4 text-gold-solid" />
                         Measurements (Optional)
                     </label>
-                    <p className="text-xs text-gray-500 mb-2">
+                    <p className="text-xs text-muted-foreground mb-2">
                         💡 Providing accurate measurements helps generate more realistic images
                     </p>
                     <div className="grid grid-cols-1 gap-3">
                         {selectedOrnament.measurements.map((measurement) => (
                             <div key={measurement.id} className="flex items-center gap-2">
-                                <label className="text-sm text-gray-600 min-w-[120px]">
+                                <label className="text-sm text-muted-foreground min-w-[120px]">
                                     {measurement.label}:
                                 </label>
                                 <div className="flex-1 flex items-center gap-2">
@@ -297,10 +297,10 @@ export function OrnamentSelection({
                                         placeholder={measurement.placeholder}
                                         value={getMeasurementValue(measurement.id)}
                                         onChange={(e) => handleMeasurementChange(measurement.id, e.target.value)}
-                                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm"
+                                        className="flex-1 px-3 py-2 border border-input rounded-lg bg-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all text-sm"
                                     />
                                     {measurement.unit && (
-                                        <span className="text-sm text-gray-500 min-w-[20px]">
+                                        <span className="text-sm text-muted-foreground min-w-[20px]">
                                             {measurement.unit}
                                         </span>
                                     )}

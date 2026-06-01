@@ -257,7 +257,7 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors ${
                     commentsCount > 0
                         ? "text-red-600 hover:bg-red-50"
-                        : "text-[#884cff] hover:bg-[#f3efff]"
+                        : "text-gold-solid hover:bg-gold-solid/10"
                 }`}
                 aria-label="Open comments"
                 title="Open comments"
@@ -475,12 +475,12 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
     return (
         <div className="space-y-4">
         <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-gold-gradient rounded-lg flex items-center justify-center">
                     <Users className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                    <h3 className="font-bold text-[#1a1a1a] text-2xl">Model Selection</h3>
-                    <p className="text-sm text-[#708090]">Select models for your project</p>
+                    <h3 className="font-bold text-foreground text-2xl">Model Selection</h3>
+                    <p className="text-sm text-muted-foreground">Select models for your project</p>
                 </div>
             </div>
 
@@ -501,14 +501,14 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Human Model Preview Card (Real Models) */}
                 <div
-                    className={`relative bg-white rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${activeTab === 'real'
-                        ? 'border-[#884cff] shadow-md'
-                        : 'border-gray-200 hover:border-gray-300'
+                    className={`relative bg-card rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${activeTab === 'real'
+                        ? 'border-gold-solid shadow-md'
+                        : 'border-border hover:border-border'
                         }`}
                 >
                     {/* Selected Badge */}
                     {activeTab === 'real' && (
-                        <div className="absolute top-4 right-4 bg-[#884cff] text-white text-xs font-semibold px-3 py-1.5 rounded-md z-10 animate-fade-in shadow-sm">
+                        <div className="absolute top-4 right-4 bg-gold-solid text-white text-xs font-semibold px-3 py-1.5 rounded-md z-10 animate-fade-in shadow-sm">
                             Selected
                         </div>
                     )}
@@ -519,14 +519,14 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
                         className="p-6 border-b border-gray-100 cursor-pointer"
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${activeTab === 'real' ? 'bg-[#884cff]' : 'bg-gray-100'
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${activeTab === 'real' ? 'bg-gold-solid' : 'bg-muted'
                                 }`}>
-                                <Users className={`w-5 h-5 transition-colors ${activeTab === 'real' ? 'text-white' : 'text-gray-600'
+                                <Users className={`w-5 h-5 transition-colors ${activeTab === 'real' ? 'text-white' : 'text-muted-foreground'
                                     }`} />
                             </div>
                             <div className="flex-1">
-                                <h3 className="text-lg font-semibold text-gray-900">Human Model Preview</h3>
-                                <p className="text-sm text-gray-500 mt-1">
+                                <h3 className="text-lg font-semibold text-foreground">Human Model Preview</h3>
+                                <p className="text-sm text-muted-foreground mt-1">
                                     Upload real model photos for automatic crop, pose detection, and professional guidelines.
                                 </p>
                             </div>
@@ -554,9 +554,9 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
 
                 {/* AI Model Preview Card */}
                 <div
-                    className={`relative bg-white rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${activeTab === 'ai'
+                    className={`relative bg-card rounded-xl border-2 transition-all duration-300 hover:shadow-lg hover:border-gold-muted/50 ${activeTab === 'ai'
                         ? 'border-amber-400 shadow-md'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-border hover:border-border'
                         }`}
                 >
                     {/* Selected Badge */}
@@ -572,14 +572,14 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
                         className="p-6 border-b border-gray-100 cursor-pointer"
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${activeTab === 'ai' ? 'bg-amber-400' : 'bg-gray-100'
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${activeTab === 'ai' ? 'bg-gold-solid' : 'bg-muted'
                                 }`}>
-                                <Sparkles className={`w-5 h-5 transition-colors ${activeTab === 'ai' ? 'text-white' : 'text-gray-600'
+                                <Sparkles className={`w-5 h-5 transition-colors ${activeTab === 'ai' ? 'text-white' : 'text-muted-foreground'
                                     }`} />
                             </div>
                             <div className="flex-1">
-                                <h3 className="text-lg font-semibold text-gray-900">AI Model Preview</h3>
-                                <p className="text-sm text-gray-500 mt-1">
+                                <h3 className="text-lg font-semibold text-foreground">AI Model Preview</h3>
+                                <p className="text-sm text-muted-foreground mt-1">
                                     AI automatically generates diverse models based on your project tone, style, and target audience.
                                 </p>
                             </div>
@@ -607,13 +607,13 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
             </div>
             {activeCommentField && (
                 <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-                    <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-[#e6e6e6]">
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-[#e6e6e6]">
-                            <h4 className="text-sm font-semibold text-[#1a1a1a]">{activeCommentConfig?.title} Comments</h4>
+                    <div className="w-full max-w-md bg-card rounded-xl shadow-2xl border border-border">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                            <h4 className="text-sm font-semibold text-foreground">{activeCommentConfig?.title} Comments</h4>
                             <button
                                 type="button"
                                 onClick={closeComments}
-                                className="p-1 rounded hover:bg-gray-100"
+                                className="p-1 rounded hover:bg-muted"
                                 aria-label="Close comments"
                             >
                                 <X className="w-4 h-4 text-[#666]" />
@@ -623,24 +623,24 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
                         <div className="p-4 space-y-3">
                             <div className="max-h-48 overflow-y-auto space-y-2">
                                 {currentComments.length === 0 ? (
-                                    <p className="text-xs text-[#708090]">No comments yet.</p>
+                                    <p className="text-xs text-muted-foreground">No comments yet.</p>
                                 ) : (
                                     currentComments.map((comment) => (
-                                        <div key={comment.id} className="border border-[#e6e6e6] rounded-md p-2 bg-[#fafafa]">
+                                        <div key={comment.id} className="border border-border rounded-md p-2 bg-[#fafafa]">
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="min-w-0">
                                                     <p className="text-xs font-medium text-[#444]">
                                                         {(comment.authorName || "Member")} • {formatRelativeCommentTime(comment.createdAt, nowMs)}
                                                     </p>
-                                                    <p className="text-sm text-[#1a1a1a] break-words">{comment.comment}</p>
+                                                    <p className="text-sm text-foreground break-words">{comment.comment}</p>
                                                     {Array.isArray(comment.replies) && comment.replies.length > 0 && (
-                                                        <div className="mt-2 pl-3 border-l border-[#e6e6e6] space-y-2">
+                                                        <div className="mt-2 pl-3 border-l border-border space-y-2">
                                                             {comment.replies.map((reply) => (
-                                                                <div key={reply.id} className="bg-white border border-[#f0f0f0] rounded p-2">
+                                                                <div key={reply.id} className="bg-card border border-[#f0f0f0] rounded p-2">
                                                                     <p className="text-xs font-medium text-[#555]">
                                                                         {(reply.authorName || "Member")} • {formatRelativeCommentTime(reply.createdAt, nowMs)}
                                                                     </p>
-                                                                    <p className="text-sm text-[#1a1a1a] break-words">{reply.comment}</p>
+                                                                    <p className="text-sm text-foreground break-words">{reply.comment}</p>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -650,7 +650,7 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleStartReply(comment.id)}
-                                                                className="text-xs text-[#884cff] hover:text-[#7a3ff0]"
+                                                                className="text-xs text-gold-solid hover:text-[#7a3ff0]"
                                                             >
                                                                 {replyingToCommentId === comment.id ? "Replying..." : "Reply"}
                                                             </button>
@@ -662,13 +662,13 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
                                                                 value={replyDraftByCommentId[comment.id] || ""}
                                                                 onChange={(e) => handleReplyDraftChange(comment.id, e.target.value)}
                                                                 placeholder="Write a reply..."
-                                                                className="w-full h-16 px-2 py-1.5 border border-[#e6e6e6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#884cff] resize-none text-sm"
+                                                                className="w-full h-16 px-2 py-1.5 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-gold-solid resize-none text-sm"
                                                             />
                                                             <div className="flex items-center justify-end gap-2">
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => setReplyingToCommentId(null)}
-                                                                    className="px-2 py-1 text-xs rounded-md border border-[#dcdcdc] text-[#555] hover:bg-gray-50"
+                                                                    className="px-2 py-1 text-xs rounded-md border border-[#dcdcdc] text-[#555] hover:bg-muted"
                                                                 >
                                                                     Cancel
                                                                 </button>
@@ -676,7 +676,7 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
                                                                     type="button"
                                                                     onClick={() => handleAddReply(comment.id)}
                                                                     disabled={savingComments || !(replyDraftByCommentId[comment.id] || "").trim()}
-                                                                    className="px-2 py-1 text-xs rounded-md bg-[#884cff] text-white hover:bg-[#7a3ff0] disabled:opacity-60"
+                                                                    className="px-2 py-1 text-xs rounded-md bg-gold-solid text-white hover:brightness-110 disabled:opacity-60"
                                                                 >
                                                                     {savingComments ? "Submitting..." : "Submit reply"}
                                                                 </button>
@@ -706,7 +706,7 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
                                         value={draftComment}
                                         onChange={(e) => setDraftComment(e.target.value)}
                                         placeholder="Write a comment..."
-                                        className="w-full h-20 px-3 py-2 border border-[#e6e6e6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#884cff] resize-none text-sm"
+                                        className="w-full h-20 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-gold-solid resize-none text-sm"
                                     />
 
                                     <div className="flex items-center justify-end gap-2">
@@ -714,7 +714,7 @@ export function ModelSelectionSection({ project, collectionData, onSave, canEdit
                                             type="button"
                                             onClick={handleAddComment}
                                             disabled={savingComments || !draftComment.trim()}
-                                            className="px-3 py-1.5 text-sm rounded-md bg-[#884cff] text-white hover:bg-[#7a3ff0] disabled:opacity-60"
+                                            className="px-3 py-1.5 text-sm rounded-md bg-gold-solid text-white hover:brightness-110 disabled:opacity-60"
                                         >
                                             {savingComments ? "Submitting..." : "Submit"}
                                         </button>
@@ -800,7 +800,7 @@ function AIModelsTab({
                 <div className="flex items-center justify-center py-8">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-400 mx-auto mb-3"></div>
-                        <p className="text-sm text-gray-600">Generating AI models... This may take a minute</p>
+                        <p className="text-sm text-muted-foreground">Generating AI models... This may take a minute</p>
                     </div>
                 </div>
             )}
@@ -818,7 +818,7 @@ function AIModelsTab({
                     {/* Existing Saved Models */}
                     {hasSavedModels && (
                         <div className="space-y-3">
-                            <h4 className="text-sm font-semibold text-gray-700">
+                            <h4 className="text-sm font-semibold text-muted-foreground">
                                 Your Existing Models
                             </h4>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -832,7 +832,7 @@ function AIModelsTab({
                                             onClick={() => canEdit && toggleTempSelection(imageUrl)}
                                             className={`group relative border-2 rounded-lg overflow-hidden transition-all cursor-pointer ${isSelected
                                                 ? 'border-amber-400 shadow-lg'
-                                                : 'border-gray-200 hover:border-amber-400/50'
+                                                : 'border-border hover:border-amber-400/50'
                                                 }`}
                                         >
                                             {/* Image */}
@@ -878,7 +878,7 @@ function AIModelsTab({
                                                         e.stopPropagation()
                                                         window.open(imageUrl, '_blank')
                                                     }}
-                                                    className="bg-white hover:bg-gray-100 text-amber-500 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all hover:scale-105"
+                                                    className="bg-card hover:bg-muted text-amber-500 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all hover:scale-105"
                                                 >
                                                     <Eye className="w-3.5 h-3.5" />
                                                     View
@@ -912,7 +912,7 @@ function AIModelsTab({
 
                     {/* Newly Generated Models */}
                     <div className="space-y-3">
-                        <h4 className="text-sm font-semibold text-gray-700">
+                        <h4 className="text-sm font-semibold text-muted-foreground">
                             Newly Generated Models
                         </h4>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -924,7 +924,7 @@ function AIModelsTab({
                                         onClick={() => canEdit && toggleTempSelection(imageUrl)}
                                         className={`group relative border-2 rounded-lg overflow-hidden transition-all cursor-pointer ${isSelected
                                             ? 'border-amber-400 shadow-lg'
-                                            : 'border-gray-200 hover:border-amber-400/50'
+                                            : 'border-border hover:border-amber-400/50'
                                             }`}
                                     >
                                         <img
@@ -947,7 +947,7 @@ function AIModelsTab({
                                                     e.stopPropagation()
                                                     window.open(imageUrl, '_blank')
                                                 }}
-                                                className="bg-white hover:bg-gray-100 text-amber-500 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all hover:scale-105"
+                                                className="bg-card hover:bg-muted text-amber-500 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all hover:scale-105"
                                             >
                                                 <Eye className="w-3.5 h-3.5" />
                                                 View
@@ -985,7 +985,7 @@ function AIModelsTab({
             {/* Show saved AI models */}
             {hasSavedModels && !hasGeneratedModels && (
                 <div className="space-y-4 animate-fade-in">
-                    <h4 className="text-sm font-semibold text-gray-700">Your AI Models</h4>
+                    <h4 className="text-sm font-semibold text-muted-foreground">Your AI Models</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {aiModels.map((model, index) => {
                             const imageUrl = model.cloud || model.local
@@ -998,7 +998,7 @@ function AIModelsTab({
                                     onClick={() => canEdit && onSelect(model)}
                                     className={`group relative border-2 rounded-lg overflow-hidden transition-all cursor-pointer ${selected
                                         ? 'border-amber-400 shadow-lg ring-2 ring-amber-400 ring-offset-1'
-                                        : 'border-gray-200 hover:border-amber-400/50'
+                                        : 'border-border hover:border-amber-400/50'
                                         }`}
                                 >
                                     <img
@@ -1018,7 +1018,7 @@ function AIModelsTab({
                                                 e.stopPropagation()
                                                 window.open(imageUrl, '_blank')
                                             }}
-                                            className="bg-white hover:bg-gray-100 text-amber-500 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all hover:scale-105"
+                                            className="bg-card hover:bg-muted text-amber-500 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all hover:scale-105"
                                         >
                                             <Eye className="w-3.5 h-3.5" />
                                             View
@@ -1044,10 +1044,10 @@ function AIModelsTab({
             )}
 
             {!generating && !hasSavedModels && !hasGeneratedModels && (
-                <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
-                    <Sparkles className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-500 mb-2">No AI models generated yet</p>
-                    <p className="text-xs text-gray-400">
+                <div className="text-center py-8 border-2 border-dashed border-border rounded-lg bg-muted">
+                    <Sparkles className="w-12 h-12 text-muted-foreground/70 mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground mb-2">No AI models generated yet</p>
+                    <p className="text-xs text-muted-foreground/70">
                         Click "Generate AI Models" to create model images
                     </p>
                 </div>
@@ -1089,7 +1089,7 @@ function RealModelsTab({
 
             <div className="space-y-4">
                 <div>
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">Upload Model Photo</h4>
+                    <h4 className="text-sm font-semibold text-muted-foreground mb-3">Upload Model Photo</h4>
                     <input
                         ref={fileInputRef}
                         type="file"
@@ -1106,18 +1106,18 @@ function RealModelsTab({
   className={`w-full border-2 border-dashed rounded-lg px-6 py-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
     uploadError
       ? "border-red-500 bg-red-50"
-      : "bg-gray-100 hover:bg-gray-200 border-gray-300"
+      : "bg-muted hover:bg-secondary border-border"
   }`}
 >
 
-                        <Upload className="w-5 h-5 text-gray-600" />
-                        <span className="text-sm font-medium text-gray-700">
+                        <Upload className="w-5 h-5 text-muted-foreground" />
+                        <span className="text-sm font-medium text-muted-foreground">
                             {uploading ? 'Uploading...' : 'Upload Model Photo'}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                             JPG, PNG, or HEIC
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                             Max 10MB
                         </span>
                     </button>
@@ -1125,22 +1125,22 @@ function RealModelsTab({
 
                 {/* Upload Guidelines */}
                 <div>
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">Upload Guidelines</h4>
-                    <ul className="space-y-2 text-sm text-gray-600">
+                    <h4 className="text-sm font-semibold text-muted-foreground mb-3">Upload Guidelines</h4>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
                         <li className="flex items-start gap-2">
-                            <span className="text-[#884cff] mt-0.5">•</span>
+                            <span className="text-gold-solid mt-0.5">•</span>
                             <span>High-resolution images (minimum 1200px width)</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <span className="text-[#884cff] mt-0.5">•</span>
+                            <span className="text-gold-solid mt-0.5">•</span>
                             <span>Well-lit with clear facial features</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <span className="text-[#884cff] mt-0.5">•</span>
+                            <span className="text-gold-solid mt-0.5">•</span>
                             <span>Full body or upper body shots preferred</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <span className="text-[#884cff] mt-0.5">•</span>
+                            <span className="text-gold-solid mt-0.5">•</span>
                             <span>Neutral background for best results</span>
                         </li>
                     </ul>
@@ -1150,15 +1150,15 @@ function RealModelsTab({
             {uploading && (
                 <div className="flex items-center justify-center py-8">
                     <div className="text-center">
-                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#884cff] mx-auto mb-3"></div>
-                        <p className="text-sm text-gray-600">Uploading models...</p>
+                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gold-solid mx-auto mb-3"></div>
+                        <p className="text-sm text-muted-foreground">Uploading models...</p>
                     </div>
                 </div>
             )}
 
             {hasModels && !uploading && (
                 <div className="space-y-4 animate-fade-in">
-                    <h4 className="text-sm font-semibold text-gray-700">Your Uploaded Models</h4>
+                    <h4 className="text-sm font-semibold text-muted-foreground">Your Uploaded Models</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                         {realModels.map((model, index) => {
                             const imageUrl = model.cloud || model.local
@@ -1168,8 +1168,8 @@ function RealModelsTab({
                                 <div
                                     key={index}
                                     className={`group relative border-2 rounded-lg overflow-hidden transition-all cursor-pointer ${selected
-                                        ? 'border-[#884cff] shadow-lg ring-2 ring-[#884cff] ring-offset-1'
-                                        : 'border-gray-200 hover:border-[#884cff]/50'
+                                        ? 'border-gold-solid shadow-lg ring-2 ring-gold-solid ring-offset-1'
+                                        : 'border-border hover:border-gold-solid/50'
                                         }`}
                                     onClick={() => canEdit && onSelect(model)}
                                 >
@@ -1182,7 +1182,7 @@ function RealModelsTab({
 
                                     {/* Selected checkmark */}
                                     {selected && (
-                                        <div className="absolute top-2 right-2 bg-[#884cff] rounded-full p-1 z-10 shadow-md">
+                                        <div className="absolute top-2 right-2 bg-gold-solid rounded-full p-1 z-10 shadow-md">
                                             <CheckCircle className="w-4 h-4 text-white" />
                                         </div>
                                     )}
@@ -1208,7 +1208,7 @@ function RealModelsTab({
                                                 e.stopPropagation()
                                                 window.open(imageUrl, '_blank')
                                             }}
-                                            className="bg-white hover:bg-gray-100 text-[#884cff] px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all hover:scale-105"
+                                            className="bg-card hover:bg-muted text-gold-solid px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all hover:scale-105"
                                         >
                                             <Eye className="w-3.5 h-3.5" />
                                             View
@@ -1222,9 +1222,9 @@ function RealModelsTab({
             )}
 
             {!uploading && !hasModels && (
-                <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
-                    <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">No models uploaded yet</p>
+                <div className="text-center py-8 border-2 border-dashed border-border rounded-lg bg-muted">
+                    <ImageIcon className="w-12 h-12 text-muted-foreground/70 mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">No models uploaded yet</p>
                 </div>
             )}
         </div>

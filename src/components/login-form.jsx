@@ -9,6 +9,9 @@ import { apiService } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 
+const inputClassName =
+    "w-full px-4 py-3 bg-input border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
+
 export default function LoginForm() {
     const { t } = useLanguage();
     const [email, setEmail] = useState("");
@@ -43,8 +46,8 @@ export default function LoginForm() {
         <div className="w-full max-w-md pt-15">
             {/* Header */}
             <div className="mb-8 ">
-                <h1 className="text-4xl font-bold text-[#0c1421] mb-2">{t("auth.login")}</h1>
-                <p className="text-lg text-[#313957]">
+                <h1 className="text-4xl font-bold text-foreground mb-2">{t("auth.login")}</h1>
+                <p className="text-lg text-muted-foreground">
                     {t("auth.stayConnected")}
                 </p>
             </div>
@@ -55,7 +58,7 @@ export default function LoginForm() {
                 <div className="space-y-2">
                     <label
                         htmlFor="email"
-                        className="block text-sm font-semibold text-[#0c1421]"
+                        className="block text-sm font-semibold text-foreground"
                     >
                         {t("auth.email")}
                     </label>
@@ -65,7 +68,7 @@ export default function LoginForm() {
                         placeholder={t("auth.exampleEmail")}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg text-[#313957] placeholder:text-[#737373] focus:outline-none focus:ring-2 focus:ring-[#5533ff]"
+                        className={inputClassName}
                     />
                 </div>
 
@@ -73,7 +76,7 @@ export default function LoginForm() {
                 <div className="space-y-2">
                     <label
                         htmlFor="password"
-                        className="block text-sm font-semibold text-[#0c1421]"
+                        className="block text-sm font-semibold text-foreground"
                     >
                         {t("auth.password")}
                     </label>
@@ -83,7 +86,7 @@ export default function LoginForm() {
                         placeholder={t("auth.atLeast8Chars")}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-4 py-3 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg text-[#313957] placeholder:text-[#737373] focus:outline-none focus:ring-2 focus:ring-[#5533ff]"
+                        className={inputClassName}
                     />
                 </div>
 
@@ -91,7 +94,7 @@ export default function LoginForm() {
                 <div className="text-right">
                     <Link
                         href="/forgot-password"
-                        className="text-sm font-medium text-[#5533ff] hover:opacity-80 transition-opacity"
+                        className="text-sm font-medium text-gold-solid hover:brightness-110 transition-opacity"
                     >
                         {t("auth.forgotPassword")}
                     </Link>
@@ -99,48 +102,27 @@ export default function LoginForm() {
 
                 {/* Error Message */}
                 {message && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-sm text-red-600">{message}</p>
+                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                        <p className="text-sm text-red-400">{message}</p>
                     </div>
                 )}
 
                 {/* Sign In Button */}
                 <Button
                     type="submit"
-                    className="w-full py-3 bg-[#5533ff] hover:bg-[#4422dd] text-white font-semibold rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    variant="brand"
+                    className="w-full py-3 h-auto rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={loading}
                 >
                     {loading ? t("auth.signingIn") : t("auth.signin")}
                 </Button>
             </form>
 
-            {/* Divider */}
-            {/* <div className="flex items-center gap-4 my-8">
-                <div className="flex-1 h-px bg-[#e6e6e6]"></div>
-                <span className="text-sm text-[#737373]">{t("auth.or")}</span>
-                <div className="flex-1 h-px bg-[#e6e6e6]"></div>
-            </div> */}
-
-            {/* Google Sign In */}
-            {/* <button
-                onClick={handleGoogleSignIn}
-                className="w-full py-3 px-4 bg-[#f3f9fa] border border-[#e6e6e6] rounded-lg flex items-center justify-center gap-3 hover:bg-[#f7fbff] transition-colors"
-            >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <text x="0" y="20" fontSize="20" fill="#4285f4">
-                        G
-                    </text>
-                </svg>
-                <span className="text-sm font-medium text-[#0c1421]">
-                    {t("auth.signInWithGoogle")}
-                </span>
-            </button> */}
-
             {/* Sign Up Link */}
             <div className="mt-8 text-center">
-                <p className="text-sm text-[#313957]">
+                <p className="text-sm text-muted-foreground">
                     {t("auth.dontHaveAccount")}{" "}
-                    <Link href="/signup" className="font-semibold text-[#5533ff] hover:opacity-80">
+                    <Link href="/signup" className="font-semibold text-gold-solid hover:brightness-110">
                         {t("auth.signup")}
                     </Link>
                 </p>

@@ -15,8 +15,8 @@ function TabSkeleton() {
     return (
         <div className="flex items-center justify-center py-12">
             <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#884cff] mx-auto mb-4"></div>
-                <p className="text-[#708090]">Loading...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-solid mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading...</p>
             </div>
         </div>
     )
@@ -29,33 +29,33 @@ export function WorkflowContent({ project }) {
     return (
         <div className="flex-1 overflow-auto">
             <Tabs value={activeTab} onValueChange={(value) => !isGenerating && setActiveTab(value)} className="w-full">
-                <div className="border-b border-[#e6e6e6] bg-white sticky top-0 z-10">
-                    <TabsList className="w-full justify-start rounded-none bg-transparent p-0 h-auto border-b border-[#e6e6e6]">
+                <div className="border-b border-border bg-card sticky top-0 z-10">
+                    <TabsList className="w-full justify-start rounded-none bg-transparent p-0 h-auto border-b border-border">
                         <TabsTrigger
                             value="workflow"
                             disabled={isGenerating}
-                            className={`rounded-none cursor-pointer border-b-2 border-transparent px-6 py-4 data-[state=active]:border-[#884cff] data-[state=active]:bg-[#f0e6ff] ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`rounded-none cursor-pointer border-b-2 border-transparent px-6 py-4 text-muted-foreground data-[state=active]:border-gold-solid data-[state=active]:bg-gold-solid/10 data-[state=active]:text-gold-solid ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             Workflow
                         </TabsTrigger>
                         <TabsTrigger
                             value="overview"
                             disabled={isGenerating}
-                            className={`rounded-none cursor-pointer border-b-2 border-transparent px-6 py-4 data-[state=active]:border-[#884cff] data-[state=active]:bg-[#f0e6ff] ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`rounded-none cursor-pointer border-b-2 border-transparent px-6 py-4 text-muted-foreground data-[state=active]:border-gold-solid data-[state=active]:bg-gold-solid/10 data-[state=active]:text-gold-solid ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             Overview
                         </TabsTrigger>
                         <TabsTrigger
                             value="results"
                             disabled={isGenerating}
-                            className={`rounded-none cursor-pointer border-b-2 border-transparent px-6 py-4 data-[state=active]:border-[#884cff] data-[state=active]:bg-[#f0e6ff] ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`rounded-none cursor-pointer border-b-2 border-transparent px-6 py-4 text-muted-foreground data-[state=active]:border-gold-solid data-[state=active]:bg-gold-solid/10 data-[state=active]:text-gold-solid ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             Results
                         </TabsTrigger>
                         <TabsTrigger
                             value="collaborators"
                             disabled={isGenerating}
-                            className={`rounded-none cursor-pointer border-b-2 border-transparent px-6 py-4 data-[state=active]:border-[#884cff] data-[state=active]:bg-[#f0e6ff] ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`rounded-none cursor-pointer border-b-2 border-transparent px-6 py-4 text-muted-foreground data-[state=active]:border-gold-solid data-[state=active]:bg-gold-solid/10 data-[state=active]:text-gold-solid ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             Collaborators
                         </TabsTrigger>

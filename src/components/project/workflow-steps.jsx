@@ -27,9 +27,9 @@ export function WorkflowSteps({ activeStep, setActiveStep, savedSteps, setSavedS
                                         role={canClick ? "button" : undefined}
                                         tabIndex={canClick ? 0 : -1}
                                         className={`flex items-center justify-center w-10 h-10 rounded-full ${isCompleted
-                                            ? "bg-[#7753ff]"
+                                            ? "bg-gold-solid"
                                             : isActive
-                                                ? "bg-[#7753ff] border-2 border-[#a78bfa]"
+                                                ? "bg-gold-solid border-2 border-gold-muted"
                                                 : "bg-gray-200"
                                             } ${canClick ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}
                                         onClick={() => {
@@ -51,15 +51,15 @@ export function WorkflowSteps({ activeStep, setActiveStep, savedSteps, setSavedS
                                         ) : isActive ? (
                                             <span className="text-white font-semibold text-base">{step.number}</span>
                                         ) : (
-                                            <span className="text-gray-500 font-semibold text-sm">{step.number}</span>
+                                            <span className="text-muted-foreground font-semibold text-sm">{step.number}</span>
                                         )}
                                     </div>
-                                    <p className="mt-2 text-sm text-center text-gray-700">
+                                    <p className="mt-2 text-sm text-center text-foreground">
                                         {step.title}
                                     </p>
                                 </div>
                                 {index !== steps.length - 1 && (
-                                    <div className={`h-0.5 flex-1 mx-2 ${step.number < activeStep ? "bg-[#7753ff]" : "bg-gray-300"}`} style={{ minWidth: '20px' }}></div>
+                                    <div className={`h-0.5 flex-1 mx-2 ${step.number < activeStep ? "bg-gold-solid" : "bg-muted"}`} style={{ minWidth: '20px' }}></div>
                                 )}
                             </div>
                         )

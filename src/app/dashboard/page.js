@@ -105,12 +105,12 @@ export default function Dashboard() {
     }, [token]);
 
     return (
-        <div className="space-y-6 animate-fadeIn p-6 bg-gray-50 text-gray-900">
+        <div className="space-y-6 animate-fadeIn">
             {/* Welcome Section */}
-            <div className="relative p-4 rounded-xl bg-white shadow-md border border-gray-200 overflow-hidden">
-                <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-tr from-indigo-500 to-purple-500 opacity-10 rounded-full blur-3xl" />
+            <div className="relative p-4 rounded-xl bg-card shadow-md border border-border overflow-hidden">
+                <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-tr from-gold-solid/20 to-gold-muted/10 rounded-full blur-3xl" />
                 <div className="relative z-10">
-                    <h1 className="text-2xl font-bold">{greeting}, {getUserDisplayName()}</h1>
+                    <h1 className="text-2xl font-bold text-foreground">{greeting}, {getUserDisplayName()}</h1>
                 </div>
             </div>
 
@@ -118,22 +118,22 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Credits */}
                 {/* <Link href="/my-account/billing"> */}
-                    <div className="p-4 bg-white border border-indigo-100 rounded-xl shadow-sm transition-all duration-300">
+                    <div className="p-4 bg-card border border-border rounded-xl shadow-sm transition-all duration-300 hover:border-gold-muted">
                         <div className="flex justify-between items-center pb-2">
-                            <span className="text-sm font-medium text-gray-500">{t("dashboard.remainingCredits")}</span>
-                            <FaCoins className="w-6 h-6 text-yellow-500" />
+                            <span className="text-sm font-medium text-muted-foreground">{t("dashboard.remainingCredits")}</span>
+                            <FaCoins className="w-6 h-6 text-gold-solid" />
                         </div>
                         <div>
                             {creditsLoading ? (
-                                <div className="text-2xl font-bold text-gray-900">...</div>
+                                <div className="text-2xl font-bold text-foreground">...</div>
                             ) : organizationCredits ? (
                                 <>
-                                    <div className="text-2xl font-bold text-gray-900">
+                                    <div className="text-2xl font-bold text-gold-solid">
                                         {organizationCredits.balance.toLocaleString()}
                                     </div>
-                                    <div className="w-full bg-gray-200 h-2 rounded-full mt-2">
+                                    <div className="w-full bg-muted h-2 rounded-full mt-2">
                                         <div 
-                                            className="bg-indigo-500 h-2 rounded-full transition-all"
+                                            className="bg-gold-gradient h-2 rounded-full transition-all"
                                             style={{ 
                                                 width: organizationCredits.balance > 0 
                                                     ? `${Math.min((organizationCredits.balance / 10000) * 100, 100)}%` 
@@ -141,13 +141,13 @@ export default function Dashboard() {
                                             }}
                                         />
                                     </div>
-                                    <p className="text-xs text-gray-500 mt-1">
+                                    <p className="text-xs text-muted-foreground mt-1">
                                         {organizationCredits.organizationName} • {t("dashboard.organizationCredits")}
                                     </p>
                                 </>
                             ) : userCredits ? (
                                 <>
-                                    <div className="text-2xl font-bold text-gray-900">
+                                    <div className="text-2xl font-bold text-gold-solid">
                                         {userCredits.balance.toLocaleString()}
                                     </div>
                                     {/* <div className="w-full bg-gray-200 h-2 rounded-full mt-2">
@@ -160,7 +160,7 @@ export default function Dashboard() {
                                             }}
                                         />
                                     </div> */}
-                                    <p className="text-xs text-gray-500 mt-1">
+                                    <p className="text-xs text-muted-foreground mt-1">
                                         {t("dashboard.individualCredits") || "Individual user credits"}
                                     </p>
                                 </>
@@ -180,16 +180,16 @@ export default function Dashboard() {
                 {/* </Link> */}
 
                 {/* Images Generated */}
-                <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <div className="p-4 bg-card border border-border rounded-xl shadow-sm hover:border-gold-muted transition-colors">
                     <div className="flex justify-between items-center pb-2">
-                        <span className="text-sm font-medium text-gray-500">{t("dashboard.imagesGenerated")}</span>
-                        <RiAiGenerate2  className="w-6 h-6 text-indigo-500" />
+                        <span className="text-sm font-medium text-muted-foreground">{t("dashboard.imagesGenerated")}</span>
+                        <RiAiGenerate2  className="w-6 h-6 text-gold-solid" />
                     </div>
                     <div>
-                        <div className="text-2xl font-bold text-gray-900">
+                        <div className="text-2xl font-bold text-gold-solid">
                             {loading ? "..." : stats.imagesGenerated}
                         </div>
-                        <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                             <TrendingUp className="w-3 h-3 text-green-500" />
                             {loading ? t("common.loading") : t("dashboard.totalImagesGenerated")}
                         </p>
@@ -197,16 +197,16 @@ export default function Dashboard() {
                 </div>
 
                 {/* Active Projects */}
-                <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <div className="p-4 bg-card border border-border rounded-xl shadow-sm hover:border-gold-muted transition-colors">
                     <div className="flex justify-between items-center pb-2">
-                        <span className="text-sm font-medium text-gray-500">{t("dashboard.activeProjects")}</span>
-                        <FolderKanban className="w-6 h-6 text-indigo-500" />
+                        <span className="text-sm font-medium text-muted-foreground">{t("dashboard.activeProjects")}</span>
+                        <FolderKanban className="w-6 h-6 text-gold-solid" />
                     </div>
                     <div>
-                        <div className="text-2xl font-bold text-gray-900">
+                        <div className="text-2xl font-bold text-gold-solid">
                             {loading ? "..." : stats.activeProjects}
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                             {loading ? t("common.loading") : `${stats.inProgressProjects} ${t("dashboard.inProgress")} • ${stats.completedProjects} ${t("dashboard.completed")}`}
                         </p>
                     </div>
@@ -230,49 +230,49 @@ export default function Dashboard() {
 
             {/* Quick Actions */}
             <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">{t("dashboard.quickActions")}</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-3">{t("dashboard.quickActions")}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Plain Image */}
                     <Link href="/dashboard/images/white-bg">
-                        <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group text-center">
-                            <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-indigo-50 group-hover:bg-indigo-100 transition">
-                                <Image className="w-5 h-5 text-indigo-500" />
+                        <div className="p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-lg hover:border-gold-muted transition-all duration-300 cursor-pointer group text-center">
+                            <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-secondary group-hover:bg-gold-solid/20 transition">
+                                <Image className="w-5 h-5 text-gold-solid" />
                             </div>
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.plainImage")}</h3>
-                            <p className="text-xs text-gray-500">{t("dashboard.cleanProductShots")}</p>
+                            <h3 className="font-semibold text-foreground text-sm mb-1">{t("dashboard.plainImage")}</h3>
+                            <p className="text-xs text-muted-foreground">{t("dashboard.cleanProductShots")}</p>
                         </div>
                     </Link>
 
                     {/* Themed Image */}
                     <Link href="/dashboard/images/replace-bg">
-                        <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group text-center">
-                            <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-yellow-50 group-hover:bg-yellow-100 transition">
-                                <Sparkles className="w-5 h-5 text-yellow-400" />
+                        <div className="p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-lg hover:border-gold-muted transition-all duration-300 cursor-pointer group text-center">
+                            <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-gold-solid/15 group-hover:bg-gold-solid/25 transition">
+                                <Sparkles className="w-5 h-5 text-gold-solid" />
                             </div>
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.themedImage")}</h3>
-                            <p className="text-xs text-gray-500">{t("dashboard.lifestyleShots")}</p>
+                            <h3 className="font-semibold text-foreground text-sm mb-1">{t("dashboard.themedImage")}</h3>
+                            <p className="text-xs text-muted-foreground">{t("dashboard.lifestyleShots")}</p>
                         </div>
                     </Link>
 
                     {/* Model Images */}
                     <Link href="/dashboard/images/model-generation">
-                        <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group text-center">
-                            <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-indigo-50 group-hover:bg-indigo-100 transition">
-                                <Image className="w-5 h-5 text-indigo-500" />
+                        <div className="p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-lg hover:border-gold-muted transition-all duration-300 cursor-pointer group text-center">
+                            <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-secondary group-hover:bg-gold-solid/20 transition">
+                                <Image className="w-5 h-5 text-gold-solid" />
                             </div>
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.modelImages")}</h3>
-                            <p className="text-xs text-gray-500">{t("dashboard.aiOrHumanModels")}</p>
+                            <h3 className="font-semibold text-foreground text-sm mb-1">{t("dashboard.modelImages")}</h3>
+                            <p className="text-xs text-muted-foreground">{t("dashboard.aiOrHumanModels")}</p>
                         </div>
                     </Link>
 
                     {/* New Project */}
                     <Link href="/dashboard/projects/create">
-                        <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group text-center">
-                            <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-yellow-50 group-hover:bg-yellow-100 transition">
-                                <FolderKanban className="w-5 h-5 text-yellow-400" />
+                        <div className="p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-lg hover:border-gold-muted transition-all duration-300 cursor-pointer group text-center">
+                            <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center rounded-xl bg-gold-solid/15 group-hover:bg-gold-solid/25 transition">
+                                <FolderKanban className="w-5 h-5 text-gold-solid" />
                             </div>
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1">{t("dashboard.newProject")}</h3>
-                            <p className="text-xs text-gray-500">{t("dashboard.fullCampaignPhotoshoots")}</p>
+                            <h3 className="font-semibold text-foreground text-sm mb-1">{t("dashboard.newProject")}</h3>
+                            <p className="text-xs text-muted-foreground">{t("dashboard.fullCampaignPhotoshoots")}</p>
                         </div>
                     </Link>
                 </div>
@@ -280,7 +280,7 @@ export default function Dashboard() {
 
             {/* Recent Images */}
             <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">{t("dashboard.myRecentImages")}</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-3">{t("dashboard.myRecentImages")}</h2>
                 {(() => {
                     if (loading) {
                         return (
@@ -288,7 +288,7 @@ export default function Dashboard() {
                                 {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                                     <div
                                         key={i}
-                                        className="aspect-square overflow-hidden rounded-xl bg-gray-200 border border-gray-200 animate-pulse"
+                                        className="aspect-square overflow-hidden rounded-xl bg-muted border border-border animate-pulse"
                                     />
                                 ))}
                             </div>
@@ -320,8 +320,8 @@ export default function Dashboard() {
                         );
                     }
                     return (
-                        <div className="text-center py-8 text-gray-500">
-                            <Image className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                        <div className="text-center py-8 text-muted-foreground">
+                            <Image className="w-12 h-12 mx-auto mb-2 text-muted-foreground/60" />
                             <p>{t("dashboard.noRecentImages")}</p>
                         </div>
                     );
